@@ -67,8 +67,6 @@ public class HeroCtrl : CharacterCtrl
 
         if (characterLevel == null)
             characterLevel = gameObject.AddComponent<CharacterLevel>();
-
-        characterLevel.Configure(this, CharacterStat);
     }
     public void ApplyProfile(CreatedCharacterData characterData)
     {

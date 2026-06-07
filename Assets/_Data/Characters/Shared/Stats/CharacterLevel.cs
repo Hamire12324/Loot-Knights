@@ -1,9 +1,7 @@
 using UnityEngine;
 
-public class CharacterLevel : BaseMonoBehaviour
+public class CharacterLevel : CharacterAbstract
 {
-    [SerializeField] private CharacterCtrl characterCtrl;
-    [SerializeField] private CharacterStat characterStat;
     [SerializeField] private bool usePlayerProgression = true;
 
     [Header("Level Bonuses")]
@@ -32,19 +30,6 @@ public class CharacterLevel : BaseMonoBehaviour
     protected override void LoadComponents()
     {
         base.LoadComponents();
-        LoadCharacterCtrl();
-        LoadCharacterStat();
-    }
-
-    public void Configure(CharacterCtrl ctrl, CharacterStat stat)
-    {
-        if (characterCtrl == null)
-            characterCtrl = ctrl;
-
-        if (characterStat == null)
-            characterStat = stat;
-
-        RefreshFromPlayerProgression();
     }
 
     public void RefreshFromPlayerProgression()
@@ -62,14 +47,14 @@ public class CharacterLevel : BaseMonoBehaviour
 
     public void ApplyLevel(int level)
     {
-        LoadCharacterStat();
+        CharacterStat stat = characterCtrl != null ? characterCtrl.CharacterStat : null;
 
-        if (characterStat == null) return;
+        if (stat == null) return;
 
         int safeLevel = Mathf.Max(1, level);
         int previousLevel = CurrentLevel;
-        float previousMaxHealth = characterStat.MaxHealth != null
-            ? characterStat.MaxHealth.FinalValue
+        float previousMaxHealth = stat.MaxHealth != null
+            ? stat.MaxHealth.FinalValue
             : 0f;
 
         currentLevel = safeLevel;
@@ -79,28 +64,27 @@ public class CharacterLevel : BaseMonoBehaviour
         ApplyFlatModifier(StatType.MaxHealth, maxHealthPerLevel * bonusLevels);
         ApplyFlatModifier(StatType.Armor, armorPerLevel * bonusLevels);
 
-        float nextMaxHealth = characterStat.MaxHealth != null
-            ? characterStat.MaxHealth.FinalValue
+        float nextMaxHealth = stat.MaxHealth != null
+            ? stat.MaxHealth.FinalValue
             : previousMaxHealth;
 
         if (healByAddedMaxHealth && safeLevel > previousLevel && nextMaxHealth > previousMaxHealth)
-            characterStat.SetCurrentHealth(characterStat.CurrentHealth + nextMaxHealth - previousMaxHealth);
-        else if (characterStat.CurrentHealth > nextMaxHealth)
-            characterStat.SetCurrentHealth(nextMaxHealth);
+            stat.SetCurrentHealth(stat.CurrentHealth + nextMaxHealth - previousMaxHealth);
+        else if (stat.CurrentHealth > nextMaxHealth)
+            stat.SetCurrentHealth(nextMaxHealth);
 
-        characterStat.SetPreviousMaxHealth(previousMaxHealth);
-        characterStat.NotifyAllStatsChanged();
+        stat.SetPreviousMaxHealth(previousMaxHealth);
+        stat.NotifyAllStatsChanged();
     }
 
     public void ClearLevelModifiers()
     {
-        LoadCharacterStat();
-        characterStat?.RemoveModifiersFromSource(this);
+        characterCtrl?.CharacterStat?.RemoveModifiersFromSource(this);
     }
 
     private void ApplyFlatModifier(StatType statType, float amount)
     {
-        CharacterStat stat = characterStat;
+        CharacterStat stat = characterCtrl != null ? characterCtrl.CharacterStat : null;
         StatValue statValue = stat != null ? stat.GetStat(statType) : null;
 
         statValue?.AddBuffModifier(new StatModifier(
@@ -126,31 +110,5 @@ public class CharacterLevel : BaseMonoBehaviour
         if (!usePlayerProgression) return;
 
         ApplySnapshot(snapshot);
-    }
-
-    private void LoadCharacterCtrl()
-    {
-        if (characterCtrl != null) return;
-
-        characterCtrl = GetComponentInParent<CharacterCtrl>(true);
-    }
-
-    private void LoadCharacterStat()
-    {
-        if (characterStat != null) return;
-
-        if (characterCtrl == null)
-            LoadCharacterCtrl();
-
-        if (characterCtrl != null && characterCtrl.CharacterStat != null)
-        {
-            characterStat = characterCtrl.CharacterStat;
-            return;
-        }
-
-        characterStat = GetComponentInChildren<CharacterStat>(true);
-        if (characterStat != null) return;
-
-        characterStat = GetComponentInParent<CharacterStat>(true);
     }
 }
