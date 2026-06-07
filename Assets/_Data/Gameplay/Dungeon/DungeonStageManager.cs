@@ -99,7 +99,7 @@ public class DungeonStageManager : DungeonAbstract
 
         currentStageCompleted = true;
         UnsubscribeHeroDeath();
-        GrantCurrentStageReward();
+        PlayerLevelRewardResult? experienceResult = GrantCurrentStageReward();
 
         if (HasNextStage)
             StageSelectionStorage.UnlockStage(CurrentStageIndex + 1);
@@ -121,21 +121,22 @@ public class DungeonStageManager : DungeonAbstract
 
         SetGameplayInteractionEnabled(false);
         SubscribeStageCompletePanel();
-        stageCompletePanel.Show(CurrentStage, CurrentStageIndex, HasNextStage);
+        stageCompletePanel.Show(CurrentStage, CurrentStageIndex, HasNextStage, experienceResult);
     }
 
-    private void GrantCurrentStageReward()
+    private PlayerLevelRewardResult? GrantCurrentStageReward()
     {
-        if (currentStageRewardGranted) return;
+        if (currentStageRewardGranted) return null;
 
         DungeonStageConfig stage = CurrentStage;
-        if (stage == null) return;
+        if (stage == null) return null;
 
         PlayerCurrencyStorage.Add(CurrencyType.Coins, stage.CoinReward);
         PlayerCurrencyStorage.Add(CurrencyType.Diamonds, stage.DiamondReward);
-        PlayerExperienceStorage.Add(stage.ExperienceReward);
+        PlayerLevelRewardResult experienceResult = PlayerExperienceStorage.Add(stage.ExperienceReward);
 
         currentStageRewardGranted = true;
+        return experienceResult;
     }
 
     public void GoToNextStage()

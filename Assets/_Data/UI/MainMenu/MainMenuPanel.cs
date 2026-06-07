@@ -80,7 +80,10 @@ public class MainMenuPanel : BaseMonoBehaviour
 
         characterStatusText.text = character == null
             ? "Chua co nhan vat"
-            : character.CharacterName + " - " + character.CharacterClass;
+            : character.CharacterName + " - "
+              + character.CharacterClass
+              + " - Lv. "
+              + PlayerExperienceStorage.Level;
 
         if (continueButton != null)
         {

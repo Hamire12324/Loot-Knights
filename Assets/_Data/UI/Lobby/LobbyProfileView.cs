@@ -5,14 +5,31 @@ using UnityEngine.UI;
 public class LobbyProfileView : BaseMonoBehaviour
 {
     [SerializeField] private TMP_Text characterNameText;
+    [SerializeField] private TMP_Text levelText;
+    [SerializeField] private TMP_Text experienceText;
+    [SerializeField] private Slider experienceSlider;
     [SerializeField] private Image avatarImage;
     [SerializeField] private Sprite defaultAvatar;
     [SerializeField] private CharacterClassAvatar[] classAvatars;
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        PlayerExperienceStorage.OnLevelSnapshotChanged += HandleLevelSnapshotChanged;
+        Refresh();
+    }
+
+    protected override void OnDisable()
+    {
+        PlayerExperienceStorage.OnLevelSnapshotChanged -= HandleLevelSnapshotChanged;
+        base.OnDisable();
+    }
 
     protected override void LoadComponents()
     {
         base.LoadComponents();
         LoadTexts();
+        LoadExperienceSlider();
         LoadAvatarImage();
     }
 
@@ -20,24 +37,58 @@ public class LobbyProfileView : BaseMonoBehaviour
     {
         CreatedCharacterData character = CharacterProfileStorage.Load();
         string characterName = character != null ? character.CharacterName : "Name";
+        PlayerLevelSnapshot levelSnapshot = PlayerExperienceStorage.Snapshot;
 
-        SetText(characterName);
+        SetText(characterName, levelSnapshot);
+        SetExperience(levelSnapshot);
         SetAvatar(character);
     }
 
     private void LoadTexts()
     {
-        if (characterNameText == null)
-        {
-            TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
+        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
 
-            foreach (TMP_Text text in texts)
+        foreach (TMP_Text text in texts)
+        {
+            if (text == null) continue;
+
+            string textName = text.name.ToLowerInvariant();
+
+            if (characterNameText == null && textName.Contains("name"))
             {
-                if (text.name.ToLowerInvariant().Contains("name"))
-                {
-                    characterNameText = text;
-                    break;
-                }
+                characterNameText = text;
+                continue;
+            }
+
+            if (levelText == null &&
+                (textName.Contains("level") || textName.Contains("lvl")))
+            {
+                levelText = text;
+                continue;
+            }
+
+            if (experienceText == null &&
+                (textName.Contains("experience") || textName.Contains("exp") || textName.Contains("xp")))
+            {
+                experienceText = text;
+            }
+        }
+    }
+
+    private void LoadExperienceSlider()
+    {
+        if (experienceSlider != null) return;
+
+        Slider[] sliders = GetComponentsInChildren<Slider>(true);
+        foreach (Slider slider in sliders)
+        {
+            if (slider == null) continue;
+
+            string sliderName = slider.name.ToLowerInvariant();
+            if (sliderName.Contains("experience") || sliderName.Contains("exp") || sliderName.Contains("xp"))
+            {
+                experienceSlider = slider;
+                return;
             }
         }
     }
@@ -60,10 +111,37 @@ public class LobbyProfileView : BaseMonoBehaviour
         }
     }
 
-    private void SetText(string characterName)
+    private void SetText(string characterName, PlayerLevelSnapshot levelSnapshot)
     {
         if (characterNameText != null)
-            characterNameText.text = characterName;
+        {
+            characterNameText.text = levelText == null
+                ? characterName + " - Lv. " + levelSnapshot.Level
+                : characterName;
+        }
+
+        if (levelText != null)
+            levelText.text = "Lv. " + levelSnapshot.Level;
+    }
+
+    private void SetExperience(PlayerLevelSnapshot levelSnapshot)
+    {
+        if (experienceText != null)
+        {
+            experienceText.text = levelSnapshot.IsMaxLevel
+                ? "MAX"
+                : levelSnapshot.ExperienceIntoLevel.ToString("N0")
+                  + " / "
+                  + levelSnapshot.ExperienceToNextLevel.ToString("N0")
+                  + " XP";
+        }
+
+        if (experienceSlider == null) return;
+
+        experienceSlider.minValue = 0f;
+        experienceSlider.maxValue = 1f;
+        experienceSlider.wholeNumbers = false;
+        experienceSlider.value = levelSnapshot.Progress01;
     }
 
     private void SetAvatar(CreatedCharacterData character)
@@ -89,5 +167,10 @@ public class LobbyProfileView : BaseMonoBehaviour
         }
 
         return defaultAvatar;
+    }
+
+    private void HandleLevelSnapshotChanged(PlayerLevelSnapshot snapshot)
+    {
+        Refresh();
     }
 }

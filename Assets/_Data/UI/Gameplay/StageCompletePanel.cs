@@ -21,6 +21,7 @@ public class StageCompletePanel : BaseMonoBehaviour
     [SerializeField] private TMP_Text rewardCoinsText;
     [SerializeField] private TMP_Text rewardDiamondsText;
     [SerializeField] private TMP_Text rewardExperienceText;
+    [SerializeField] private TMP_Text levelResultText;
 
     protected override void Start()
     {
@@ -28,11 +29,15 @@ public class StageCompletePanel : BaseMonoBehaviour
         BindButtons();
     }
 
-    public void Show(DungeonStageConfig completedStage, int completedStageIndex, bool hasNextStage)
+    public void Show(
+        DungeonStageConfig completedStage,
+        int completedStageIndex,
+        bool hasNextStage,
+        PlayerLevelRewardResult? experienceResult = null)
     {
         LoadComponents();
         BindButtons();
-        RefreshRewardTexts(completedStage);
+        RefreshRewardTexts(completedStage, experienceResult);
         RefreshButtonState(hasNextStage);
 
         SetActive(true);
@@ -159,11 +164,19 @@ public class StageCompletePanel : BaseMonoBehaviour
                 (textName.Contains("experience") || textName.Contains("exp") || textName.Contains("xp")))
             {
                 rewardExperienceText = foundText;
+                continue;
+            }
+
+            if (levelResultText == null && textName.Contains("level"))
+            {
+                levelResultText = foundText;
             }
         }
     }
 
-    private void RefreshRewardTexts(DungeonStageConfig completedStage)
+    private void RefreshRewardTexts(
+        DungeonStageConfig completedStage,
+        PlayerLevelRewardResult? experienceResult)
     {
         int coins = completedStage != null ? completedStage.CoinReward : 0;
         int diamonds = completedStage != null ? completedStage.DiamondReward : 0;
@@ -172,6 +185,18 @@ public class StageCompletePanel : BaseMonoBehaviour
         SetText(rewardCoinsText, coins.ToString("N0"));
         SetText(rewardDiamondsText, diamonds.ToString("N0"));
         SetText(rewardExperienceText, experience.ToString("N0"));
+        SetText(levelResultText, GetLevelResultText(experienceResult));
+    }
+
+    private string GetLevelResultText(PlayerLevelRewardResult? experienceResult)
+    {
+        if (!experienceResult.HasValue)
+            return "Lv. " + PlayerExperienceStorage.Level;
+
+        PlayerLevelRewardResult result = experienceResult.Value;
+        return result.LeveledUp
+            ? "LEVEL UP! " + result.Before.Level + " -> " + result.After.Level
+            : "Lv. " + result.After.Level;
     }
 
     private void RefreshButtonState(bool hasNextStage)

@@ -37,6 +37,7 @@ public static class CharacterProfileStorage
         CreatedCharacterData character = Load();
         return "CharacterName: " + character.CharacterName + "\n"
             + "CharacterClass: " + character.CharacterClass + "\n"
+            + "Level: " + PlayerExperienceStorage.Level + "\n"
             + "Experience: " + PlayerExperienceStorage.Experience + "\n"
             + "PlayerPrefs Keys:\n"
             + "- " + NameKey + "\n"
