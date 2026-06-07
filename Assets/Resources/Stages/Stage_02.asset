@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f14ec9d8a7b45d4ab1d236d14dc0d51, type: 3}
+  m_Name: Stage_02
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonStageConfig
+  stageName: Stage 2
+  stageNumber: 2
+  difficultyLevel: 2
+  middleRoomCount: 5
+  totalEnemyBudget: 100
+  bossRoomBudget: 18
+  coinReward: 180
+  diamondReward: 1
+  experienceReward: 180
+  itemDrops:
+  - item: {fileID: 11400000, guid: ad2c0a1ea5b44864ab94793ee28bbf42, type: 2}
+    weight: 60
+    minAmount: 1
+    maxAmount: 3
+  - item: {fileID: 11400000, guid: 5a7c9b8d1f2e4e80978b017a44255b72, type: 2}
+    weight: 20
+    minAmount: 1
+    maxAmount: 1
+  - item: {fileID: 11400000, guid: 86d9eab4c9754ad5a435d942ce90cf12, type: 2}
+    weight: 10
+    minAmount: 1
+    maxAmount: 1
+  enemyEntries:
+  - prefab: {fileID: 6626155559249779585, guid: 37393141bdaf2f9418f005b34f4ea263, type: 3}
+    cost: 3
+    weight: 10
+    minDifficultyLevel: 1
+    maxDifficultyLevel: 0
