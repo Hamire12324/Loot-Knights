@@ -29,8 +29,8 @@ public abstract class CharacterCtrl : BaseMonoBehaviour
     public CharacterTargetFinder CharacterTargetFinder => characterTargetFinder;
     [SerializeField] private CharacterVFXController characterVFXController;
     public CharacterVFXController CharacterVFXController => characterVFXController;
-    //[SerializeField] private CharacterLevel characterLevel;
-    //public CharacterLevel CharacterLevel => characterLevel;
+    [SerializeField] protected CharacterLevel characterLevel;
+    public CharacterLevel CharacterLevel => characterLevel;
     protected override void LoadComponents()
     {
         base.LoadComponents();
@@ -47,7 +47,7 @@ public abstract class CharacterCtrl : BaseMonoBehaviour
         this.LoadCharacterCombatController();
         this.LoadTargetFinder();
         this.LoadCharacterVFXController();
-        //this.LoadCharacterLevel();
+        this.LoadCharacterLevel();
     }
     protected virtual void LoadModel()
     {
@@ -116,10 +116,10 @@ public abstract class CharacterCtrl : BaseMonoBehaviour
         if (this.characterVFXController != null) return;
         this.characterVFXController = GetComponentInChildren<CharacterVFXController>();
     }
-    //protected virtual void LoadCharacterLevel()
-    //{
-    //    if (this.characterLevel != null) return;
-    //    this.characterLevel = GetComponentInChildren<CharacterLevel>();
-    //    //Debug.Log(transform.name + ": LoadCharacterLevel", gameObject);
-    //}
+    protected virtual void LoadCharacterLevel()
+    {
+        if (this.characterLevel != null) return;
+
+        this.characterLevel = GetComponentInChildren<CharacterLevel>(true);
+    }
 }

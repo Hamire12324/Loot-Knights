@@ -130,6 +130,19 @@ public class CharacterStat : CharacterAbstract
         NotifyAllStatsChanged();
     }
 
+    public virtual void RemoveModifiersFromSource(UnityEngine.Object source)
+    {
+        if (source == null) return;
+
+        foreach (StatType type in Enum.GetValues(typeof(StatType)))
+        {
+            GetStat(type)?.RemoveModifierFromSource(source);
+        }
+
+        ClampHealthToMax();
+        NotifyAllStatsChanged();
+    }
+
     public void NotifyAllStatsChanged()
     {
         foreach (StatType type in Enum.GetValues(typeof(StatType)))

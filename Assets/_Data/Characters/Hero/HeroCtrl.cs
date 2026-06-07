@@ -57,6 +57,18 @@ public class HeroCtrl : CharacterCtrl
         base.LoadComponents();
 
         this.photonView = GetComponent<PhotonView>();
+        LoadHeroLevel();
+    }
+
+    private void LoadHeroLevel()
+    {
+        if (characterLevel == null)
+            characterLevel = GetComponentInChildren<CharacterLevel>(true);
+
+        if (characterLevel == null)
+            characterLevel = gameObject.AddComponent<CharacterLevel>();
+
+        characterLevel.Configure(this, CharacterStat);
     }
     public void ApplyProfile(CreatedCharacterData characterData)
     {
