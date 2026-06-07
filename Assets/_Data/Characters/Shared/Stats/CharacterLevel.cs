@@ -4,10 +4,7 @@ public class CharacterLevel : CharacterAbstract
 {
     [SerializeField] private bool usePlayerProgression = true;
 
-    [Header("Level Bonuses")]
-    [SerializeField] private float attackPerLevel = 2f;
-    [SerializeField] private float maxHealthPerLevel = 10f;
-    [SerializeField] private float armorPerLevel = 0.5f;
+    [Header("Attribute Points")]
     [SerializeField] private bool healByAddedMaxHealth = true;
 
     [SerializeField] private int currentLevel = 1;
@@ -18,12 +15,14 @@ public class CharacterLevel : CharacterAbstract
     {
         base.OnEnable();
         SubscribePlayerLevel();
+        SubscribeAttributePoints();
         RefreshFromPlayerProgression();
     }
 
     protected override void OnDisable()
     {
         UnsubscribePlayerLevel();
+        UnsubscribeAttributePoints();
         base.OnDisable();
     }
 
@@ -36,39 +35,43 @@ public class CharacterLevel : CharacterAbstract
     {
         if (!usePlayerProgression) return;
 
+        PlayerAttributePointStorage.EnsureLevelRewarded(PlayerExperienceStorage.Level);
         ApplySnapshot(PlayerExperienceStorage.Snapshot);
     }
 
     public void ApplySnapshot(PlayerLevelSnapshot snapshot)
     {
         CurrentSnapshot = snapshot;
-        ApplyLevel(snapshot.Level);
+        currentLevel = Mathf.Max(1, snapshot.Level);
+        ApplyAllocatedStats();
     }
 
     public void ApplyLevel(int level)
+    {
+        currentLevel = Mathf.Max(1, level);
+        ApplyAllocatedStats();
+    }
+
+    public void ApplyAllocatedStats()
     {
         CharacterStat stat = characterCtrl != null ? characterCtrl.CharacterStat : null;
 
         if (stat == null) return;
 
-        int safeLevel = Mathf.Max(1, level);
-        int previousLevel = CurrentLevel;
         float previousMaxHealth = stat.MaxHealth != null
             ? stat.MaxHealth.FinalValue
             : 0f;
 
-        currentLevel = safeLevel;
+        stat.RemoveModifiersFromSource(this);
 
-        int bonusLevels = Mathf.Max(0, safeLevel - 1);
-        ApplyFlatModifier(StatType.Attack, attackPerLevel * bonusLevels);
-        ApplyFlatModifier(StatType.MaxHealth, maxHealthPerLevel * bonusLevels);
-        ApplyFlatModifier(StatType.Armor, armorPerLevel * bonusLevels);
+        foreach (StatType statType in PlayerAttributePointStorage.GetSpendableStats())
+            ApplyFlatModifier(statType, PlayerAttributePointStorage.GetBonusValue(statType));
 
         float nextMaxHealth = stat.MaxHealth != null
             ? stat.MaxHealth.FinalValue
             : previousMaxHealth;
 
-        if (healByAddedMaxHealth && safeLevel > previousLevel && nextMaxHealth > previousMaxHealth)
+        if (healByAddedMaxHealth && nextMaxHealth > previousMaxHealth)
             stat.SetCurrentHealth(stat.CurrentHealth + nextMaxHealth - previousMaxHealth);
         else if (stat.CurrentHealth > nextMaxHealth)
             stat.SetCurrentHealth(nextMaxHealth);
@@ -84,6 +87,8 @@ public class CharacterLevel : CharacterAbstract
 
     private void ApplyFlatModifier(StatType statType, float amount)
     {
+        if (Mathf.Approximately(amount, 0f)) return;
+
         CharacterStat stat = characterCtrl != null ? characterCtrl.CharacterStat : null;
         StatValue statValue = stat != null ? stat.GetStat(statType) : null;
 
@@ -105,10 +110,28 @@ public class CharacterLevel : CharacterAbstract
         PlayerExperienceStorage.OnLevelSnapshotChanged -= HandleLevelSnapshotChanged;
     }
 
+    private void SubscribeAttributePoints()
+    {
+        PlayerAttributePointStorage.OnPointsChanged -= HandleAttributePointsChanged;
+        PlayerAttributePointStorage.OnPointsChanged += HandleAttributePointsChanged;
+    }
+
+    private void UnsubscribeAttributePoints()
+    {
+        PlayerAttributePointStorage.OnPointsChanged -= HandleAttributePointsChanged;
+    }
+
     private void HandleLevelSnapshotChanged(PlayerLevelSnapshot snapshot)
     {
         if (!usePlayerProgression) return;
 
         ApplySnapshot(snapshot);
+    }
+
+    private void HandleAttributePointsChanged()
+    {
+        if (!usePlayerProgression) return;
+
+        ApplyAllocatedStats();
     }
 }

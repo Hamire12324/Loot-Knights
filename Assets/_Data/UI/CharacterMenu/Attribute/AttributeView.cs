@@ -151,25 +151,31 @@ public class AttributeView : BaseMonoBehaviour
         if (equipmentManager == null)
             LoadEquipmentManager();
 
-        if (equipmentManager == null)
-            return baseSnapshot;
-
         StatAccumulator attack = new(baseSnapshot.Attack);
         StatAccumulator armor = new(baseSnapshot.Armor);
         StatAccumulator maxHealth = new(baseSnapshot.MaxHealth);
         StatAccumulator critChance = new(baseSnapshot.CritChance);
         StatAccumulator critDamage = new(baseSnapshot.CritDamage);
 
-        foreach (EquipmentSlotData slot in equipmentManager.EquippedSlots)
+        if (equipmentManager != null)
         {
-            ItemDefinition item = slot?.Item;
-            if (item == null) continue;
+            foreach (EquipmentSlotData slot in equipmentManager.EquippedSlots)
+            {
+                ItemDefinition item = slot?.Item;
+                if (item == null) continue;
 
-            if (slot.EquipmentInstance != null && slot.EquipmentInstance.IsValid)
-                ApplyModifiers(slot.EquipmentInstance.BuildModifiers(item));
-            else
-                ApplyModifiers(item.BuildEquipmentModifiers(equipmentManager.GetUpgradeLevel(slot.SlotType)));
+                if (slot.EquipmentInstance != null && slot.EquipmentInstance.IsValid)
+                    ApplyModifiers(slot.EquipmentInstance.BuildModifiers(item));
+                else
+                    ApplyModifiers(item.BuildEquipmentModifiers(equipmentManager.GetUpgradeLevel(slot.SlotType)));
+            }
         }
+
+        ApplyAttributePointBonus(StatType.Attack, ref attack);
+        ApplyAttributePointBonus(StatType.Armor, ref armor);
+        ApplyAttributePointBonus(StatType.MaxHealth, ref maxHealth);
+        ApplyAttributePointBonus(StatType.CritChance, ref critChance);
+        ApplyAttributePointBonus(StatType.CritDamage, ref critDamage);
 
         float finalMaxHealth = maxHealth.FinalValue;
         float healthRatio = baseSnapshot.MaxHealth > 0f
@@ -211,6 +217,14 @@ public class AttributeView : BaseMonoBehaviour
                         break;
                 }
             }
+        }
+
+        void ApplyAttributePointBonus(StatType statType, ref StatAccumulator accumulator)
+        {
+            float bonus = PlayerAttributePointStorage.GetBonusValue(statType);
+            if (Mathf.Approximately(bonus, 0f)) return;
+
+            accumulator.Add(new StatModifier(statType, ModifierType.Flat, bonus));
         }
     }
 

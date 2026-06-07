@@ -45,6 +45,7 @@ public static class PlayerExperienceStorage
     {
         PlayerLevelSnapshot before = Snapshot;
         PlayerPrefs.DeleteKey(ExperienceKey);
+        PlayerAttributePointStorage.Clear();
         PlayerPrefs.Save();
 
         PlayerLevelSnapshot after = Snapshot;
@@ -53,6 +54,8 @@ public static class PlayerExperienceStorage
 
     private static void PublishChanges(PlayerLevelSnapshot before, PlayerLevelSnapshot after)
     {
+        PlayerAttributePointStorage.EnsureLevelRewarded(after.Level);
+
         OnExperienceChanged?.Invoke(after.TotalExperience);
         OnLevelSnapshotChanged?.Invoke(after);
 
