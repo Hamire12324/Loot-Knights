@@ -112,11 +112,11 @@ public class CharacterMenuPanel : BaseMonoBehaviour
 
         attributeView?.Refresh();
 
-        CharacterStatUpgradePanel upgradePanel = viewRoot.GetComponentInChildren<CharacterStatUpgradePanel>(true);
-        if (upgradePanel == null && section == CharacterMenuSection.Strengthen)
-            upgradePanel = viewRoot.AddComponent<CharacterStatUpgradePanel>();
-
-        upgradePanel?.Refresh();
+        if (section == CharacterMenuSection.Strengthen)
+        {
+            CharacterStatUpgradePanel upgradePanel = viewRoot.GetComponentInChildren<CharacterStatUpgradePanel>(true);
+            upgradePanel?.Refresh();
+        }
     }
 
     private void RefreshEquipmentView()

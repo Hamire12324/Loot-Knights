@@ -86,6 +86,7 @@ public class CharacterStatUpgradePanel : BaseMonoBehaviour
     private void LoadCards()
     {
         cards.Clear();
+        if (statUpgradeGrid == null) return;
 
         foreach (Transform child in statUpgradeGrid.GetComponentsInChildren<Transform>(true))
         {
@@ -94,7 +95,7 @@ public class CharacterStatUpgradePanel : BaseMonoBehaviour
 
             CharacterStatUpgradeCard card = child.GetComponent<CharacterStatUpgradeCard>();
             if (card == null)
-                card = child.gameObject.AddComponent<CharacterStatUpgradeCard>();
+                continue;
 
             StatType statType = CharacterStatUpgradeCard.ResolveStatType(child.name);
             card.Configure(statType);
