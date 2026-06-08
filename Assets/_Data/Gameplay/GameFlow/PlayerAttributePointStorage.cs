@@ -45,6 +45,20 @@ public static class PlayerAttributePointStorage
         return true;
     }
 
+    public static bool TryRefundPoint(StatType statType)
+    {
+        if (!CanSpendOn(statType)) return false;
+
+        int spentPoints = GetSpentPoints(statType);
+        if (spentPoints <= 0) return false;
+
+        PlayerPrefs.SetInt(AvailablePointsKey, AvailablePoints + 1);
+        PlayerPrefs.SetInt(GetSpentPointKey(statType), spentPoints - 1);
+        PlayerPrefs.Save();
+        OnPointsChanged?.Invoke();
+        return true;
+    }
+
     public static int GetSpentPoints(StatType statType)
     {
         return CanSpendOn(statType)
