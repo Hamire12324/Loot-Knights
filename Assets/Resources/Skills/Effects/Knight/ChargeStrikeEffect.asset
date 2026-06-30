@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b91d5bdf1f64ff1ab0b089e61270a11, type: 3}
+  m_Name: ChargeStrikeEffect
+  m_EditorClassIdentifier: 
+  distance: 2.4
+  dashDuration: 0.16
+  stopDistanceFromTarget: 0.75
+  invincibleDuringDash: 1
+  slashHitDelay: 0.35
+  attackVisualDuration: 0.75
+  radius: 1.1
+  angle: 80
+  forwardOffset: 0.55
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  damageData:
+    Multiplier: 1.35
+    CanCrit: 1
+    CausesHitStun: 1
+    HitStunDuration: 0.2
+    HitStunImmunityDuration: 0.55
+    InterruptsAttack: 1
+    HitVfx: {fileID: 11400000, guid: 5e968ca568c24b15ae9b5f984ad3d27f, type: 2}
+    HitVfxOffset: {x: 0, y: 0, z: 0}
+    HitSfx: {fileID: 11400000, guid: 9fba50e016f647349bb5ad82ddeea5fd, type: 2}
+    HitSfxOffset: {x: 0, y: 0, z: 0}
+  flatBonusDamage: 0
+  impactVfx: {fileID: 11400000, guid: 2b884347172948129733b740a52163a7, type: 2}
+  impactSfx: {fileID: 11400000, guid: f15bc3fc0f5143c0a1429ff491e3d7a4, type: 2}

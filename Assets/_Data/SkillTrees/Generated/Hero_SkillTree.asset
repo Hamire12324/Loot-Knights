@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 062da7d0656f4b0284fc01925fa3fa00, type: 3}
+  m_Name: Hero_SkillTree
+  m_EditorClassIdentifier: Assembly-CSharp::SkillTreeDefinition
+  treeId: hero_skill_tree
+  displayName: Hero Skill Tree
+  nodes:
+  - {fileID: 11400000, guid: 8836be5e17a13534c99e585e8ae93843, type: 2}
+  - {fileID: 11400000, guid: a7325b53573235d449e6f7061573434d, type: 2}
+  - {fileID: 11400000, guid: fbc4972d42630094b84bedb25d0b93ed, type: 2}
+  - {fileID: 11400000, guid: 352e8e8df22627249bab96d3b6a4a2b1, type: 2}
+  - {fileID: 11400000, guid: 81b5a23f9024de944b2a27a4a866c26d, type: 2}
+  - {fileID: 11400000, guid: a57f72c0389872f4890783e8dcd0fe7c, type: 2}
+  - {fileID: 11400000, guid: ec4f7815d4a38c747b8c84fb6eb5b19f, type: 2}

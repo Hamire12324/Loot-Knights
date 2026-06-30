@@ -36,6 +36,19 @@ public class DamageData
     [Tooltip("Local offset added to the target hit SFX position.")]
     public Vector3 HitSfxOffset;
 
+    [Header("Element")]
+    [SerializeField] private ElementType element = ElementType.None;
+    public ElementType Element => element;
+
+    [SerializeField, Min(0f)] private float elementalPower = 1f;
+    public float ElementalPower => elementalPower;
+
+    [SerializeField, Min(0f)] private float elementalStatusDuration = 4f;
+    public float ElementalStatusDuration => elementalStatusDuration;
+
+    [SerializeField] private bool consumesElementOnReaction = true;
+    public bool ConsumesElementOnReaction => consumesElementOnReaction;
+
     public DamageData() { }
 
     public DamageData(float multiplier = 1f, bool canCrit = false)

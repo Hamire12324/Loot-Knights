@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
+  m_Name: Node_KnightCommander
+  m_EditorClassIdentifier: 
+  nodeId: knight.commander
+  displayName: Knight Commander
+  description: Capstone mastery. A balanced boost for offense, defense, and critical finishers.
+  icon: {fileID: 21300000, guid: c67fbf9375ad5c34399c2849430ca7f7, type: 3}
+  kind: 0
+  branch: 1
+  treePosition: {x: 0, y: -450}
+  maxRank: 1
+  pointCost: 3
+  requiredPlayerLevel: 12
+  prerequisites:
+  - node: {fileID: 11400000, guid: 80ff35a157eb4a54b0e0a1c1550238da, type: 2}
+    requiredRank: 1
+  - node: {fileID: 11400000, guid: 08bc3db80db642fbad9d4c1cb6422748, type: 2}
+    requiredRank: 1
+  - node: {fileID: 11400000, guid: 9a47cce4558e4610afb65c72738f5e3b, type: 2}
+    requiredRank: 1
+  - node: {fileID: 11400000, guid: 01529ffee00c4db096a69ca7fdeb44f2, type: 2}
+    requiredRank: 1
+  scaleStatModifiersByRank: 1
+  statModifiers:
+  - statType: 1
+    modifierType: 0
+    amount: 8
+  - statType: 3
+    modifierType: 0
+    amount: 50
+  - statType: 8
+    modifierType: 0
+    amount: 0.15
+  activeSkill: {fileID: 0}
+  preferredEquipSlot: -1
+  element: 0
+  reaction: 0

@@ -111,9 +111,9 @@ public class PoolManager : BaseSingleton<PoolManager>
         objTransform.SetParent(spawnParent, true);
         objTransform.SetPositionAndRotation(position, rotation);
 
+        obj.gameObject.SetActive(true);
         pool.ActiveObjects.Add(obj);
         obj.OnSpawnedFromPool();
-        obj.gameObject.SetActive(true);
 
         if (!obj.gameObject.activeInHierarchy)
         {

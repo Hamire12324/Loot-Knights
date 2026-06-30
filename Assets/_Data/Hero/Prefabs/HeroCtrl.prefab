@@ -56,6 +56,58 @@ MonoBehaviour:
   defaultDeathVfx: {fileID: 0}
   deathAnchor: {fileID: 8256115376057758440}
   defaultDeathSfx: {fileID: 0}
+--- !u!1 &2228630815814662918
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7017755238160979037}
+  - component: {fileID: 3720910507926577759}
+  m_Layer: 7
+  m_Name: 'HeroSkillController '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7017755238160979037
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2228630815814662918}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8256115376057758440}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3720910507926577759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2228630815814662918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae2c45c65c33226459bb5410cf645ade, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HeroSkillController
+  characterCtrl: {fileID: 8879337150097753119}
+  basicAttack: {fileID: 0}
+  equippedSkills:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  cancelBasicAttackOnCast: 1
 --- !u!1 &2336071543560550323
 GameObject:
   m_ObjectHideFlags: 0
@@ -159,6 +211,10 @@ MonoBehaviour:
     HitVfxOffset: {x: 0, y: 0, z: 0}
     HitSfx: {fileID: 0}
     HitSfxOffset: {x: 0, y: 0, z: 0}
+    element: 0
+    elementalPower: 1
+    elementalStatusDuration: 4
+    consumesElementOnReaction: 1
   hitboxCollider: {fileID: 8681258863776155875}
   targetLayer:
     serializedVersion: 2
@@ -304,6 +360,8 @@ Transform:
   - {fileID: 8002323674898344257}
   - {fileID: 1096120690360056042}
   - {fileID: 910000000000000012}
+  - {fileID: 8679861876582568543}
+  - {fileID: 7017755238160979037}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7599912151265102085
@@ -521,12 +579,16 @@ MonoBehaviour:
   characterDamSender: {fileID: 2962451539958678809}
   characterDamReceiver: {fileID: 4720838628130102561}
   characterCombatController: {fileID: 6599739441919343307}
+  characterSkillController: {fileID: 0}
   characterTargetFinder: {fileID: 7245543124969690380}
   characterVFXController: {fileID: 910000000000000010}
+  characterLevel: {fileID: 0}
   photonView: {fileID: 4558969153179040639}
   profile:
     CharacterName: 
     CharacterClass: 0
+  heroLevel: {fileID: 0}
+  heroSkillController: {fileID: 0}
 --- !u!114 &4558969153179040639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -692,6 +754,54 @@ MonoBehaviour:
   attackDuration: 0.8
   canAttackBeInterrupted: 1
   isAttacking: 0
+--- !u!1 &8520408199072860706
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8679861876582568543}
+  - component: {fileID: 6668165206419482075}
+  m_Layer: 7
+  m_Name: HeroLevel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8679861876582568543
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8520408199072860706}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8256115376057758440}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6668165206419482075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8520408199072860706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 784d9955d8ba6f9408dc497c23b245da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HeroLevel
+  characterCtrl: {fileID: 8879337150097753119}
+  usePlayerProgression: 1
+  healByAddedMaxHealth: 1
+  currentLevel: 1
 --- !u!1 &9182299359963978304
 GameObject:
   m_ObjectHideFlags: 0

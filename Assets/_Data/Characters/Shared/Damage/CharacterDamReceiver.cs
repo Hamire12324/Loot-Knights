@@ -82,6 +82,11 @@ public class CharacterDamReceiver : CharacterAbstract
 
         OnHit?.Invoke(finalDamage, attacker);
         OnHitDetailed?.Invoke(finalDamage, attacker, damageData);
+        CharacterElementalState.ApplyElementalHit(
+            characterCtrl,
+            attacker != null ? attacker.GetComponentInParent<CharacterCtrl>() : null,
+            finalDamage,
+            damageData);
 
         if (characterCtrl.CharacterStat.CurrentHealth <= 0f)
         {
@@ -142,6 +147,8 @@ public class CharacterDamReceiver : CharacterAbstract
         isDead = false;
         hitStunEndTime = 0f;
         hitStunImmunityEndTime = 0f;
+
+        characterCtrl.CharacterAnimation?.ResetAfterRevive();
     }
 
     protected virtual void HandleHealthChanged(float currentHp)

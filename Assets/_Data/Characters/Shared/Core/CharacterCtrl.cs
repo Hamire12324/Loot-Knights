@@ -25,6 +25,8 @@ public abstract class CharacterCtrl : BaseMonoBehaviour
     public CharacterDamReceiver CharacterDamReceiver => characterDamReceiver;
     [SerializeField] private CharacterCombatController characterCombatController;
     public CharacterCombatController CharacterCombatController => characterCombatController;
+    [SerializeField] protected CharacterSkillController characterSkillController;
+    public CharacterSkillController CharacterSkillController => characterSkillController;
     [SerializeField] private CharacterTargetFinder characterTargetFinder;
     public CharacterTargetFinder CharacterTargetFinder => characterTargetFinder;
     [SerializeField] private CharacterVFXController characterVFXController;
@@ -45,6 +47,7 @@ public abstract class CharacterCtrl : BaseMonoBehaviour
         this.LoadCharacterDamReceiver();
         this.LoadCharacterDamSender();
         this.LoadCharacterCombatController();
+        this.LoadCharacterSkillController();
         this.LoadTargetFinder();
         this.LoadCharacterVFXController();
         this.LoadCharacterLevel();
@@ -104,6 +107,11 @@ public abstract class CharacterCtrl : BaseMonoBehaviour
         if (this.characterCombatController != null) return;
         this.characterCombatController = GetComponentInChildren<CharacterCombatController>();
         Debug.Log(transform.name + ": LoadCharacterCombatController", gameObject);
+    }
+    protected virtual void LoadCharacterSkillController()
+    {
+        if (this.characterSkillController != null) return;
+        this.characterSkillController = GetComponentInChildren<CharacterSkillController>(true);
     }
     protected virtual void LoadTargetFinder()
     {

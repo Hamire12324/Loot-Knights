@@ -48,7 +48,7 @@ public class VFXManager : BaseSingleton<VFXManager>
             finalOffset.x = -finalOffset.x;
 
         Vector3 finalPosition = position + finalOffset;
-        Transform parent = definition.ParentToAnchor ? anchor : defaultParent;
+        Transform parent = definition.ParentToAnchor ? anchor : null;
 
         PoolObj spawned = poolManager.Spawn(definition.Prefab, finalPosition, Quaternion.identity, parent);
         ApplyRendererFlip(spawned, definition.FlipX ^ mirrorHorizontally, definition.FlipY);

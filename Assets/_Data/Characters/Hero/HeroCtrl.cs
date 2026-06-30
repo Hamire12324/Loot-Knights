@@ -8,6 +8,10 @@ public class HeroCtrl : CharacterCtrl
     [SerializeField] private PhotonView photonView;
     [SerializeField] private CreatedCharacterData profile;
     public CreatedCharacterData Profile => profile;
+    [SerializeField] private HeroLevel heroLevel;
+    public HeroLevel HeroLevel => heroLevel;
+    [SerializeField] private HeroSkillController heroSkillController;
+    public HeroSkillController HeroSkillController => heroSkillController;
     protected override void Awake()
     {
         base.Awake();
@@ -57,17 +61,52 @@ public class HeroCtrl : CharacterCtrl
         base.LoadComponents();
 
         this.photonView = GetComponent<PhotonView>();
+    }
+
+    protected override void LoadCharacterLevel()
+    {
         LoadHeroLevel();
+    }
+
+    protected override void LoadCharacterSkillController()
+    {
+        LoadHeroSkillController();
     }
 
     private void LoadHeroLevel()
     {
-        if (characterLevel == null)
-            characterLevel = GetComponentInChildren<CharacterLevel>(true);
+        if (heroLevel == null)
+            heroLevel = FindChildComponent<HeroLevel>();
 
-        if (characterLevel == null)
-            characterLevel = gameObject.AddComponent<CharacterLevel>();
+        if (heroLevel == null)
+            Debug.LogError($"{nameof(HeroCtrl)} requires a child {nameof(HeroLevel)}.", gameObject);
+
+        characterLevel = heroLevel;
     }
+
+    private void LoadHeroSkillController()
+    {
+        if (heroSkillController == null)
+            heroSkillController = FindChildComponent<HeroSkillController>();
+
+        if (heroSkillController == null)
+            Debug.LogError($"{nameof(HeroCtrl)} requires a child {nameof(HeroSkillController)}.", gameObject);
+
+        characterSkillController = heroSkillController;
+    }
+
+    private T FindChildComponent<T>() where T : Component
+    {
+        T[] components = GetComponentsInChildren<T>(true);
+        foreach (T component in components)
+        {
+            if (component != null && component.transform != transform)
+                return component;
+        }
+
+        return null;
+    }
+
     public void ApplyProfile(CreatedCharacterData characterData)
     {
         profile = characterData;

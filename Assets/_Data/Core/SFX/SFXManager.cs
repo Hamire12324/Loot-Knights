@@ -13,6 +13,26 @@ public class SFXManager : BaseSingleton<SFXManager>
 
     private readonly Queue<AudioSource> availableSources = new();
     private readonly HashSet<AudioSource> activeSources = new();
+    private readonly Dictionary<AudioSource, float> sourceBaseVolumes = new();
+
+    public float MasterVolume
+    {
+        get => masterVolume;
+        set
+        {
+            masterVolume = Mathf.Clamp01(value);
+
+            foreach (AudioSource source in activeSources)
+            {
+                if (source == null) continue;
+
+                if (sourceBaseVolumes.TryGetValue(source, out float baseVolume))
+                {
+                    source.volume = baseVolume * masterVolume;
+                }
+            }
+        }
+    }
 
     protected override void Awake()
     {
@@ -21,6 +41,7 @@ public class SFXManager : BaseSingleton<SFXManager>
         if (InstanceOrNull != this)
             return;
 
+        MasterVolume = GameSettingsData.EffectVolume;
         PreloadSources();
     }
 
@@ -105,6 +126,7 @@ public class SFXManager : BaseSingleton<SFXManager>
 
         source.outputAudioMixerGroup = definition.Output;
         source.clip = clip;
+        sourceBaseVolumes[source] = definition.Volume;
         source.volume = definition.Volume * masterVolume;
         source.pitch = pitch;
         source.priority = definition.Priority;
@@ -127,6 +149,7 @@ public class SFXManager : BaseSingleton<SFXManager>
         source.Stop();
         source.clip = null;
         source.gameObject.SetActive(false);
+        sourceBaseVolumes.Remove(source);
 
         if (activeSources.Remove(source))
             availableSources.Enqueue(source);
