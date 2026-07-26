@@ -25,6 +25,7 @@ public class VFXPoolObj : PoolObj
     [SerializeField] private AudioSource[] audioSources;
 
     private Coroutine returnCoroutine;
+    private bool suppressAutoReturn;
 
     protected override void OnEnable()
     {
@@ -38,6 +39,14 @@ public class VFXPoolObj : PoolObj
     {
         StopReturnCoroutine();
         base.OnDisable();
+    }
+
+    public override void OnSpawnedFromPool()
+    {
+        base.OnSpawnedFromPool();
+
+        if (playOnSpawn)
+            Restart();
     }
 
     protected override void LoadComponents()
@@ -57,6 +66,12 @@ public class VFXPoolObj : PoolObj
         PlayParticles();
         PlayAudio();
         ScheduleReturn();
+    }
+
+    public void RestartIfPlayOnSpawn()
+    {
+        if (playOnSpawn)
+            Restart();
     }
     private void LoadParticleSystems()
     {
@@ -86,6 +101,7 @@ public class VFXPoolObj : PoolObj
         StopReturnCoroutine();
         StopParticles();
         StopAudio();
+        suppressAutoReturn = false;
 
         base.OnReturnedToPool();
     }
@@ -101,10 +117,20 @@ public class VFXPoolObj : PoolObj
 
     private void ScheduleReturn()
     {
-        if (!autoReturnToPool)
+        if (!autoReturnToPool || suppressAutoReturn)
             return;
 
         returnCoroutine = StartCoroutine(ReturnAfterPlayback(lifetime));
+    }
+
+    public void SetAutoReturnToPool(bool enabled)
+    {
+        suppressAutoReturn = !enabled;
+
+        if (!enabled)
+            StopReturnCoroutine();
+        else if (isActiveAndEnabled && returnCoroutine == null)
+            ScheduleReturn();
     }
 
     private IEnumerator ReturnAfterPlayback(float activeLifetime)
@@ -112,6 +138,10 @@ public class VFXPoolObj : PoolObj
         if (activeLifetime > 0f)
         {
             yield return new WaitForSeconds(activeLifetime);
+        }
+        else if (activeLifetime <= 0f && AnyParticleLooping())
+        {
+            yield return new WaitForSeconds(fallbackLifetime);
         }
         else if (particleSystems != null && particleSystems.Length > 0)
         {
@@ -135,6 +165,25 @@ public class VFXPoolObj : PoolObj
         {
             ParticleSystem particleSystem = particleSystems[i];
             if (particleSystem != null && particleSystem.IsAlive(true))
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool AnyParticleLooping()
+    {
+        if (particleSystems == null)
+            return false;
+
+        for (int i = 0; i < particleSystems.Length; i++)
+        {
+            ParticleSystem particleSystem = particleSystems[i];
+            if (particleSystem == null)
+                continue;
+
+            ParticleSystem.MainModule main = particleSystem.main;
+            if (main.loop)
                 return true;
         }
 

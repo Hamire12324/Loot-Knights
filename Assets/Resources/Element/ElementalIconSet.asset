@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5a82543f48a4eb49ba2eea0f4519402, type: 3}
+  m_Name: ElementalIconSet
+  m_EditorClassIdentifier: 
+  fallbackSprite: {fileID: 0}
+  defaultFallbackColor: {r: 0.42, g: 0.95, b: 1, a: 1}
+  elementIcons:
+  - Element: 1
+    Sprite: {fileID: 21300000, guid: 90e9d575f2d3ec44191c8dbfa6833350, type: 3}
+    ShardVfx: {fileID: 11400000, guid: 2cf9af50cbd57ec4b91efce2aaac2c29, type: 2}
+    FallbackColor: {r: 1, g: 0.28, b: 0.06, a: 1}
+  - Element: 2
+    Sprite: {fileID: 21300000, guid: f88bd8a26160a1d4b968f7ea91119a2d, type: 3}
+    ShardVfx: {fileID: 11400000, guid: 2ba0af3dab375db439cf10604fef864c, type: 2}
+    FallbackColor: {r: 0.35, g: 0.88, b: 1, a: 1}
+  - Element: 3
+    Sprite: {fileID: 21300000, guid: c4139807443590f4ab87b3a53515ea3f, type: 3}
+    ShardVfx: {fileID: 11400000, guid: 8d3dc18cb1ce75b43ad5c9f951648ad1, type: 2}
+    FallbackColor: {r: 1, g: 0.88, b: 0.18, a: 1}
+  - Element: 4
+    Sprite: {fileID: 21300000, guid: 4fb9a39afdb7fef4a9b167687d9f5166, type: 3}
+    ShardVfx: {fileID: 11400000, guid: e9dea36e79844bd4ea0cc2d906563d08, type: 2}
+    FallbackColor: {r: 0.42, g: 1, b: 0.12, a: 1}
+  reactionIcons:
+  - Reaction: 1
+    Sprite: {fileID: 21300000, guid: 85c8fc94b1106cb4f8bff9ab6c9e0ad8, type: 3}
+  - Reaction: 2
+    Sprite: {fileID: 21300000, guid: ea5ee09a0958dfc48bde71216dd66330, type: 3}
+  - Reaction: 3
+    Sprite: {fileID: 21300000, guid: b7c84687d655e60408e1151de1a103af, type: 3}
+  - Reaction: 4
+    Sprite: {fileID: 21300000, guid: 40bdde94fd3db4845a8d8d7ad9f054e3, type: 3}
+  - Reaction: 5
+    Sprite: {fileID: 21300000, guid: 63a52c91f137a1e45a6195a75228dddd, type: 3}
+  - Reaction: 6
+    Sprite: {fileID: 21300000, guid: ce995549daa85634eb2b63668db5f013, type: 3}

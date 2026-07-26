@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 public sealed class SkillTreeRuntime
 {
@@ -39,7 +38,7 @@ public sealed class SkillTreeRuntime
             return false;
         }
 
-        if (PlayerSkillTreeStorage.AvailablePoints < node.PointCost)
+        if (PlayerSkillTreeManager.Service.AvailablePoints < node.PointCost)
         {
             reason = "Not enough skill points.";
             return false;
@@ -64,20 +63,25 @@ public sealed class SkillTreeRuntime
         if (!CanUpgrade(node, playerLevel, out reason))
             return false;
 
-        if (!PlayerSkillTreeStorage.TrySpendPoints(node.PointCost))
+        if (!PlayerSkillTreeManager.Service.TrySpendPoints(node.PointCost))
         {
             reason = "Not enough skill points.";
             return false;
         }
 
-        PlayerSkillTreeStorage.SetRank(tree, node, GetRank(node) + 1);
+        PlayerSkillTreeManager.Service.SetRank(tree, node, GetRank(node) + 1);
         reason = string.Empty;
         return true;
     }
 
     public int GetRank(SkillTreeNodeDefinition node)
     {
-        return PlayerSkillTreeStorage.GetRank(tree, node);
+        return PlayerSkillTreeManager.Service.GetRank(tree, node);
+    }
+
+    public int GetRank(string nodeId)
+    {
+        return GetRank(tree != null ? tree.FindNode(nodeId) : null);
     }
 
     public List<StatModifier> CreateStatModifiers()
@@ -108,6 +112,7 @@ public sealed class SkillTreeRuntime
             if (node == null ||
                 node.Kind != SkillTreeNodeKind.ActiveSkill ||
                 node.ActiveSkill == null ||
+                IsSpecialActiveSkillNode(node) ||
                 GetRank(node) <= 0)
             {
                 continue;
@@ -140,6 +145,41 @@ public sealed class SkillTreeRuntime
         return false;
     }
 
+    public List<ElementType> GetUnlockedElements()
+    {
+        List<ElementType> elements = new();
+        if (tree == null) return elements;
+
+        foreach (SkillTreeNodeDefinition node in tree.Nodes)
+        {
+            if (node == null ||
+                node.Kind != SkillTreeNodeKind.ElementUnlock ||
+                node.Element == ElementType.None ||
+                GetRank(node) <= 0 ||
+                elements.Contains(node.Element))
+            {
+                continue;
+            }
+
+            elements.Add(node.Element);
+        }
+
+        return elements;
+    }
+
+    public bool HasAnyElementUnlockNodes()
+    {
+        if (tree == null) return false;
+
+        foreach (SkillTreeNodeDefinition node in tree.Nodes)
+        {
+            if (node != null && node.Kind == SkillTreeNodeKind.ElementUnlock)
+                return true;
+        }
+
+        return false;
+    }
+
     public bool HasReaction(ElementalReactionType reaction)
     {
         if (tree == null || reaction == ElementalReactionType.None)
@@ -156,6 +196,54 @@ public sealed class SkillTreeRuntime
 
             if (GetRank(node) > 0)
                 return true;
+        }
+
+        return false;
+    }
+
+    public bool HasAnyReactionUnlockNodes()
+    {
+        if (tree == null) return false;
+
+        foreach (SkillTreeNodeDefinition node in tree.Nodes)
+        {
+            if (node != null && node.Kind == SkillTreeNodeKind.ElementReaction)
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool IsSpecialActiveSkillNode(SkillTreeNodeDefinition node)
+    {
+        return tree != null &&
+               node != null &&
+               node.Kind == SkillTreeNodeKind.ActiveSkill &&
+               node.ActiveSkill != null &&
+               IsElementalSkillTree();
+    }
+
+    private bool IsElementalSkillTree()
+    {
+        if (tree == null)
+            return false;
+
+        if (!string.IsNullOrWhiteSpace(tree.TreeId) &&
+            tree.TreeId.IndexOf("element", System.StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return true;
+        }
+
+        foreach (SkillTreeNodeDefinition node in tree.Nodes)
+        {
+            if (node != null &&
+                (node.Element != ElementType.None ||
+                 node.Reaction != ElementalReactionType.None ||
+                 node.Kind == SkillTreeNodeKind.ElementUnlock ||
+                 node.Kind == SkillTreeNodeKind.ElementReaction))
+            {
+                return true;
+            }
         }
 
         return false;

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.iron_guard
   displayName: Iron Guard
-  description: Unlock Iron Guard, a defensive stance for surviving burst damage.
+  description: Unlock Iron Guard. Cast a defensive buff skill for surviving burst damage.
   icon: {fileID: 21300000, guid: f6b8b85cbdc82ce439a41ae3d56d57ee, type: 3}
   kind: 1
   branch: 1

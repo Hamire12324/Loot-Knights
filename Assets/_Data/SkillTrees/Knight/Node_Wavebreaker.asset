@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.wavebreaker
   displayName: Wavebreaker
-  description: Blend technique and movement. Gain Attack after learning Ground Wave and Momentum.
+  description: '+4 Attack per rank. Also upgrades Ground Wave per rank: +0.45 length, +0.08 width, +8% Attack damage multiplier, and 0.15s stun. Max rank 2.'
   icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
   kind: 0
   branch: 0

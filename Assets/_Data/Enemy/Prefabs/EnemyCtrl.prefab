@@ -109,7 +109,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyStat
   characterCtrl: {fileID: 5807337789327651017}
   Attack:
-    baseValue: 10
+    baseValue: 1
     isDirty: 1
     cachedFinalValue: 0
   CritChance:
@@ -121,11 +121,31 @@ MonoBehaviour:
     isDirty: 1
     cachedFinalValue: 0
   Armor:
-    baseValue: 0
+    baseValue: 10
     isDirty: 1
     cachedFinalValue: 0
   MaxHealth:
-    baseValue: 100
+    baseValue: 10000
+    isDirty: 1
+    cachedFinalValue: 0
+  MaxMana:
+    baseValue: 0
+    isDirty: 1
+    cachedFinalValue: 0
+  MoveSpeed:
+    baseValue: 0
+    isDirty: 1
+    cachedFinalValue: 0
+  AttackSpeed:
+    baseValue: 0
+    isDirty: 1
+    cachedFinalValue: 0
+  HealthRegen:
+    baseValue: 0
+    isDirty: 1
+    cachedFinalValue: 0
+  ManaRegen:
+    baseValue: 0
     isDirty: 1
     cachedFinalValue: 0
   previousMaxHealth: 0
@@ -317,12 +337,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -4030792056451597264, guid: bb45e67f3409ce7459cf6d75ce77ae14, type: 3}
+  m_Sprite: {fileID: 5770554414319492624, guid: 18d6b1b6a1d410041b0e521e35ed978d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.2, y: 0.18}
+  m_Size: {x: 0.23, y: 0.14}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -415,6 +435,7 @@ MonoBehaviour:
   flashOnDamage: 1
   damageFlashColor: {r: 1, g: 0.35, b: 0.35, a: 1}
   damageFlashDuration: 0.08
+  fallbackReturnToPoolDelay: 1.2
 --- !u!1 &4078929762291601749
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,8 +513,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4325988491008515566}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.016, y: 0.038, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -598,8 +619,10 @@ MonoBehaviour:
   characterDamSender: {fileID: 9134152244285718677}
   characterDamReceiver: {fileID: 7992388985059515559}
   characterCombatController: {fileID: 2566884767154531975}
+  characterSkillController: {fileID: 0}
   characterTargetFinder: {fileID: 8243017945076777029}
   characterVFXController: {fileID: 910000000000000103}
+  characterLevel: {fileID: 0}
   enemyAIController: {fileID: 2949383566835647808}
 --- !u!114 &6626155559249779585
 MonoBehaviour:
@@ -719,6 +742,10 @@ MonoBehaviour:
     HitVfxOffset: {x: 0, y: 0, z: 0}
     HitSfx: {fileID: 0}
     HitSfxOffset: {x: 0, y: 0, z: 0}
+    element: 0
+    elementalPower: 1
+    elementalStatusDuration: 4
+    consumesElementOnReaction: 1
   hitboxCollider: {fileID: 1619871753386892027}
   targetLayer:
     serializedVersion: 2

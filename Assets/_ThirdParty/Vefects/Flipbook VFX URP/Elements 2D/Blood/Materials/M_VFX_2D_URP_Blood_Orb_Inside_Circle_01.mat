@@ -100,7 +100,7 @@ Material:
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _G: {r: 1, g: 1, b: 1, a: 0}
     - _Outline: {r: 1, g: 1, b: 1, a: 0}
-    - _R: {r: 0.5566038, g: 0.023629395, b: 0.023629395, a: 0}
+    - _R: {r: 0, g: 32, b: 24.591936, a: 0}
     - _UVDP: {r: -0.1, g: -0.7, b: 0, a: 0}
     - _UVDP1: {r: 0.1, g: -0.2, b: 0, a: 0}
     - _UVDS: {r: 0.5, g: 1, b: 0, a: 0}
@@ -108,3 +108,4 @@ Material:
     - _UVP: {r: 0, g: 0, b: 0, a: 0}
     - _UVS: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1

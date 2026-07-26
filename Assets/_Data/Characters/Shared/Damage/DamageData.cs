@@ -56,4 +56,31 @@ public class DamageData
         Multiplier = multiplier;
         CanCrit = canCrit;
     }
+
+    public DamageData CloneWithElement(
+        ElementType overrideElement,
+        float elementalPowerOverride = -1f,
+        float elementalStatusDurationOverride = -1f,
+        bool? consumesElementOnReactionOverride = null)
+    {
+        DamageData clone = new(Multiplier, CanCrit)
+        {
+            CausesHitStun = CausesHitStun,
+            HitStunDuration = HitStunDuration,
+            HitStunImmunityDuration = HitStunImmunityDuration,
+            InterruptsAttack = InterruptsAttack,
+            HitVfx = HitVfx,
+            HitVfxOffset = HitVfxOffset,
+            HitSfx = HitSfx,
+            HitSfxOffset = HitSfxOffset,
+            element = overrideElement,
+            elementalPower = elementalPowerOverride >= 0f ? elementalPowerOverride : elementalPower,
+            elementalStatusDuration = elementalStatusDurationOverride >= 0f
+                ? elementalStatusDurationOverride
+                : elementalStatusDuration,
+            consumesElementOnReaction = consumesElementOnReactionOverride ?? consumesElementOnReaction
+        };
+
+        return clone;
+    }
 }

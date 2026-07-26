@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class CharacterMenuTabButton : ButtonAbstract
 {
@@ -13,6 +14,18 @@ public class CharacterMenuTabButton : ButtonAbstract
     public void SetPanel(CharacterMenuPanel targetPanel)
     {
         panel = targetPanel;
+    }
+
+    public void SetSection(CharacterMenuSection targetSection)
+    {
+        section = targetSection;
+    }
+
+    public void SetLabel(string value)
+    {
+        TMP_Text label = GetComponentInChildren<TMP_Text>(true);
+        if (label != null)
+            label.text = value;
     }
 
     public void SetSelected(bool selected)

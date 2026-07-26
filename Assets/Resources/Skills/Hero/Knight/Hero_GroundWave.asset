@@ -18,10 +18,10 @@ MonoBehaviour:
   castType: 0
   castTime: 0.12
   duration: 0
-  lockMovementWhileCasting: 1
+  lockMovementWhileCasting: 0
   canBeInterrupted: 1
   cooldown: 3
-  triggerName: Attack
+  triggerName: GroundAttack
   animationIndex: 0
   castVfx: {fileID: 0}
   castSfx: {fileID: 0}

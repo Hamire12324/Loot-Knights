@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.whirlwind
   displayName: Whirlwind
-  description: Unlock Whirlwind, a moving area attack that rewards aggressive positioning.
+  description: Unlock Whirlwind. Spin for 2.2s, hitting nearby enemies every 0.35s for 45% Attack damage per tick. Spinning Guard and Guardian Spin upgrade this skill.
   icon: {fileID: 21300000, guid: 08c71e4e0565fe4469d1e0a593047156, type: 3}
   kind: 1
   branch: 0

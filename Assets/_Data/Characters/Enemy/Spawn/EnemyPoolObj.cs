@@ -24,11 +24,8 @@ public class EnemyPoolObj : PoolObj
         if (enemyCtrl == null)
             LoadEnemyCtrl();
 
-        enemyCtrl.CharacterDamReceiver?.SetDead(false);
+        enemyCtrl.CharacterDamReceiver?.Revive();
         enemyCtrl.CharacterDamReceiver?.SetInvincible(false);
-        enemyCtrl.CharacterStat?.SetCurrentHealth(
-            enemyCtrl.CharacterStat.MaxHealth?.FinalValue ?? 1f
-        );
 
         if (enemyCtrl.Rb != null)
             enemyCtrl.Rb.linearVelocity = Vector2.zero;

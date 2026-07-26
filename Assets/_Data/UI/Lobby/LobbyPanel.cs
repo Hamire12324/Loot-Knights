@@ -85,7 +85,15 @@ public class LobbyPanel : BaseMonoBehaviour
     public void OpenFriends() => onFriendsRequested.Invoke();
     public void OpenMessages() => onMessagesRequested.Invoke();
     public void OpenRanking() => onRankingRequested.Invoke();
-    public void OpenSettings() => onSettingsRequested.Invoke();
+    public void OpenSettings()
+    {
+        if (SettingsPanel.Instance != null)
+        {
+            SettingsPanel.Instance.Show();
+        }
+
+        onSettingsRequested.Invoke();
+    }
     public void OpenAddCoins() => onAddCoinsRequested.Invoke();
     public void OpenAddDiamonds() => onAddDiamondsRequested.Invoke();
     public void ReadyGo()

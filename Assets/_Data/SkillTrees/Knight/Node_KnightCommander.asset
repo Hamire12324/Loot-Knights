@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.commander
   displayName: Knight Commander
-  description: Capstone mastery. A balanced boost for offense, defense, and critical finishers.
+  description: '+8 Attack, +50 Max Health, and +15% Crit Damage.'
   icon: {fileID: 21300000, guid: c67fbf9375ad5c34399c2849430ca7f7, type: 3}
   kind: 0
   branch: 1

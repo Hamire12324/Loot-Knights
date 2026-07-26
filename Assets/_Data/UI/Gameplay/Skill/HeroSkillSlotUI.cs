@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class HeroSkillSlotUI : BaseMonoBehaviour
 {
+    [SerializeField] private bool isSpecialSkill;
     [SerializeField, Min(0)] private int skillIndex;
     [SerializeField] private Image icon;
     [SerializeField] private Image cooldownOverlay;
@@ -30,6 +31,7 @@ public class HeroSkillSlotUI : BaseMonoBehaviour
     protected override void Update()
     {
         base.Update();
+        RebindIfRuntimeChanged();
         RefreshCooldown();
     }
 
@@ -43,7 +45,15 @@ public class HeroSkillSlotUI : BaseMonoBehaviour
 
     public void SetSkillIndex(int index)
     {
+        isSpecialSkill = false;
         skillIndex = Mathf.Max(0, index);
+        BindRuntime();
+        Refresh();
+    }
+
+    public void SetSpecialSkillSlot()
+    {
+        isSpecialSkill = true;
         BindRuntime();
         Refresh();
     }
@@ -52,13 +62,31 @@ public class HeroSkillSlotUI : BaseMonoBehaviour
     {
         UnbindRuntime();
 
-        HeroCtrl hero = HeroCtrl.GetLocal();
-        runtime = hero != null && hero.HeroSkillController != null
-            ? hero.HeroSkillController.GetSkill(skillIndex)
-            : null;
+        runtime = GetCurrentRuntime();
 
         if (runtime != null)
             runtime.OnChanged += HandleRuntimeChanged;
+    }
+
+    private void RebindIfRuntimeChanged()
+    {
+        CharacterSkillRuntime currentRuntime = GetCurrentRuntime();
+        if (currentRuntime == runtime)
+            return;
+
+        BindRuntime();
+        Refresh();
+    }
+
+    private CharacterSkillRuntime GetCurrentRuntime()
+    {
+        HeroCtrl hero = HeroCtrl.GetLocal();
+        if (hero == null || hero.HeroSkillController == null)
+            return null;
+
+        return isSpecialSkill
+            ? hero.HeroSkillController.GetSpecialSkill()
+            : hero.HeroSkillController.GetSkill(skillIndex);
     }
 
     private void UnbindRuntime()

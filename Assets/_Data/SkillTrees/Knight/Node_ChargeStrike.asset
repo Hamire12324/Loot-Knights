@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.charge_strike
   displayName: Charge Strike
-  description: Unlock Charge Strike, a committed engage tool for finishing priority enemies.
+  description: Unlock Charge Strike. Dash up to 2.4 units toward a target, then slash in an 80 degree arc for 140% Attack damage. Cleaving Arc upgrades this skill.
   icon: {fileID: 21300000, guid: c67fbf9375ad5c34399c2849430ca7f7, type: 3}
   kind: 1
   branch: 2

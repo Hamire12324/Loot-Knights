@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.spinning_guard
   displayName: Spinning Guard
-  description: Protect yourself while moving through enemies. Gain Armor and Attack.
+  description: '+1 Armor and +3 Attack per rank. Also upgrades Whirlwind per rank: +0.2s duration, +0.12 radius, and +1.5 Armor while spinning. Max rank 2.'
   icon: {fileID: 21300000, guid: 08c71e4e0565fe4469d1e0a593047156, type: 3}
   kind: 2
   branch: 0

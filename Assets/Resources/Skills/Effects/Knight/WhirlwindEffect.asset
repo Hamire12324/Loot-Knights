@@ -30,8 +30,6 @@ MonoBehaviour:
     HitSfx: {fileID: 11400000, guid: 9fba50e016f647349bb5ad82ddeea5fd, type: 2}
     HitSfxOffset: {x: 0, y: 0, z: 0}
   flatBonusDamage: 0
-  tickVfx: {fileID: 11400000, guid: 5e968ca568c24b15ae9b5f984ad3d27f, type: 2}
-  tickSfx: {fileID: 11400000, guid: 9fba50e016f647349bb5ad82ddeea5fd, type: 2}
   spinVfx: {fileID: 11400000, guid: 8c98b1d6735e4440bec292d5c46597a9, type: 2}
   spinVfxInterval: 0.12
   spinVfxRadius: 0.55

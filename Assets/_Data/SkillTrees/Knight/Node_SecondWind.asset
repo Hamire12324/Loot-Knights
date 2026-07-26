@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.second_wind
   displayName: Second Wind
-  description: Recover through long fights. Gain health regeneration.
+  description: '+0.4 Health Regen per second per rank. Max rank 2: +0.8 HP/s.'
   icon: {fileID: 21300000, guid: f6b8b85cbdc82ce439a41ae3d56d57ee, type: 3}
   kind: 0
   branch: 1

@@ -25,6 +25,7 @@ public sealed class CharacterSkillFacing
         Vector3 scale = originalScale;
         scale.x = direction.x >= 0f ? Mathf.Abs(scale.x) : -Mathf.Abs(scale.x);
         characterCtrl.transform.localScale = scale;
+        characterCtrl.CharacterMovement?.SetLookDirection(direction);
         castFacingOverrideActive = true;
     }
 
@@ -41,7 +42,6 @@ public sealed class CharacterSkillFacing
         if (!castFacingOverrideActive || characterCtrl == null)
             return;
 
-        characterCtrl.transform.localScale = originalScale;
         castFacingOverrideActive = false;
     }
 }

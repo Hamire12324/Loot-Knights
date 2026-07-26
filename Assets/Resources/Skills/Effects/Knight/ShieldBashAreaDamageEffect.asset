@@ -31,5 +31,8 @@ MonoBehaviour:
     HitSfx: {fileID: 11400000, guid: 9fba50e016f647349bb5ad82ddeea5fd, type: 2}
     HitSfxOffset: {x: 0, y: 0, z: 0}
   flatBonusDamage: 0
-  impactVfx: {fileID: 11400000, guid: 5e968ca568c24b15ae9b5f984ad3d27f, type: 2}
-  impactSfx: {fileID: 11400000, guid: 9fba50e016f647349bb5ad82ddeea5fd, type: 2}
+  shieldBashHealMaxHealthPercent: 0.12
+  shieldWallHealMaxHealthPercentPerRank: 0.04
+  shieldWallArmorPerRank: 1.5
+  shieldWallArmorDuration: 2.5
+  supportVfx: {fileID: 11400000, guid: a632c46718bb43fdb5d5333dc11af6d0, type: 2}

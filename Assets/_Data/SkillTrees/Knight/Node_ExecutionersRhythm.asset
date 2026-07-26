@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.executioners_rhythm
   displayName: Executioner's Rhythm
-  description: Keep pressure after spinning attacks. Gain crit chance.
+  description: '+2% Crit Chance per rank. Max rank 3: +6% Crit Chance.'
   icon: {fileID: 21300000, guid: 08c71e4e0565fe4469d1e0a593047156, type: 3}
   kind: 0
   branch: 0

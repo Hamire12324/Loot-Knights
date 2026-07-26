@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.hold_the_line
   displayName: Hold the Line
-  description: Stand firm after engaging. Gain max health and armor.
+  description: '+20 Max Health and +1 Armor per rank. Max rank 2: +40 Max Health, +2 Armor.'
   icon: {fileID: 21300000, guid: f6b8b85cbdc82ce439a41ae3d56d57ee, type: 3}
   kind: 0
   branch: 1

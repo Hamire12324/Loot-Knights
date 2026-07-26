@@ -11941,7 +11941,11 @@ MonoBehaviour:
     viewRoot: {fileID: 894413868}
     tabButton: {fileID: 8601227134755363250}
   closeButton: {fileID: 8493183133941611317}
+  equipmentView: {fileID: 0}
   hideOnStart: 1
+  elementalSkillTree: {fileID: 11400000, guid: b7f0e128d5444be18a5f4af914a3ce6b, type: 2}
+  classSkillTreeLabel: CLASS
+  elementalSkillTreeLabel: ELEMENT
 --- !u!1 &793375875
 GameObject:
   m_ObjectHideFlags: 0

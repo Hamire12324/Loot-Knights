@@ -18,7 +18,23 @@ public class EnemySpawner : BaseMonoBehaviour
     [SerializeField] private int maxAlive = 10;
     [SerializeField] private float returnToPoolDelay = 0.8f;
 
+    [Header("Element Shards")]
+    [SerializeField] private bool dropElementShardsOnDeath = true;
+    [SerializeField] private ElementalShardPickup elementalShardPrefab;
+    [SerializeField, Range(0f, 1f)] private float elementalShardDropChance = 1f;
+    [SerializeField, Min(0)] private int minElementalShardDrops = 1;
+    [SerializeField, Min(0)] private int maxElementalShardDrops = 2;
+    [SerializeField, Min(0f)] private float elementalShardScatterRadius = 0.35f;
+    [SerializeField, Min(0f)] private float elementalShardPower = 1f;
+
     private readonly List<PoolObj> aliveEnemies = new();
+    private static readonly ElementType[] DropElements =
+    {
+        ElementType.Fire,
+        ElementType.Frost,
+        ElementType.Lightning,
+        ElementType.Poison
+    };
 
     protected override void OnDisable()
     {
@@ -205,11 +221,18 @@ public class EnemySpawner : BaseMonoBehaviour
         if (this == null) return;
         if (receiver == null) return;
 
-        PoolObj poolObj = receiver.GetComponentInParent<PoolObj>();
-        if (poolObj == null) return;
+        PoolObj poolObj = ResolvePoolObj(receiver);
+        if (poolObj == null)
+        {
+            Debug.LogWarning(
+                $"{name}: Enemy death received from {receiver.name}, but no PoolObj was found in its hierarchy.",
+                receiver.gameObject);
+            return;
+        }
 
         receiver.OnDeath -= HandleEnemyDeath;
         aliveEnemies.Remove(poolObj);
+        DropElementShards(receiver);
 
         if (!isActiveAndEnabled || !gameObject.activeInHierarchy)
         {
@@ -218,6 +241,52 @@ public class EnemySpawner : BaseMonoBehaviour
         }
 
         StartCoroutine(ReturnToPoolAfterDelay(poolObj));
+    }
+
+    private void DropElementShards(CharacterDamReceiver receiver)
+    {
+        if (!dropElementShardsOnDeath || receiver == null)
+            return;
+
+        if (Random.value > elementalShardDropChance)
+            return;
+
+        int minDrops = Mathf.Max(0, minElementalShardDrops);
+        int maxDrops = Mathf.Max(minDrops, maxElementalShardDrops);
+        int count = Random.Range(minDrops, maxDrops + 1);
+        if (count <= 0)
+            return;
+
+        ElementType element = ResolveDropElement(receiver);
+        for (int i = 0; i < count; i++)
+        {
+            Vector2 scatter = Random.insideUnitCircle * Mathf.Max(0f, elementalShardScatterRadius);
+            Vector3 position = receiver.transform.position + new Vector3(scatter.x, scatter.y, 0f);
+            ElementalShardPickup.Spawn(element, elementalShardPower, position, elementalShardPrefab);
+        }
+    }
+
+    private static ElementType ResolveDropElement(CharacterDamReceiver receiver)
+    {
+        CharacterElementalState state = receiver.GetComponentInChildren<CharacterElementalState>();
+        if (state != null && state.TryGetStrongestStatus(out ElementType element, out _))
+            return element;
+
+        return DropElements[Random.Range(0, DropElements.Length)];
+    }
+
+    private static PoolObj ResolvePoolObj(CharacterDamReceiver receiver)
+    {
+        if (receiver == null) return null;
+
+        PoolObj poolObj = receiver.GetComponentInParent<PoolObj>();
+        if (poolObj != null) return poolObj;
+
+        CharacterCtrl characterCtrl = receiver.CharacterCtrl;
+        if (characterCtrl != null)
+            poolObj = characterCtrl.GetComponent<PoolObj>();
+
+        return poolObj;
     }
 
     private IEnumerator ReturnToPoolAfterDelay(PoolObj poolObj)

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.shield_wall
   displayName: Shield Wall
-  description: Follow Shield Bash with a sturdier guard. Gain armor and max health.
+  description: '+1 Armor and +15 Max Health per rank. Also upgrades Shield Bash per rank: +4% Max Health healing and +1.5 Armor for 2.5s after use. Max rank 2.'
   icon: {fileID: 21300000, guid: f6b8b85cbdc82ce439a41ae3d56d57ee, type: 3}
   kind: 2
   branch: 1
@@ -23,7 +23,7 @@ MonoBehaviour:
   pointCost: 1
   requiredPlayerLevel: 7
   prerequisites:
-  - node: {fileID: 11400000, guid: 02bbb8fa290d443989c09f48bcf40221, type: 2}
+  - node: {fileID: 11400000, guid: 5feaf650c985409692819b1f4d176264, type: 2}
     requiredRank: 1
   scaleStatModifiersByRank: 1
   statModifiers:

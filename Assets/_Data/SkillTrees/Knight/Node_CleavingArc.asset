@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.cleaving_arc
   displayName: Cleaving Arc
-  description: Refine wide swings into heavier finishers. Gain crit damage.
+  description: '+8% Crit Damage per rank. Also upgrades Charge Strike per rank: +0.25 dash range, +0.12 hit radius, +12 degree slash angle, +10% Attack damage multiplier. Max rank 2.'
   icon: {fileID: 21300000, guid: 08c71e4e0565fe4469d1e0a593047156, type: 3}
   kind: 2
   branch: 0

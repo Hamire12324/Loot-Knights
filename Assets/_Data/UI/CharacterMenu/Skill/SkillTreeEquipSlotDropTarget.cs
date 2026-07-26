@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public sealed class SkillTreeEquipSlotDropTarget : MonoBehaviour, IPointerClickHandler
+public sealed class SkillTreeEquipSlotDropTarget : MonoBehaviour, IPointerClickHandler, IDropHandler
 {
     private SkillTreeView owner;
     private int slotIndex;
@@ -18,5 +18,15 @@ public sealed class SkillTreeEquipSlotDropTarget : MonoBehaviour, IPointerClickH
             return;
 
         owner?.ClickEquipSlot(slotIndex);
+    }
+
+    public void OnDrop(PointerEventData eventData)
+    {
+        SkillTreeEquipDragSource source = SkillTreeEquipDragSource.DraggingSource;
+        if (source == null || owner == null)
+            return;
+
+        if (owner.CompleteEquipDrag(slotIndex))
+            source.MarkDropped();
     }
 }

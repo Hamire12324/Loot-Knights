@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.oath
   displayName: Knight's Oath
-  description: Begin the Knight path. Gain a small max health bonus and open the four Knight skill routes.
+  description: '+15 Max Health. Opens the Knight skill routes.'
   icon: {fileID: 21300000, guid: f6b8b85cbdc82ce439a41ae3d56d57ee, type: 3}
   kind: 0
   branch: 1

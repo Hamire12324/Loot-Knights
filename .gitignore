@@ -93,3 +93,7 @@ Desktop.ini
 
 # Non-Unity source exports bundled inside asset packs
 Assets/_ThirdParty/Sunnyside_World/**/Sunnyside_World_Gamemaker/
+
+# Local recovered project backups
+/Recovered_Skill_Setup_*/
+/Recovered_Skill_Setup_*.zip

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.ground_wave
   displayName: Ground Wave
-  description: Unlock Ground Wave, a ranged shockwave for starting fights from a safe distance.
+  description: Unlock Ground Wave. Fire a 3.2 unit shockwave that deals 145% Attack damage in a line. Wavebreaker upgrades this skill.
   icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
   kind: 1
   branch: 0

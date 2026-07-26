@@ -3,6 +3,7 @@ using UnityEngine;
 public class CharacterCombatController : CharacterAbstract
 {
     private const string AttackStateName = "Attack";
+    private const float MinAttackSpeedMultiplier = 0.1f;
 
     [Header("Attack")]
     [SerializeField] protected float attackDuration = 0.8f;
@@ -55,7 +56,7 @@ public class CharacterCombatController : CharacterAbstract
             characterCtrl.CharacterTargetFinder.FindClosestTarget();
 
         isAttacking = true;
-        attackEndTime = Time.time + Mathf.Max(attackDuration, 0.01f);
+        attackEndTime = Time.time + GetScaledAttackDuration();
 
         FaceAttackDirection(target);
         attackFacingOverrideActive = true;
@@ -117,7 +118,6 @@ public class CharacterCombatController : CharacterAbstract
 
     private void RestoreOriginalScale()
     {
-        characterCtrl.transform.localScale = originalScale;
         attackFacingOverrideActive = false;
     }
 
@@ -142,5 +142,16 @@ public class CharacterCombatController : CharacterAbstract
             : -Mathf.Abs(scale.x);
 
         characterCtrl.transform.localScale = scale;
+        characterCtrl.CharacterMovement?.SetLookDirection(new Vector2(dir, 0f));
+    }
+
+    private float GetScaledAttackDuration()
+    {
+        StatValue attackSpeed = characterCtrl != null && characterCtrl.CharacterStat != null
+            ? characterCtrl.CharacterStat.GetStat(StatType.AttackSpeed)
+            : null;
+
+        float multiplier = 1f + (attackSpeed != null ? attackSpeed.FinalValue : 0f);
+        return Mathf.Max(attackDuration, 0.01f) / Mathf.Max(MinAttackSpeedMultiplier, multiplier);
     }
 }

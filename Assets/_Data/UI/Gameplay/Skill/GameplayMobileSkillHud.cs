@@ -1,80 +1,56 @@
+using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GameplayMobileSkillHud : BaseMonoBehaviour
 {
-    private const string HudName = "MobileSkillHud";
+    private const int ElementMeterSlotCount = 4;
 
-    [SerializeField] private bool rebuildOnStart = true;
-    [SerializeField] private Vector2 anchoredPosition = new(-112f, 102f);
-    [SerializeField] private float attackSize = 92f;
-    [SerializeField] private float skillSize = 62f;
-    [SerializeField] private float skillRadius = 102f;
-    [SerializeField] private float skillArcStartAngle = 180f;
-    [SerializeField] private float skillArcEndAngle = 90f;
+    [SerializeField] private ElementalIconSet elementalIconSet;
+
+    private Transform[] elementMeterSlots;
+    private Image[] elementMeterIconImages;
+    private TMP_Text[] elementMeterStackTexts;
+    private Outline[] elementMeterSelectionOutlines;
+    private Image elementReleaseIconImage;
 
     protected override void Start()
     {
         base.Start();
 
-        if (!rebuildOnStart) return;
-
-        Build();
+        BindExistingButtons();
+        LoadElementMeterReferences();
+        BindElementMeterSlotButtons();
+        LoadElementReleaseIconReference();
+        RefreshElementMeter();
     }
 
-    public void Build()
+    protected override void Update()
     {
-        Clear();
-        ArrangeExistingButtons();
-    }
-
-    [ContextMenu("Arrange Existing Skill Buttons")]
-    private void BuildFromContextMenu()
-    {
-        ArrangeExistingButtons();
-    }
-
-    [ContextMenu("Clear Generated Mobile Skill HUD")]
-    private void ClearFromContextMenu()
-    {
-        Clear();
-    }
-
-    public void ArrangeExistingButtons()
-    {
-        Clear();
-
-        RectTransform attack = FindRect("Btn_Attack", "Btn_Attack_Basic");
-        RectTransform skill0 = FindRect("Btn_Skill", "Btn_Skill_GroundWave");
-        RectTransform skill1 = FindRect("Btn_Skill (1)", "Btn_Skill_IronGuard", "Btn_Skill_ShieldBash");
-        RectTransform skill2 = FindRect("Btn_Skill (2)", "Btn_Skill_Whirlwind");
-        RectTransform skill3 = FindRect("Btn_Skill (3)", "Btn_Skill_ChargeStrike");
-
-        SetupAttackButton(attack, "Btn_Attack_Basic", Vector2.zero, attackSize);
-        SetupSkillButton(skill0, "Btn_Skill_GroundWave", 0, SkillArcPosition(0, 4));
-        SetupSkillButton(skill1, "Btn_Skill_IronGuard", 1, SkillArcPosition(1, 4));
-        SetupSkillButton(skill2, "Btn_Skill_Whirlwind", 2, SkillArcPosition(2, 4));
-        SetupSkillButton(skill3, "Btn_Skill_ChargeStrike", 3, SkillArcPosition(3, 4));
-    }
-
-    public void Clear()
-    {
-        Transform oldHud = transform.Find(HudName);
-        if (oldHud == null) return;
+        base.Update();
 
         if (Application.isPlaying)
-            Destroy(oldHud.gameObject);
-        else
-            DestroyImmediate(oldHud.gameObject);
+            RefreshElementMeter();
     }
 
-    private void SetupAttackButton(RectTransform rect, string objectName, Vector2 localOffset, float size)
+    private void BindExistingButtons()
     {
-        if (rect == null) return;
+        BindAttackButton(FindRect("Btn_Attack_Basic", "Btn_Attack"));
+        BindSkillButton(FindRect("Btn_Skill_GroundWave", "Btn_Skill"), 0);
+        BindSkillButton(FindRect("Btn_Skill_IronGuard", "Btn_Skill_ShieldBash", "Btn_Skill (1)"), 1);
+        BindSkillButton(FindRect("Btn_Skill_Whirlwind", "Btn_Skill (2)"), 2);
+        BindSkillButton(FindRect("Btn_Skill_ChargeStrike", "Btn_Skill (3)"), 3);
+        BindElementButton(FindRect("Btn_Skill_ElementConduit"), release: true);
+        BindElementButton(FindRect("Btn_ElementAbsorb"), release: false);
+        BindAddAllElementsButton(FindRect("Btn_AddAllElements", "Button_AddAllElements"));
+    }
 
-        rect.gameObject.name = objectName;
-        PlaceButton(rect, localOffset, size);
+    private static void BindAttackButton(RectTransform rect)
+    {
+        if (rect == null)
+            return;
 
         if (rect.GetComponent<Button>() == null)
             rect.gameObject.AddComponent<Button>();
@@ -83,12 +59,10 @@ public class GameplayMobileSkillHud : BaseMonoBehaviour
             rect.gameObject.AddComponent<ButtonAttack>();
     }
 
-    private void SetupSkillButton(RectTransform rect, string objectName, int skillIndex, Vector2 localOffset)
+    private static void BindSkillButton(RectTransform rect, int skillIndex)
     {
-        if (rect == null) return;
-
-        rect.gameObject.name = objectName;
-        PlaceButton(rect, localOffset, skillSize);
+        if (rect == null)
+            return;
 
         if (rect.GetComponent<Button>() == null)
             rect.gameObject.AddComponent<Button>();
@@ -100,17 +74,389 @@ public class GameplayMobileSkillHud : BaseMonoBehaviour
         buttonHeroSkill.SetSkillIndex(skillIndex);
     }
 
-    private void PlaceButton(RectTransform rect, Vector2 localOffset, float size)
+    private static void BindElementButton(RectTransform rect, bool release)
     {
-        rect.gameObject.SetActive(true);
-        rect.SetParent(transform, false);
-        rect.anchorMin = Vector2.one;
-        rect.anchorMax = Vector2.one;
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = anchoredPosition + localOffset;
-        rect.sizeDelta = new Vector2(size, size);
-        rect.localScale = Vector3.one;
-        rect.localRotation = Quaternion.identity;
+        if (rect == null)
+            return;
+
+        if (rect.GetComponent<Button>() == null)
+            rect.gameObject.AddComponent<Button>();
+
+        ButtonHeroSkill buttonHeroSkill = rect.GetComponent<ButtonHeroSkill>();
+        if (buttonHeroSkill == null)
+            buttonHeroSkill = rect.gameObject.AddComponent<ButtonHeroSkill>();
+
+        if (release)
+            buttonHeroSkill.SetElementRelease();
+        else
+            buttonHeroSkill.SetElementAbsorb();
+    }
+
+    private static void BindAddAllElementsButton(RectTransform rect)
+    {
+        if (rect == null)
+            return;
+
+        if (rect.GetComponent<Button>() == null)
+            rect.gameObject.AddComponent<Button>();
+
+        if (rect.GetComponent<ButtonAddAllElements>() == null)
+            rect.gameObject.AddComponent<ButtonAddAllElements>();
+    }
+
+    private void LoadElementMeterReferences()
+    {
+        elementMeterSlots ??= new Transform[ElementMeterSlotCount];
+        elementMeterIconImages ??= new Image[ElementMeterSlotCount];
+        elementMeterStackTexts ??= new TMP_Text[ElementMeterSlotCount];
+        elementMeterSelectionOutlines ??= new Outline[ElementMeterSlotCount];
+
+        RectTransform root = FindElementMeterRoot();
+        if (root == null)
+            return;
+
+        for (int i = 0; i < ElementMeterSlotCount; i++)
+        {
+            Transform slot = root.Find($"ElementSlot_{i + 1}");
+            elementMeterSlots[i] = slot;
+
+            elementMeterIconImages[i] = FindElementSlotIcon(slot);
+
+            if (elementMeterStackTexts[i] == null)
+                elementMeterStackTexts[i] = FindChildComponent<TMP_Text>(slot, "StackText");
+
+            if (elementMeterSelectionOutlines[i] == null && slot != null)
+                elementMeterSelectionOutlines[i] = slot.GetComponent<Outline>();
+        }
+    }
+
+    private void BindElementMeterSlotButtons()
+    {
+        LoadElementMeterReferences();
+
+        for (int i = 0; i < ElementMeterSlotCount; i++)
+        {
+            Transform slot = GetElementSlot(i);
+            if (slot == null)
+                continue;
+
+            if (slot.TryGetComponent(out Graphic graphic))
+                graphic.raycastTarget = true;
+
+            Button button = slot.GetComponent<Button>();
+            if (button == null)
+                button = slot.gameObject.AddComponent<Button>();
+
+            int slotIndex = i;
+            button.onClick.RemoveListener(() => SelectElementSlot(slotIndex));
+            button.onClick.AddListener(() => SelectElementSlot(slotIndex));
+        }
+    }
+
+    private void SelectElementSlot(int slotIndex)
+    {
+        ElementalConduitState state = GetLocalConduitState();
+        if (state == null)
+            return;
+
+        if (state.SelectReleaseSlot(slotIndex))
+            RefreshElementMeter();
+    }
+
+    private void LoadElementReleaseIconReference()
+    {
+        if (elementReleaseIconImage != null)
+            return;
+
+        RectTransform releaseButton = FindRect("Btn_Skill_ElementConduit");
+        elementReleaseIconImage = FindReleaseButtonIcon(releaseButton);
+    }
+
+    public void ClearStoredElementSlots()
+    {
+        LoadElementMeterReferences();
+        LoadElementReleaseIconReference();
+
+        for (int i = 0; i < ElementMeterSlotCount; i++)
+        {
+            ClearElementSlotVisuals(i);
+            SetStackText(i, 0);
+            SetElementSlotSelected(i, false);
+        }
+
+        ClearElementIcon(elementReleaseIconImage);
+    }
+
+    public void RefreshElementMeterNow()
+    {
+        RefreshElementMeter();
+    }
+
+    private void RefreshElementMeter()
+    {
+        LoadElementMeterReferences();
+
+        ElementalConduitState state = GetLocalConduitState();
+        IReadOnlyList<ElementalConduitStoredElementView> storedElements = state != null
+            ? state.GetStoredElements()
+            : Array.Empty<ElementalConduitStoredElementView>();
+
+        RefreshElementReleaseIcon(state, storedElements);
+
+        for (int i = 0; i < ElementMeterSlotCount; i++)
+        {
+            if (i < storedElements.Count)
+            {
+                ElementalConduitStoredElementView stored = storedElements[i];
+                SetElementSlotIcon(i, stored.Element);
+                SetStackText(i, stored.Stacks);
+                SetElementSlotSelected(i, state != null && state.IsReleaseSlotSelected(i));
+            }
+            else
+            {
+                SetElementSlotIcon(i, ElementType.None);
+                SetStackText(i, 0);
+                SetElementSlotSelected(i, false);
+            }
+        }
+    }
+
+    private void SetElementSlotSelected(int index, bool selected)
+    {
+        if (index < 0 || index >= ElementMeterSlotCount)
+            return;
+
+        Transform slot = GetElementSlot(index);
+        if (slot == null)
+            return;
+
+        if (elementMeterSelectionOutlines == null || elementMeterSelectionOutlines.Length != ElementMeterSlotCount)
+            elementMeterSelectionOutlines = new Outline[ElementMeterSlotCount];
+
+        Outline outline = elementMeterSelectionOutlines[index];
+        if (outline == null)
+        {
+            outline = slot.GetComponent<Outline>();
+            if (outline == null)
+                outline = slot.gameObject.AddComponent<Outline>();
+
+            elementMeterSelectionOutlines[index] = outline;
+        }
+
+        outline.enabled = selected;
+        outline.effectColor = new Color(1f, 0.88f, 0.25f, 0.95f);
+        outline.effectDistance = new Vector2(4f, -4f);
+        outline.useGraphicAlpha = false;
+    }
+
+    private void SetElementSlotIcon(int index, ElementType element)
+    {
+        if (index < 0 || index >= ElementMeterSlotCount)
+        {
+            return;
+        }
+
+        if (element == ElementType.None)
+        {
+            ClearElementSlotVisuals(index);
+            return;
+        }
+
+        ClearElementSlotVisuals(index);
+
+        Image icon = GetElementSlotIcon(index);
+        if (icon == null)
+            return;
+
+        Sprite sprite = GetElementIconSprite(element);
+        if (sprite == null)
+            return;
+
+        icon.sprite = sprite;
+        icon.gameObject.SetActive(sprite != null);
+        icon.enabled = sprite != null;
+        icon.color = Color.white;
+        icon.preserveAspect = true;
+        icon.raycastTarget = false;
+    }
+
+    private Image GetElementSlotIcon(int index)
+    {
+        if (index < 0 || index >= ElementMeterSlotCount)
+        {
+            return null;
+        }
+
+        if (elementMeterIconImages == null || elementMeterIconImages.Length != ElementMeterSlotCount)
+            elementMeterIconImages = new Image[ElementMeterSlotCount];
+
+        Image cachedIcon = elementMeterIconImages[index];
+        if (cachedIcon != null)
+            return cachedIcon;
+
+        Transform slot = GetElementSlot(index);
+        cachedIcon = FindElementSlotIcon(slot);
+        elementMeterIconImages[index] = cachedIcon;
+        return cachedIcon;
+    }
+
+    private static void ClearElementIcon(Image icon)
+    {
+        if (icon == null)
+            return;
+
+        icon.sprite = null;
+        icon.gameObject.SetActive(false);
+        icon.enabled = false;
+        icon.color = Color.white;
+        icon.preserveAspect = true;
+        icon.raycastTarget = false;
+    }
+
+    private Transform GetElementSlot(int index)
+    {
+        if (index < 0 || index >= ElementMeterSlotCount)
+            return null;
+
+        if (elementMeterSlots != null &&
+            index < elementMeterSlots.Length &&
+            elementMeterSlots[index] != null)
+        {
+            return elementMeterSlots[index];
+        }
+
+        RectTransform root = FindElementMeterRoot();
+        if (root == null)
+            return null;
+
+        elementMeterSlots ??= new Transform[ElementMeterSlotCount];
+        Transform slot = root.Find($"ElementSlot_{index + 1}");
+        elementMeterSlots[index] = slot;
+        return slot;
+    }
+
+    private void ClearElementSlotVisuals(int index)
+    {
+        Transform slot = GetElementSlot(index);
+        if (slot == null)
+        {
+            ClearElementIcon(GetElementSlotIcon(index));
+            return;
+        }
+
+        foreach (Image image in slot.GetComponentsInChildren<Image>(true))
+        {
+            if (image == null || !IsElementSlotRuntimeIconImage(image))
+                continue;
+
+            ClearElementIcon(image);
+        }
+
+        if (elementMeterIconImages != null && index < elementMeterIconImages.Length)
+            elementMeterIconImages[index] = FindElementSlotIcon(slot);
+    }
+
+    private static bool IsElementSlotRuntimeIconImage(Image image)
+    {
+        if (image == null)
+            return false;
+
+        if (image.gameObject.name == "Icon")
+            return true;
+
+        Transform parent = image.transform.parent;
+        return parent != null && parent.name == "IconMask" && image.gameObject.name.Contains("Icon");
+    }
+
+    private void RefreshElementReleaseIcon(
+        ElementalConduitState state,
+        IReadOnlyList<ElementalConduitStoredElementView> storedElements)
+    {
+        LoadElementReleaseIconReference();
+
+        if (elementReleaseIconImage == null)
+            return;
+
+        if (storedElements == null || storedElements.Count == 0)
+        {
+            ClearElementIcon(elementReleaseIconImage);
+            return;
+        }
+
+        if (TryGetUnlockedReleasePreview(out ElementalConduitReleasePayload preview))
+        {
+            ApplyElementReleaseIcon(preview.Reaction);
+            return;
+        }
+
+        ClearElementIcon(elementReleaseIconImage);
+    }
+
+    private void ApplyElementReleaseIcon(ElementalReactionType releaseReaction)
+    {
+        if (elementReleaseIconImage == null || releaseReaction == ElementalReactionType.None)
+            return;
+
+        Sprite releaseSprite = GetReactionIconSprite(releaseReaction);
+        Color releaseColor = Color.white;
+
+        if (releaseSprite == null)
+        {
+            ClearElementIcon(elementReleaseIconImage);
+            return;
+        }
+
+        elementReleaseIconImage.sprite = releaseSprite;
+        elementReleaseIconImage.gameObject.SetActive(true);
+        elementReleaseIconImage.enabled = true;
+        elementReleaseIconImage.color = releaseColor;
+        elementReleaseIconImage.preserveAspect = true;
+        elementReleaseIconImage.raycastTarget = false;
+    }
+
+    private void SetStackText(int index, int stacks)
+    {
+        if (index < 0 || index >= ElementMeterSlotCount)
+        {
+            return;
+        }
+
+        if (elementMeterStackTexts == null || elementMeterStackTexts.Length != ElementMeterSlotCount)
+            elementMeterStackTexts = new TMP_Text[ElementMeterSlotCount];
+
+        if (elementMeterStackTexts[index] == null)
+            elementMeterStackTexts[index] = FindChildComponent<TMP_Text>(GetElementSlot(index), "StackText");
+
+        if (elementMeterStackTexts[index] == null)
+            return;
+
+        TMP_Text stackText = elementMeterStackTexts[index];
+        stackText.text = stacks > 0 ? $"x{stacks}" : "";
+        stackText.gameObject.SetActive(stacks > 0);
+
+        if (stacks > 0)
+        {
+            stackText.enabled = true;
+            stackText.color = new Color(1f, 0.95f, 0.62f, 1f);
+            stackText.raycastTarget = false;
+            stackText.transform.SetAsLastSibling();
+        }
+    }
+
+    private RectTransform FindElementMeterRoot()
+    {
+        Transform direct = transform.Find("ElementCoreMeter");
+        if (direct is RectTransform directRect)
+            return directRect;
+
+        Transform[] children = GetComponentsInChildren<Transform>(true);
+        foreach (Transform child in children)
+        {
+            if (child != null && child.name == "ElementCoreMeter")
+                return child as RectTransform;
+        }
+
+        return null;
     }
 
     private RectTransform FindRect(params string[] objectNames)
@@ -119,152 +465,121 @@ public class GameplayMobileSkillHud : BaseMonoBehaviour
 
         foreach (Transform child in children)
         {
-            if (child == null) continue;
-            if (!NameMatches(child.name, objectNames)) continue;
+            if (child == null)
+                continue;
 
-            return child as RectTransform;
+            foreach (string objectName in objectNames)
+            {
+                if (child.name == objectName)
+                    return child as RectTransform;
+            }
         }
 
-        Debug.LogWarning($"{nameof(GameplayMobileSkillHud)}: Cannot find {string.Join(" or ", objectNames)}.", gameObject);
         return null;
     }
 
-    private static bool NameMatches(string candidate, string[] names)
+    private static Image FindElementSlotIcon(Transform slot)
     {
-        foreach (string name in names)
+        if (slot == null)
+            return null;
+
+        Transform icon = slot.Find("IconMask/Icon");
+        if (icon != null && icon.TryGetComponent(out Image image))
+            return image;
+
+        icon = slot.Find("Icon");
+        if (icon != null && icon.TryGetComponent(out image))
+            return image;
+
+        return null;
+    }
+
+    private static Image FindReleaseButtonIcon(Transform releaseButton)
+    {
+        if (releaseButton == null)
+            return null;
+
+        Transform icon = releaseButton.Find("IconMask/Icon");
+        if (icon != null && icon.TryGetComponent(out Image image))
+            return image;
+
+        icon = releaseButton.Find("Icon");
+        if (icon != null && icon.TryGetComponent(out image))
+            return image;
+
+        foreach (Transform child in releaseButton)
         {
-            if (candidate == name)
-                return true;
+            if (child == null || child.name == "ElementCoreMeter")
+                continue;
+
+            image = FindChildComponent<Image>(child, "Icon");
+            if (image != null)
+                return image;
         }
 
-        return false;
+        return null;
     }
 
-    private void CreateButton(
-        RectTransform parent,
-        string name,
-        bool basicAttack,
-        int skillIndex,
-        Vector2 position,
-        float size,
-        string fallbackLabel,
-        Color backgroundColor)
+    private static T FindChildComponent<T>(Transform parent, string childName) where T : Component
     {
-        RectTransform buttonRect = CreateGraphicRect(name, parent, new Vector2(1f, 0f), new Vector2(1f, 0f), position, new Vector2(size, size));
-        buttonRect.pivot = new Vector2(0.5f, 0.5f);
+        if (parent == null)
+            return null;
 
-        UICircleGraphic background = buttonRect.gameObject.AddComponent<UICircleGraphic>();
-        background.color = backgroundColor;
-        background.raycastTarget = true;
-
-        UICircleGraphic border = CreateCircle("Frame", buttonRect, Vector2.zero, new Vector2(size, size), new Color(0.92f, 0.84f, 0.62f, 0.95f));
-        border.InnerRadius = 0.82f;
-        border.raycastTarget = false;
-
-        RectTransform iconRect = CreateGraphicRect("Icon", buttonRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.one * size * 0.58f);
-        Image icon = iconRect.gameObject.AddComponent<Image>();
-        icon.preserveAspect = true;
-        icon.raycastTarget = false;
-        icon.enabled = false;
-
-        TMP_Text label = CreateText("Label", buttonRect, fallbackLabel, size <= 70f ? 18 : 22, new Color(0.96f, 0.91f, 0.78f, 1f));
-        label.raycastTarget = false;
-
-        UICircleGraphic cooldown = CreateCircle("CooldownOverlay", buttonRect, Vector2.zero, new Vector2(size, size), new Color(0f, 0f, 0f, 0.58f));
-        cooldown.FillAmount = 0f;
-        cooldown.raycastTarget = false;
-
-        TMP_Text cooldownText = CreateText("CooldownText", buttonRect, "", size <= 70f ? 20 : 26, Color.white);
-        cooldownText.raycastTarget = false;
-
-        MobileSkillButton skillButton = buttonRect.gameObject.AddComponent<MobileSkillButton>();
-        skillButton.Setup(basicAttack, skillIndex, icon, cooldown, cooldownText, label);
-    }
-
-    private static UICircleGraphic CreateCircle(string name, RectTransform parent, Vector2 position, Vector2 size, Color color)
-    {
-        RectTransform rect = CreateGraphicRect(name, parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), position, size);
-        UICircleGraphic circle = rect.gameObject.AddComponent<UICircleGraphic>();
-        circle.color = color;
-        return circle;
-    }
-
-    private static TMP_Text CreateText(string name, RectTransform parent, string text, int fontSize, Color color)
-    {
-        RectTransform rect = CreateGraphicRect(name, parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, parent.sizeDelta);
-        TextMeshProUGUI label = rect.gameObject.AddComponent<TextMeshProUGUI>();
-        label.text = text;
-        label.fontSize = fontSize;
-        label.alignment = TextAlignmentOptions.Center;
-        label.color = color;
-        label.enableAutoSizing = true;
-        label.fontSizeMin = 10f;
-        label.fontSizeMax = fontSize;
-        return label;
-    }
-
-    private static RectTransform CreateRect(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 anchored, Vector2 size)
-    {
-        GameObject obj = new(name, typeof(RectTransform));
-        obj.layer = parent.gameObject.layer;
-        obj.transform.SetParent(parent, false);
-
-        RectTransform rect = obj.GetComponent<RectTransform>();
-        rect.anchorMin = anchorMin;
-        rect.anchorMax = anchorMax;
-        rect.anchoredPosition = anchored;
-        rect.sizeDelta = size;
-        return rect;
-    }
-
-    private static RectTransform CreateGraphicRect(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 anchored, Vector2 size)
-    {
-        GameObject obj = new(name, typeof(RectTransform), typeof(CanvasRenderer));
-        obj.layer = parent.gameObject.layer;
-        obj.transform.SetParent(parent, false);
-
-        RectTransform rect = obj.GetComponent<RectTransform>();
-        rect.anchorMin = anchorMin;
-        rect.anchorMax = anchorMax;
-        rect.anchoredPosition = anchored;
-        rect.sizeDelta = size;
-        return rect;
-    }
-
-    private Vector2 Polar(float degrees)
-    {
-        float radians = degrees * Mathf.Deg2Rad;
-        return new Vector2(Mathf.Cos(radians), Mathf.Sin(radians)) * skillRadius;
-    }
-
-    private Vector2 SkillArcPosition(int index, int count)
-    {
-        if (count <= 1)
-            return Polar(skillArcStartAngle);
-
-        float t = Mathf.Clamp01((float)index / (count - 1));
-        float angle = Mathf.Lerp(skillArcStartAngle, skillArcEndAngle, t);
-        return Polar(angle);
-    }
-
-    private void HideLegacyButtons()
-    {
-        HideIfFound("Btn_Skill");
-        HideIfFound("Btn_Skill (1)");
-        HideIfFound("Btn_Skill (2)");
-        HideIfFound("Btn_Attack");
-    }
-
-    private void HideIfFound(string objectName)
-    {
-        Transform[] children = GetComponentsInChildren<Transform>(true);
-
+        Transform[] children = parent.GetComponentsInChildren<Transform>(true);
         foreach (Transform child in children)
         {
-            if (child == null || child == transform) continue;
-            if (child.name != objectName) continue;
+            if (child == null || child.name != childName)
+                continue;
 
-            child.gameObject.SetActive(false);
+            return child.GetComponent<T>();
         }
+
+        return null;
+    }
+
+    private static ElementalConduitState GetLocalConduitState()
+    {
+        HeroCtrl hero = HeroCtrl.GetLocal();
+        return hero != null ? hero.GetComponent<ElementalConduitState>() : null;
+    }
+
+    private static bool TryGetUnlockedReleasePreview(out ElementalConduitReleasePayload preview)
+    {
+        preview = default;
+
+        HeroCtrl hero = HeroCtrl.GetLocal();
+        return hero != null &&
+               hero.HeroSkillController != null &&
+               hero.HeroSkillController.TryGetElementalConduitReleasePreview(out preview);
+    }
+
+    private Sprite GetElementIconSprite(ElementType element)
+    {
+        return elementalIconSet != null ? elementalIconSet.GetElementSprite(element) : null;
+    }
+
+    private Sprite GetReactionIconSprite(ElementalReactionType reaction)
+    {
+        return elementalIconSet != null ? elementalIconSet.GetReactionSprite(reaction) : null;
+    }
+
+}
+
+public sealed class ButtonAddAllElements : ButtonAbstract
+{
+    protected override void OnClick()
+    {
+        HeroCtrl hero = HeroCtrl.GetLocal();
+        if (hero == null || hero.HeroSkillController == null)
+            return;
+
+        if (!hero.HeroSkillController.AddAllElementConduitForTesting())
+            return;
+
+        GameplayMobileSkillHud hud = GetComponentInParent<GameplayMobileSkillHud>();
+        if (hud == null)
+            hud = FindAnyObjectByType<GameplayMobileSkillHud>();
+
+        hud?.RefreshElementMeterNow();
     }
 }

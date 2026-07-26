@@ -9,6 +9,10 @@ public class CharacterMenuPanel : BaseMonoBehaviour
     [SerializeField] private Button closeButton;
     [SerializeField] private CharacterMenuEquipmentPanel equipmentView;
     [SerializeField] private bool hideOnStart = true;
+    [Header("Skill Trees")]
+    [SerializeField] private SkillTreeDefinition elementalSkillTree;
+    [SerializeField] private string classSkillTreeLabel = "CLASS";
+    [SerializeField] private string elementalSkillTreeLabel = "ELEMENT";
 
     private bool initialized;
     private bool openedBeforeStart;
@@ -117,12 +121,39 @@ public class CharacterMenuPanel : BaseMonoBehaviour
             CharacterStatUpgradePanel upgradePanel = viewRoot.GetComponentInChildren<CharacterStatUpgradePanel>(true);
             upgradePanel?.Refresh();
         }
+
+        if (section == CharacterMenuSection.Skill)
+        {
+            SkillTreeView skillTreeView = viewRoot.GetComponentInChildren<SkillTreeView>(true);
+            ConfigureSkillTreeView(skillTreeView);
+            skillTreeView?.Refresh();
+        }
     }
 
     private void RefreshEquipmentView()
     {
         LoadEquipmentView();
-        equipmentView?.Refresh();
+
+        if (equipmentView == null) return;
+
+        bool shouldShowEquipment = CurrentSection != CharacterMenuSection.Skill &&
+                                   CurrentSection != CharacterMenuSection.Elemental;
+        equipmentView.gameObject.SetActive(shouldShowEquipment);
+
+        if (shouldShowEquipment)
+            equipmentView.Refresh();
+    }
+
+    private void ConfigureSkillTreeView(SkillTreeView skillTreeView)
+    {
+        if (skillTreeView == null || elementalSkillTree == null)
+            return;
+
+        skillTreeView.SetSkillTrees(
+            skillTreeView.PrimarySkillTree,
+            elementalSkillTree,
+            classSkillTreeLabel,
+            elementalSkillTreeLabel);
     }
 
     private void LoadCloseButton()

@@ -150,7 +150,11 @@ public class EnemyAIController : CharacterAbstract
         if (Time.time >= nextAttackTime && !IsAttacking())
         {
             nextAttackTime = Time.time + attackCooldown;
-            characterCtrl.CharacterCombatController?.Attack();
+            if (characterCtrl.CharacterSkillController == null ||
+                !characterCtrl.CharacterSkillController.TryCastBasicAttack())
+            {
+                characterCtrl.CharacterCombatController?.Attack();
+            }
         }
     }
 

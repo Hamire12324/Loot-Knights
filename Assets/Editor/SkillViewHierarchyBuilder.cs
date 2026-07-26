@@ -16,7 +16,13 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         "LootKnights.SkillViewBuilder.Defaults.v4",
         "LootKnights.SkillViewBuilder.Defaults.v3"
     };
-    private const string BuiltRootName = "SkillTreeRoot";
+    private static readonly string[] GeneratedRootNames =
+    {
+        "SkillTreeRoot",
+        "TreeArea",
+        "DetailPanel",
+        "EquipSkillPanel"
+    };
 
     private readonly struct BranchDepthKey
     {
@@ -32,7 +38,18 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
 
     [SerializeField] private GameObject skillViewRoot;
     [SerializeField] private SkillTreeDefinition skillTree;
+    [SerializeField] private SkillTreeDefinition secondarySkillTree;
     [SerializeField] private bool replaceExisting = true;
+
+    [Header("Tree Switcher")]
+    [SerializeField] private bool buildTreeSwitcher = true;
+    [SerializeField] private string primarySkillTreeLabel = "CLASS";
+    [SerializeField] private string secondarySkillTreeLabel = "ELEMENT";
+    [SerializeField] private Vector2 treeSwitcherInset = new(0f, 20f);
+    [SerializeField] private Vector2 treeSwitcherSize = new(420f, 56f);
+    [SerializeField] private Vector2 treeSwitcherButtonSize = new(200f, 46f);
+    [SerializeField] private float treeSwitcherButtonSpacing = 20f;
+    [SerializeField] private float treeSwitcherTextSize = 20f;
 
     [Header("Layout")]
     [SerializeField, Range(0.55f, 0.8f)] private float treeWidthRatio = 0.68f;
@@ -174,6 +191,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         EditorGUILayout.LabelField("Skill Tree UI Tool", EditorStyles.boldLabel);
         skillViewRoot = (GameObject)EditorGUILayout.ObjectField("SkillView Root", skillViewRoot, typeof(GameObject), true);
         skillTree = (SkillTreeDefinition)EditorGUILayout.ObjectField("Skill Tree Asset", skillTree, typeof(SkillTreeDefinition), false);
+        secondarySkillTree = (SkillTreeDefinition)EditorGUILayout.ObjectField("Secondary Skill Tree", secondarySkillTree, typeof(SkillTreeDefinition), false);
         if (lastSkillTree != skillTree)
             ResetNodePositionEditor();
 
@@ -190,11 +208,9 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
                 ResetNodePositionEditor();
             }
 
-            if (GUILayout.Button("Create From Hero Skills"))
-            {
-                skillTree = CreateSkillTreeFromHeroSkills();
-                ResetNodePositionEditor();
-            }
+            if (GUILayout.Button("Find Elemental Tree"))
+                secondarySkillTree = FindElementalSkillTreeAsset();
+
         }
 
         DrawFields();
@@ -204,8 +220,14 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         if (GUILayout.Button("Build", GUILayout.Height(38f)))
             Build();
 
-        if (GUILayout.Button("Save Defaults", GUILayout.Height(28f)))
-            SaveDefaults();
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            if (GUILayout.Button("Load Saved Defaults", GUILayout.Height(28f)))
+                LoadDefaults();
+
+            if (GUILayout.Button("Save Defaults", GUILayout.Height(28f)))
+                SaveDefaults();
+        }
 
         EditorGUILayout.EndScrollView();
     }
@@ -214,6 +236,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     {
         SerializedObject so = new(this);
 
+        DrawGroup(so, "Tree Switcher", nameof(buildTreeSwitcher), nameof(primarySkillTreeLabel), nameof(secondarySkillTreeLabel), nameof(treeSwitcherInset), nameof(treeSwitcherSize), nameof(treeSwitcherButtonSize), nameof(treeSwitcherButtonSpacing), nameof(treeSwitcherTextSize));
         DrawGroup(so, "Layout", nameof(treeWidthRatio), nameof(padding), nameof(panelGap), nameof(treeInnerPadding), nameof(treeClipHorizontalPadding), nameof(treeClipTopPadding), nameof(treeClipBottomPadding), nameof(detailHeightRatio), nameof(contentSize), nameof(contentOffset), nameof(contentScale), nameof(useAuthoredNodePositions), nameof(useBranchColumnLayout), nameof(showBranchHeaders), nameof(branchColumnSpacing), nameof(branchRowSpacing), nameof(branchSiblingSpacing), nameof(branchStartY), nameof(branchHeaderOffsetY), nameof(branchHeaderTextSize), nameof(useBranchLaneLayout), nameof(branchLaneSpacing), nameof(branchSameColumnSpacing), nameof(skillPointsInset), nameof(skillPointsSize), nameof(skillPointsTextSize), nameof(resetButtonInset), nameof(resetButtonSize), nameof(resetButtonTextSize), nameof(resetButtonTopRight), nameof(nodeColumnSpacingScale), nameof(nodeRowSpacingScale), nameof(autoColumnSpacing), nameof(autoRowSpacing), nameof(autoExpandScrollContent), nameof(scrollContentPadding), nameof(horizontalScroll), nameof(startTreeAtTop), nameof(scrollSensitivity));
         DrawGroup(so, "Node", nameof(nodeSize), nameof(iconSize), nameof(lineThickness), nameof(textSize), nameof(nodeIconFramePadding), nameof(useMajorMinorNodeSizes), nameof(majorNodeSize), nameof(majorIconSize), nameof(minorNodeSize), nameof(minorIconSize), nameof(showNodeRankText), nameof(showNodeCostText), nameof(nodeRankTextOffset), nameof(nodeCostTextOffset));
         DrawGroup(so, "Equip Skills", nameof(equipSlotCount), nameof(equipContentScale), nameof(equipSlotSize), nameof(equipSlotIconSize), nameof(equipSlotSpacing), nameof(equipIndexSpacingOffset), nameof(equipIndexTextOffset), nameof(equipIndexTextSize), nameof(equipTitleHeight), nameof(equipPanelInnerPadding));
@@ -293,7 +316,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         string[] guids = AssetDatabase.FindAssets("t:SkillTreeDefinition");
         if (guids.Length == 0)
         {
-            Debug.LogWarning("No SkillTreeDefinition asset found. Use 'Create From Hero Skills' to make one.");
+            Debug.LogWarning("No SkillTreeDefinition asset found.");
             return null;
         }
 
@@ -311,6 +334,24 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         SkillTreeDefinition tree = AssetDatabase.LoadAssetAtPath<SkillTreeDefinition>(path);
         Selection.activeObject = tree;
         return tree;
+    }
+
+    private static SkillTreeDefinition FindElementalSkillTreeAsset()
+    {
+        string[] guids = AssetDatabase.FindAssets("Elemental_SkillTree t:SkillTreeDefinition");
+        foreach (string guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            SkillTreeDefinition tree = AssetDatabase.LoadAssetAtPath<SkillTreeDefinition>(path);
+            if (tree != null)
+            {
+                Selection.activeObject = tree;
+                return tree;
+            }
+        }
+
+        Debug.LogWarning("Elemental_SkillTree.asset was not found.");
+        return null;
     }
 
     private string[] GetNodeDisplayNames()
@@ -366,110 +407,6 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         }
     }
 
-    private static SkillTreeDefinition CreateSkillTreeFromHeroSkills()
-    {
-        string[] skillGuids = AssetDatabase.FindAssets("t:HeroSkillDefinition", new[] { "Assets/Resources/Skills/Hero" });
-        if (skillGuids.Length == 0)
-        {
-            Debug.LogError("No HeroSkillDefinition assets found in Assets/Resources/Skills/Hero.");
-            return null;
-        }
-
-        const string folder = "Assets/_Data/SkillTrees/Generated";
-        EnsureFolder(folder);
-
-        string treePath = AssetDatabase.GenerateUniqueAssetPath($"{folder}/Hero_SkillTree.asset");
-        SkillTreeDefinition tree = CreateInstance<SkillTreeDefinition>();
-        AssetDatabase.CreateAsset(tree, treePath);
-
-        List<SkillTreeNodeDefinition> nodes = new();
-        for (int i = 0; i < skillGuids.Length; i++)
-        {
-            string skillPath = AssetDatabase.GUIDToAssetPath(skillGuids[i]);
-            HeroSkillDefinition skill = AssetDatabase.LoadAssetAtPath<HeroSkillDefinition>(skillPath);
-            if (skill == null)
-                continue;
-
-            SkillTreeNodeDefinition node = CreateNodeAsset(folder, skill, i);
-            nodes.Add(node);
-        }
-
-        for (int i = 1; i < nodes.Count; i++)
-            AddPrerequisite(nodes[i], nodes[i - 1]);
-
-        SerializedObject treeSo = new(tree);
-        treeSo.FindProperty("treeId").stringValue = "hero_skill_tree";
-        treeSo.FindProperty("displayName").stringValue = "Hero Skill Tree";
-
-        SerializedProperty nodesProperty = treeSo.FindProperty("nodes");
-        nodesProperty.ClearArray();
-        for (int i = 0; i < nodes.Count; i++)
-        {
-            nodesProperty.InsertArrayElementAtIndex(i);
-            nodesProperty.GetArrayElementAtIndex(i).objectReferenceValue = nodes[i];
-        }
-
-        treeSo.ApplyModifiedPropertiesWithoutUndo();
-        EditorUtility.SetDirty(tree);
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
-
-        Selection.activeObject = tree;
-        Debug.Log($"Created Skill Tree asset at {treePath} with {nodes.Count} nodes.");
-        return tree;
-    }
-
-    private static SkillTreeNodeDefinition CreateNodeAsset(string folder, HeroSkillDefinition skill, int index)
-    {
-        SkillTreeNodeDefinition node = CreateInstance<SkillTreeNodeDefinition>();
-        string nodePath = AssetDatabase.GenerateUniqueAssetPath($"{folder}/Node_{SanitizeName(GetSkillName(skill))}.asset");
-        AssetDatabase.CreateAsset(node, nodePath);
-
-        SerializedObject so = new(node);
-        so.FindProperty("nodeId").stringValue = GetNodeId(skill, index);
-        so.FindProperty("displayName").stringValue = GetSkillName(skill);
-        so.FindProperty("icon").objectReferenceValue = skill.Icon;
-        so.FindProperty("kind").enumValueIndex = (int)SkillTreeNodeKind.ActiveSkill;
-        so.FindProperty("branch").enumValueIndex = (int)GetGeneratedBranch(index);
-        so.FindProperty("treePosition").vector2Value = new Vector2((index % 4 - 1.5f) * 140f, 160f - (index / 4) * 110f);
-        so.FindProperty("maxRank").intValue = 1;
-        so.FindProperty("pointCost").intValue = 1;
-        so.FindProperty("requiredPlayerLevel").intValue = Mathf.Max(1, index + 1);
-        so.FindProperty("activeSkill").objectReferenceValue = skill;
-        so.ApplyModifiedPropertiesWithoutUndo();
-
-        EditorUtility.SetDirty(node);
-        return node;
-    }
-
-    private static void AddPrerequisite(SkillTreeNodeDefinition node, SkillTreeNodeDefinition prerequisiteNode)
-    {
-        SerializedObject so = new(node);
-        SerializedProperty prerequisites = so.FindProperty("prerequisites");
-        int index = prerequisites.arraySize;
-        prerequisites.InsertArrayElementAtIndex(index);
-
-        SerializedProperty prerequisite = prerequisites.GetArrayElementAtIndex(index);
-        prerequisite.FindPropertyRelative("node").objectReferenceValue = prerequisiteNode;
-        prerequisite.FindPropertyRelative("requiredRank").intValue = 1;
-        so.ApplyModifiedPropertiesWithoutUndo();
-        EditorUtility.SetDirty(node);
-    }
-
-    private static void EnsureFolder(string folder)
-    {
-        string[] parts = folder.Split('/');
-        string current = parts[0];
-        for (int i = 1; i < parts.Length; i++)
-        {
-            string next = $"{current}/{parts[i]}";
-            if (!AssetDatabase.IsValidFolder(next))
-                AssetDatabase.CreateFolder(current, parts[i]);
-
-            current = next;
-        }
-    }
-
     private static void DrawGroup(SerializedObject so, string title, params string[] propertyNames)
     {
         EditorGUILayout.Space(8f);
@@ -486,6 +423,27 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         EditorGUILayout.EndVertical();
     }
 
+    private static void SetObjectReference(SerializedObject so, string propertyName, UnityEngine.Object value)
+    {
+        SerializedProperty property = so.FindProperty(propertyName);
+        if (property != null)
+            property.objectReferenceValue = value;
+    }
+
+    private static void SetString(SerializedObject so, string propertyName, string value)
+    {
+        SerializedProperty property = so.FindProperty(propertyName);
+        if (property != null)
+            property.stringValue = value;
+    }
+
+    private static void SetBool(SerializedObject so, string propertyName, bool value)
+    {
+        SerializedProperty property = so.FindProperty(propertyName);
+        if (property != null)
+            property.boolValue = value;
+    }
+
     private void Build()
     {
         if (skillViewRoot == null)
@@ -496,30 +454,32 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
 
         if (skillTree == null)
         {
-            Debug.LogError("Skill Tree Asset is missing. Click 'Find Skill Tree Asset' or 'Create From Hero Skills' in the builder window first.");
+            Debug.LogError("Skill Tree Asset is missing. Click 'Find Skill Tree Asset' in the builder window first.");
             return;
         }
+
+        if (secondarySkillTree == null)
+            secondarySkillTree = FindElementalSkillTreeAsset();
 
         EnsureDefaultSprites();
         activeTextFont = textFont;
         activeTextColor = globalTextColor;
         activeButtonTextColor = buttonTextColor;
 
-        Transform existing = skillViewRoot.transform.Find(BuiltRootName);
-        if (existing != null)
+        if (!replaceExisting && HasGeneratedContent(skillViewRoot.transform))
         {
-            if (!replaceExisting)
-            {
-                Debug.LogWarning($"{BuiltRootName} already exists.");
-                return;
-            }
-
-            RepairMissingCanvasRenderers(existing);
-            DestroyImmediate(existing.gameObject);
+            Debug.LogWarning("SkillView already has generated skill tree content.");
+            return;
         }
 
-        RectTransform root = CreatePanel(skillViewRoot.transform, BuiltRootName, null);
-        Stretch(root);
+        RemoveGeneratedContent(skillViewRoot.transform);
+
+        RectTransform root = skillViewRoot.GetComponent<RectTransform>();
+        if (root == null)
+        {
+            Debug.LogError("SkillView Root must have a RectTransform.");
+            return;
+        }
 
         BuildTree(root);
         BuildDetail(root);
@@ -545,6 +505,9 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         else
             AnchorTopLeft(reset, Max(resetButtonInset, Vector2.zero), Max(resetButtonSize, new Vector2(48f, 18f)));
 
+        if (buildTreeSwitcher && HasSecondarySkillTree())
+            BuildTreeSwitcher(treeArea);
+
         RectTransform viewport = CreateEmpty(treeArea, "Viewport");
         float innerPadding = Mathf.Max(0f, treeInnerPadding);
         Anchor(viewport, Vector2.zero, Vector2.one, new Vector2(innerPadding, innerPadding), new Vector2(-innerPadding, -innerPadding));
@@ -558,7 +521,26 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         content.anchorMin = new Vector2(0.5f, 0.5f);
         content.anchorMax = new Vector2(0.5f, 0.5f);
         content.pivot = new Vector2(0.5f, 0.5f);
-        Dictionary<SkillTreeNodeDefinition, Vector2> positions = GetNodePositions(out Vector2 scrollContentSize);
+
+        List<SkillTreeDefinition> trees = GetBuildSkillTrees();
+        Dictionary<SkillTreeDefinition, Dictionary<SkillTreeNodeDefinition, Vector2>> treePositions = new();
+        Vector2 scrollContentSize = Vector2.zero;
+        foreach (SkillTreeDefinition tree in trees)
+        {
+            Dictionary<SkillTreeNodeDefinition, Vector2> positions = GetNodePositionsForTree(tree, out Vector2 treeScrollContentSize);
+            treePositions[tree] = positions;
+            scrollContentSize = Max(scrollContentSize, treeScrollContentSize);
+        }
+
+        if (startTreeAtTop)
+        {
+            foreach (SkillTreeDefinition tree in trees)
+            {
+                if (tree != skillTree)
+                    treePositions[tree] = AlignPositionsToTop(treePositions[tree], scrollContentSize);
+            }
+        }
+
         content.sizeDelta = scrollContentSize;
         content.anchoredPosition = Vector2.zero;
 
@@ -571,28 +553,121 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         scrollRect.inertia = true;
         scrollRect.scrollSensitivity = Mathf.Max(1f, scrollSensitivity);
 
-        RectTransform linesRoot = CreateEmpty(content, "Lines");
-        Stretch(linesRoot);
-
-        RectTransform headersRoot = CreateEmpty(content, "BranchHeaders");
-        Stretch(headersRoot);
-
-        RectTransform nodesRoot = CreateEmpty(content, "Nodes");
-        Stretch(nodesRoot);
-
-        CreateBranchHeaders(headersRoot, positions);
-
-        foreach (SkillTreeNodeDefinition node in skillTree.Nodes)
-            CreateNodeLines(linesRoot, node, positions);
-
-        foreach (SkillTreeNodeDefinition node in skillTree.Nodes)
-            CreateSkillNode(nodesRoot, node, positions[node]);
+        foreach (SkillTreeDefinition tree in trees)
+            BuildTreeContent(content, tree, treePositions[tree], tree == skillTree);
 
         reset.SetAsLastSibling();
 
         Canvas.ForceUpdateCanvases();
         scrollRect.horizontalNormalizedPosition = 0.5f;
         scrollRect.verticalNormalizedPosition = startTreeAtTop ? 1f : 0.5f;
+    }
+
+    private void BuildTreeContent(
+        RectTransform contentRoot,
+        SkillTreeDefinition tree,
+        IReadOnlyDictionary<SkillTreeNodeDefinition, Vector2> positions,
+        bool selected)
+    {
+        if (tree == null)
+            return;
+
+        SkillTreeDefinition previousTree = skillTree;
+        skillTree = tree;
+
+        try
+        {
+            RectTransform treeContent = CreateEmpty(contentRoot, GetTreeContentName(tree));
+            Stretch(treeContent);
+            treeContent.gameObject.SetActive(selected);
+
+            RectTransform linesRoot = CreateEmpty(treeContent, "Lines");
+            Stretch(linesRoot);
+
+            RectTransform headersRoot = CreateEmpty(treeContent, "BranchHeaders");
+            Stretch(headersRoot);
+
+            RectTransform nodesRoot = CreateEmpty(treeContent, "Nodes");
+            Stretch(nodesRoot);
+
+            CreateBranchHeaders(headersRoot, positions);
+
+            foreach (SkillTreeNodeDefinition node in tree.Nodes)
+                CreateNodeLines(linesRoot, node, positions);
+
+            foreach (SkillTreeNodeDefinition node in tree.Nodes)
+            {
+                if (node != null && positions.TryGetValue(node, out Vector2 position))
+                    CreateSkillNode(nodesRoot, node, position);
+            }
+        }
+        finally
+        {
+            skillTree = previousTree;
+        }
+    }
+
+    private void BuildTreeSwitcher(Transform treeArea)
+    {
+        RectTransform switcher = CreateEmpty(treeArea, "TreeSwitcher");
+        switcher.anchorMin = new Vector2(0.5f, 1f);
+        switcher.anchorMax = new Vector2(0.5f, 1f);
+        switcher.pivot = new Vector2(0.5f, 1f);
+        switcher.anchoredPosition = new Vector2(treeSwitcherInset.x, -treeSwitcherInset.y);
+        switcher.sizeDelta = Max(treeSwitcherSize, new Vector2(120f, 28f));
+
+        Vector2 buttonSize = Max(treeSwitcherButtonSize, new Vector2(54f, 22f));
+        float gap = Mathf.Max(0f, treeSwitcherButtonSpacing);
+        float offset = buttonSize.x * 0.5f + gap * 0.5f;
+        float fontSize = Mathf.Max(7f, treeSwitcherTextSize);
+
+        RectTransform primaryButton = CreateButton(
+            switcher,
+            "ClassTreeButton",
+            string.IsNullOrWhiteSpace(primarySkillTreeLabel) ? "CLASS" : primarySkillTreeLabel,
+            new Vector2(-offset, 0f),
+            buttonSize,
+            fontSize);
+        ApplySprite(primaryButton, buttonSprite);
+
+        RectTransform secondaryButton = CreateButton(
+            switcher,
+            "ElementTreeButton",
+            string.IsNullOrWhiteSpace(secondarySkillTreeLabel) ? "ELEMENT" : secondarySkillTreeLabel,
+            new Vector2(offset, 0f),
+            buttonSize,
+            fontSize);
+        ApplySprite(secondaryButton, buttonSprite);
+    }
+
+    private static bool HasGeneratedContent(Transform root)
+    {
+        if (root == null)
+            return false;
+
+        foreach (string childName in GeneratedRootNames)
+        {
+            if (root.Find(childName) != null)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static void RemoveGeneratedContent(Transform root)
+    {
+        if (root == null)
+            return;
+
+        foreach (string childName in GeneratedRootNames)
+        {
+            Transform child = root.Find(childName);
+            if (child == null)
+                continue;
+
+            RepairMissingCanvasRenderers(child);
+            DestroyImmediate(child.gameObject);
+        }
     }
 
 
@@ -613,7 +688,11 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         TMP_Text skillName = CreateText(detail, "SkillNameText", "Select Skill", titleFont, TextAlignmentOptions.Center, Scale(new Vector2(0f, 30f), scale), Scale(new Vector2(textWidth, 30f), scale));
         skillName.color = titleTextColor;
         CreateText(detail, "RankText", "RANK 0/0", bodyFont, TextAlignmentOptions.Center, Scale(new Vector2(0f, 2f), scale), Scale(new Vector2(textWidth, 24f), scale));
-        CreateText(detail, "DescriptionText", "Skill description", bodyFont, TextAlignmentOptions.TopLeft, Scale(new Vector2(0f, -50f), scale), Scale(new Vector2(textWidth, 68f), scale));
+        TMP_Text description = CreateText(detail, "DescriptionText", "Skill description", bodyFont, TextAlignmentOptions.TopLeft, Scale(new Vector2(0f, -48f), scale), Scale(new Vector2(textWidth, 88f), scale));
+        description.enableAutoSizing = true;
+        description.fontSizeMin = Mathf.Max(7f, bodyFont * 0.68f);
+        description.fontSizeMax = bodyFont;
+        description.overflowMode = TextOverflowModes.Ellipsis;
         CreateText(detail, "RequirementText", "Requirement", Mathf.Max(7f, (detailBodyFontSize - 1f) * scale), TextAlignmentOptions.Center, Scale(new Vector2(0f, -108f), scale), Scale(new Vector2(textWidth, 22f), scale));
 
         TMP_Text costText = CreateText(detail, "CostText", "Cost: 0", Mathf.Max(7f, (detailBodyFontSize - 1f) * scale), TextAlignmentOptions.Right, Vector2.zero, Max(detailCostSize, new Vector2(60f, 18f)) * scale);
@@ -662,6 +741,8 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
             AnchorTopRight(illustrationIcon, new Vector2(innerPadding, innerPadding + 2f * scale), new Vector2(32f, 32f) * scale);
         }
 
+        CreateElementCoreSlot(equipPanel, slotSize, slotIconSize, indexTextOffset, indexTextSize, scale);
+
         RectTransform slotsRoot = CreateEmpty(equipPanel, "Slots");
         float titleGap = Mathf.Max(4f, 8f * scale);
         Anchor(slotsRoot, Vector2.zero, Vector2.one, new Vector2(innerPadding, innerPadding), new Vector2(-innerPadding, -innerPadding - titleHeight - titleGap));
@@ -684,6 +765,62 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         float centerIndex = (Mathf.Max(1, count) - 1) * 0.5f;
         Vector2 labelPosition = indexTextOffset + new Vector2((index - centerIndex) * indexSpacingOffset, 0f);
         CreateText(slot, "IndexText", (index + 1).ToString(), indexTextSize, TextAlignmentOptions.Center, labelPosition, new Vector2(28f * scale, 14f * scale));
+    }
+
+    private void CreateElementCoreSlot(RectTransform parent, Vector2 slotSize, Vector2 slotIconSize, Vector2 indexTextOffset, float indexTextSize, float scale)
+    {
+        RectTransform slot = CreateImage(parent, "ElementCoreSlot", null, Vector2.zero, slotSize);
+        slot.anchorMin = new Vector2(0.5f, 0.5f);
+        slot.anchorMax = new Vector2(0.5f, 0.5f);
+        slot.pivot = new Vector2(0.5f, 0.5f);
+        slot.anchoredPosition = Vector2.zero;
+
+        Image background = slot.GetComponent<Image>();
+        if (background != null)
+        {
+            background.color = Color.clear;
+            background.raycastTarget = false;
+        }
+
+        RectTransform frame = CreateImage(slot, "NodeFrame", nodeSprite, Vector2.zero, slotIconSize + new Vector2(30f * scale, 30f * scale));
+        Image frameImage = frame.GetComponent<Image>();
+        if (frameImage != null)
+        {
+            frameImage.color = Color.white;
+            frameImage.preserveAspect = true;
+            frameImage.raycastTarget = false;
+        }
+
+        RectTransform mask = CreateCircleMask(slot, "IconMask", Vector2.zero, slotIconSize);
+        CreateImage(mask, "Icon", null, Vector2.zero, slotIconSize);
+
+        TMP_Text label = CreateText(
+            slot,
+            "LabelText",
+            "ELEMENT",
+            indexTextSize,
+            TextAlignmentOptions.Center,
+            indexTextOffset,
+            new Vector2(Mathf.Max(28f * scale, slotSize.x), 14f * scale));
+        label.color = new Color(0.45f, 1f, 0.95f, 1f);
+        slot.gameObject.SetActive(false);
+    }
+
+    private Dictionary<SkillTreeNodeDefinition, Vector2> GetNodePositionsForTree(
+        SkillTreeDefinition tree,
+        out Vector2 scrollSize)
+    {
+        SkillTreeDefinition previousTree = skillTree;
+        skillTree = tree;
+
+        try
+        {
+            return GetNodePositions(out scrollSize);
+        }
+        finally
+        {
+            skillTree = previousTree;
+        }
     }
 
     private Dictionary<SkillTreeNodeDefinition, Vector2> GetNodePositions(out Vector2 scrollSize)
@@ -1029,7 +1166,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
             if (fromNode == null || !positions.TryGetValue(fromNode, out Vector2 from))
                 continue;
 
-            CreateLine(parent, $"Line_{fromNode.NodeId}_To_{node.NodeId}", from, to, GetLineColor(node.Branch));
+            CreateLine(parent, $"Line_{fromNode.NodeId}_To_{node.NodeId}", from, to, GetConnectionLineColor(fromNode, node));
         }
     }
 
@@ -1101,9 +1238,14 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         Sprite icon = definition.Icon != null ? definition.Icon : definition.ActiveSkill != null ? definition.ActiveSkill.Icon : null;
         if (icon != null)
         {
-            CreateCircleGraphic(node, "IconBack", Vector2.zero, new Vector2(iconSizeValue, iconSizeValue), new Color(0.02f, 0.04f, 0.08f, 0.92f));
+            if (!IsElementalTreeNode(definition))
+                CreateCircleGraphic(node, "IconBack", Vector2.zero, new Vector2(iconSizeValue, iconSizeValue), new Color(0.02f, 0.04f, 0.08f, 0.92f));
+
             RectTransform mask = CreateCircleMask(node, "IconMask", Vector2.zero, new Vector2(iconSizeValue, iconSizeValue));
-            CreateImage(mask, "Icon", icon, Vector2.zero, new Vector2(iconSizeValue, iconSizeValue));
+            RectTransform iconRect = CreateImage(mask, "Icon", icon, Vector2.zero, new Vector2(iconSizeValue, iconSizeValue));
+            Image iconImage = iconRect.GetComponent<Image>();
+            if (iconImage != null && IsElementalTreeNode(definition))
+                iconImage.color = GetNodeAccentColor(definition);
         }
         else
         {
@@ -1182,15 +1324,70 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         };
     }
 
+    private List<SkillTreeDefinition> GetBuildSkillTrees()
+    {
+        List<SkillTreeDefinition> trees = new();
+        if (skillTree != null)
+            trees.Add(skillTree);
+
+        if (HasSecondarySkillTree())
+            trees.Add(secondarySkillTree);
+
+        return trees;
+    }
+
+    private bool HasSecondarySkillTree()
+    {
+        return secondarySkillTree != null && secondarySkillTree != skillTree;
+    }
+
+    private static string GetTreeContentName(SkillTreeDefinition tree)
+    {
+        return $"TreeContent_{SanitizeTreeContentName(tree != null ? tree.TreeId : "Tree")}";
+    }
+
     private void ConfigureRuntimeView(RectTransform root)
     {
-        SkillTreeView view = root.gameObject.AddComponent<SkillTreeView>();
-        view.SetSkillTree(skillTree);
+        SkillTreeView view = skillViewRoot.GetComponent<SkillTreeView>();
+        if (view == null)
+            view = skillViewRoot.AddComponent<SkillTreeView>();
+
+        SkillTreePresenter presenter = skillViewRoot.GetComponent<SkillTreePresenter>();
+        if (presenter == null)
+            presenter = skillViewRoot.AddComponent<SkillTreePresenter>();
+
+        ConfigureRuntimeSerializedFields(view, presenter);
 
         foreach (SkillTreeNodeView nodeView in root.GetComponentsInChildren<SkillTreeNodeView>(true))
         {
             if (nodeView == null || nodeView.Definition == null) continue;
             view.RegisterNode(nodeView, nodeView.Definition);
+        }
+    }
+
+    private void ConfigureRuntimeSerializedFields(SkillTreeView view, SkillTreePresenter presenter)
+    {
+        if (view != null)
+        {
+            SerializedObject viewSo = new(view);
+            SetObjectReference(viewSo, "skillTree", skillTree);
+            SetObjectReference(viewSo, "primarySkillTree", skillTree);
+            SetObjectReference(viewSo, "secondarySkillTree", secondarySkillTree);
+            SetString(viewSo, "primarySkillTreeLabel", primarySkillTreeLabel);
+            SetString(viewSo, "secondarySkillTreeLabel", secondarySkillTreeLabel);
+            SetBool(viewSo, "buildMissingNodeViews", false);
+            SetBool(viewSo, "buildTreeSwitcher", false);
+            viewSo.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(view);
+        }
+
+        if (presenter != null)
+        {
+            SerializedObject presenterSo = new(presenter);
+            SetObjectReference(presenterSo, "view", view);
+            SetObjectReference(presenterSo, "skillTree", skillTree);
+            presenterSo.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(presenter);
         }
     }
 
@@ -1230,6 +1427,40 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
             SkillTreeBranch.GauntletPoison => poisonLineColor,
             _ => defaultLineColor
         };
+    }
+
+    private Color GetConnectionLineColor(SkillTreeNodeDefinition fromNode, SkillTreeNodeDefinition toNode)
+    {
+        if (toNode != null && toNode.Kind == SkillTreeNodeKind.ElementReaction && fromNode != null)
+            return GetNodeAccentColor(fromNode);
+
+        return GetLineColor(toNode != null ? toNode.Branch : SkillTreeBranch.GauntletReaction);
+    }
+
+    private Color GetNodeAccentColor(SkillTreeNodeDefinition definition)
+    {
+        if (definition == null)
+            return defaultLineColor;
+
+        return definition.Element switch
+        {
+            ElementType.Fire => fireLineColor,
+            ElementType.Frost => frostLineColor,
+            ElementType.Lightning => lightningLineColor,
+            ElementType.Poison => poisonLineColor,
+            _ => definition.Kind == SkillTreeNodeKind.ElementReaction
+                ? defaultLineColor
+                : GetLineColor(definition.Branch)
+        };
+    }
+
+    private static bool IsElementalTreeNode(SkillTreeNodeDefinition definition)
+    {
+        return definition != null &&
+               (definition.Kind == SkillTreeNodeKind.ElementUnlock ||
+                definition.Kind == SkillTreeNodeKind.ElementReaction ||
+                definition.Element != ElementType.None ||
+                definition.Reaction != ElementalReactionType.None);
     }
 
     private Sprite GetFirstIcon()
@@ -1315,6 +1546,10 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         useBranchLaneLayout = true;
         branchLaneSpacing = 112f;
         branchSameColumnSpacing = 62f;
+        treeSwitcherSize = new Vector2(420f, 56f);
+        treeSwitcherButtonSize = new Vector2(200f, 46f);
+        treeSwitcherButtonSpacing = 20f;
+        treeSwitcherTextSize = 20f;
         treeClipHorizontalPadding = 0f;
         treeClipTopPadding = 24f;
         treeClipBottomPadding = 24f;
@@ -1597,38 +1832,28 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         return label;
     }
 
-    private static string GetSkillName(HeroSkillDefinition skill)
-    {
-        return string.IsNullOrWhiteSpace(skill.DisplayName) ? skill.name : skill.DisplayName;
-    }
-
-    private static string GetNodeId(HeroSkillDefinition skill, int index)
-    {
-        if (!string.IsNullOrWhiteSpace(skill.SkillId))
-            return skill.SkillId;
-
-        return $"{SanitizeName(skill.name).ToLowerInvariant()}_{index + 1}";
-    }
-
-    private static SkillTreeBranch GetGeneratedBranch(int index)
-    {
-        SkillTreeBranch[] branches =
-        {
-            SkillTreeBranch.KnightTechnique,
-            SkillTreeBranch.KnightDefense,
-            SkillTreeBranch.KnightControl,
-            SkillTreeBranch.GauntletFire
-        };
-
-        return branches[index % branches.Length];
-    }
-
     private static string SanitizeName(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return "Skill";
 
         return ObjectNames.NicifyVariableName(value).Replace(" ", string.Empty);
+    }
+
+    private static string SanitizeTreeContentName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return "Tree";
+
+        char[] chars = value.ToCharArray();
+        for (int i = 0; i < chars.Length; i++)
+        {
+            char c = chars[i];
+            if (!char.IsLetterOrDigit(c) && c != '_' && c != '-')
+                chars[i] = '_';
+        }
+
+        return new string(chars);
     }
 
     private static Sprite LoadSprite(string assetPath)

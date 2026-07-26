@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.last_stand
   displayName: Last Stand
-  description: Lock down a fight even when surrounded. Gain max health and armor.
+  description: '+35 Max Health and +3 Armor.'
   icon: {fileID: 21300000, guid: f6b8b85cbdc82ce439a41ae3d56d57ee, type: 3}
   kind: 0
   branch: 1

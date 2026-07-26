@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class CharacterMovement : CharacterAbstract
 {
+    private const float MinSpeedMultiplier = 0.1f;
+
     [SerializeField] protected float moveSpeed = 5f;
 
     protected Vector2 moveInput;
@@ -15,5 +17,15 @@ public class CharacterMovement : CharacterAbstract
         if (dir == Vector2.zero) return;
 
         lookDirection = dir.normalized;
+    }
+
+    protected float GetMoveSpeed()
+    {
+        StatValue moveSpeedStat = characterCtrl != null && characterCtrl.CharacterStat != null
+            ? characterCtrl.CharacterStat.GetStat(StatType.MoveSpeed)
+            : null;
+
+        float multiplier = 1f + (moveSpeedStat != null ? moveSpeedStat.FinalValue : 0f);
+        return moveSpeed * Mathf.Max(MinSpeedMultiplier, multiplier);
     }
 }

@@ -5,6 +5,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "HeroSkillChargeStrikeEffect", menuName = "Loot Knights/Hero/Skill Effects/Charge Strike")]
 public class HeroSkillChargeStrikeEffect : CharacterSkillEffectDefinition
 {
+    private const string CleavingArcNodeId = "knight.cleaving_arc";
+    private const string RallyingCryNodeId = "knight.rallying_cry";
+
     [Header("Movement")]
     [SerializeField, Min(0f)] private float distance = 2.4f;
     [SerializeField, Min(0.01f)] private float dashDuration = 0.16f;
@@ -24,6 +27,7 @@ public class HeroSkillChargeStrikeEffect : CharacterSkillEffectDefinition
     [Header("Damage")]
     [SerializeField] private DamageData damageData = new(1.4f, true);
     [SerializeField] private float flatBonusDamage;
+    [SerializeField, Min(0f)] private float rallyingCryLifeStealPercentPerRank = 0.05f;
 
     [Header("Feedback")]
     [SerializeField] private VFXDefinition impactVfx;
@@ -51,8 +55,10 @@ public class HeroSkillChargeStrikeEffect : CharacterSkillEffectDefinition
     {
         if (caster.Rb == null) yield break;
 
+        int cleavingArcRank = SkillTreeRankResolver.GetRank(caster, CleavingArcNodeId);
+        int rallyingCryRank = SkillTreeRankResolver.GetRank(caster, RallyingCryNodeId);
         Vector2 start = caster.Rb.position;
-        Vector2 end = GetDashEndPosition(start, direction, target);
+        Vector2 end = GetDashEndPosition(start, direction, target, cleavingArcRank);
         direction = end - start;
 
         if (direction.sqrMagnitude <= 0.001f)
@@ -82,8 +88,7 @@ public class HeroSkillChargeStrikeEffect : CharacterSkillEffectDefinition
         if (invincibleDuringDash && receiver != null)
             receiver.SetInvincible(previousInvincible);
 
-        Vector3 scaleBeforeSlash = caster.transform.localScale;
-        bool changedFacing = FaceHorizontalDirection(caster.transform, direction);
+        FaceHorizontalDirection(caster.transform, direction);
 
         controller.PlaySkillAttackAnimation();
 
@@ -91,17 +96,16 @@ public class HeroSkillChargeStrikeEffect : CharacterSkillEffectDefinition
             yield return new WaitForSeconds(slashHitDelay);
 
         PlayImpactFeedback((Vector2)caster.transform.position + direction * forwardOffset, direction, caster.transform);
-        DealImpactDamage(caster, direction);
+        DealImpactDamage(caster, direction, cleavingArcRank, rallyingCryRank);
+        ApplyRallyingCryBuff(caster, rallyingCryRank);
 
         float restoreDelay = Mathf.Max(0f, attackVisualDuration - slashHitDelay);
         if (restoreDelay > 0f)
             yield return new WaitForSeconds(restoreDelay);
 
-        if (changedFacing && caster != null)
-            caster.transform.localScale = scaleBeforeSlash;
     }
 
-    private void DealImpactDamage(CharacterCtrl caster, Vector2 direction)
+    private void DealImpactDamage(CharacterCtrl caster, Vector2 direction, int cleavingArcRank, int rallyingCryRank)
     {
         Vector2 origin = (Vector2)caster.transform.position + direction * forwardOffset;
         int layerMask = targetLayer.value != 0
@@ -117,7 +121,8 @@ public class HeroSkillChargeStrikeEffect : CharacterSkillEffectDefinition
             layerMask = layerMask
         };
 
-        int count = Physics2D.OverlapCircle(origin, radius, filter, Hits);
+        float effectiveRadius = radius + cleavingArcRank * 0.12f;
+        int count = Physics2D.OverlapCircle(origin, effectiveRadius, filter, Hits);
         DamagedTargets.Clear();
 
         for (int i = 0; i < count; i++)
@@ -131,23 +136,35 @@ public class HeroSkillChargeStrikeEffect : CharacterSkillEffectDefinition
             if (target.CharacterDamReceiver == null || target.CharacterDamReceiver.IsDead) continue;
             if (!FactionManager.CanAttack(caster.Faction, target.Faction)) continue;
             if (!DamagedTargets.Add(target.CharacterDamReceiver)) continue;
-            if (!IsInsideAngle(caster.transform.position, direction, target.transform.position)) continue;
+            if (!IsInsideAngle(caster.transform.position, direction, target.transform.position, cleavingArcRank)) continue;
 
-            float damage = CalculateDamage(caster);
+            float damage = CalculateDamage(caster, cleavingArcRank);
             target.CharacterDamReceiver.ReceiveDamage(damage, caster.transform, damageData);
+            ApplyLifeSteal(caster, damage, rallyingCryRank);
         }
 
         DamagedTargets.Clear();
     }
 
-    private bool IsInsideAngle(Vector2 casterPosition, Vector2 aimDirection, Vector2 targetPosition)
+    private void ApplyLifeSteal(CharacterCtrl caster, float damage, int rallyingCryRank)
     {
-        if (angle >= 359f) return true;
+        if (caster == null || rallyingCryRank <= 0 || damage <= 0f)
+            return;
+
+        float healAmount = damage * rallyingCryRank * rallyingCryLifeStealPercentPerRank;
+        if (healAmount > 0f)
+            caster.CharacterDamReceiver?.Heal(healAmount);
+    }
+
+    private bool IsInsideAngle(Vector2 casterPosition, Vector2 aimDirection, Vector2 targetPosition, int cleavingArcRank)
+    {
+        float effectiveAngle = Mathf.Min(360f, angle + cleavingArcRank * 12f);
+        if (effectiveAngle >= 359f) return true;
 
         Vector2 toTarget = targetPosition - casterPosition;
         if (toTarget.sqrMagnitude <= 0.001f) return true;
 
-        return Vector2.Angle(aimDirection, toTarget.normalized) <= angle * 0.5f;
+        return Vector2.Angle(aimDirection, toTarget.normalized) <= effectiveAngle * 0.5f;
     }
 
     private static bool IsTargetBodyCollider(Collider2D hitCollider, CharacterCtrl target)
@@ -156,9 +173,10 @@ public class HeroSkillChargeStrikeEffect : CharacterSkillEffectDefinition
         return hitCollider == target.Collider2D;
     }
 
-    private float CalculateDamage(CharacterCtrl caster)
+    private float CalculateDamage(CharacterCtrl caster, int cleavingArcRank)
     {
         float multiplier = damageData != null ? damageData.Multiplier : 1f;
+        multiplier += cleavingArcRank * 0.1f;
         float damage = caster.CharacterStat.Attack.FinalValue * multiplier + flatBonusDamage;
 
         if (damageData != null &&
@@ -171,6 +189,19 @@ public class HeroSkillChargeStrikeEffect : CharacterSkillEffectDefinition
         return damage;
     }
 
+    private void ApplyRallyingCryBuff(CharacterCtrl caster, int rank)
+    {
+        if (rank <= 0 || caster == null || caster.CharacterStat == null)
+            return;
+
+        StatValue attackSpeed = caster.CharacterStat.GetStat(StatType.AttackSpeed);
+        if (attackSpeed == null)
+            return;
+
+        attackSpeed.AddBuffModifier(new StatModifier(StatType.AttackSpeed, ModifierType.Flat, rank * 0.08f, this, 3f));
+        attackSpeed.NotifyValueChanged();
+    }
+
     private void PlayImpactFeedback(Vector3 position, Vector2 direction, Transform target)
     {
         if (impactVfx != null && VFXManager.HasInstance)
@@ -180,10 +211,10 @@ public class HeroSkillChargeStrikeEffect : CharacterSkillEffectDefinition
             SFXManager.Play(impactSfx, position);
     }
 
-    private Vector2 GetDashEndPosition(Vector2 start, Vector2 fallbackDirection, Transform target)
+    private Vector2 GetDashEndPosition(Vector2 start, Vector2 fallbackDirection, Transform target, int cleavingArcRank)
     {
         if (target == null)
-            return start + GetAimDirection(start, fallbackDirection, target) * distance;
+            return start + GetAimDirection(start, fallbackDirection, target) * GetEffectiveDistance(cleavingArcRank);
 
         Vector2 targetPosition = target.position;
         Vector2 toTarget = targetPosition - start;
@@ -198,11 +229,16 @@ public class HeroSkillChargeStrikeEffect : CharacterSkillEffectDefinition
         if (dash.sqrMagnitude <= 0.001f)
             return start;
 
-        float maxDistance = Mathf.Max(0f, distance);
+        float maxDistance = GetEffectiveDistance(cleavingArcRank);
         if (dash.magnitude > maxDistance)
             return start + dash.normalized * maxDistance;
 
         return desired;
+    }
+
+    private float GetEffectiveDistance(int cleavingArcRank)
+    {
+        return Mathf.Max(0f, distance + cleavingArcRank * 0.25f);
     }
 
     private static Vector2 GetAimDirection(Vector2 start, Vector2 fallbackDirection, Transform target)
@@ -241,5 +277,7 @@ public class HeroSkillChargeStrikeEffect : CharacterSkillEffectDefinition
 
         if (damageData == null)
             damageData = new DamageData(1f, false);
+
+        rallyingCryLifeStealPercentPerRank = Mathf.Max(0f, rallyingCryLifeStealPercentPerRank);
     }
 }

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 062da7d0656f4b0284fc01925fa3fa00, type: 3}
+  m_Name: Elemental_SkillTree
+  m_EditorClassIdentifier: 
+  treeId: elemental_skill_tree
+  displayName: Elemental Skill Tree
+  nodes:
+  - {fileID: 11400000, guid: de3abf112c2649858bb964fc2ccbc577, type: 2}
+  - {fileID: 11400000, guid: a9f29d39bba34ba7b072d3b93e3f7a89, type: 2}
+  - {fileID: 11400000, guid: 5d5102b40f31475d9fd5496debc604de, type: 2}
+  - {fileID: 11400000, guid: 30770c3a2f4e49eb80dcadc3fda7e080, type: 2}
+  - {fileID: 11400000, guid: 5ace7869365a4ae58afaa4c651254cae, type: 2}
+  - {fileID: 11400000, guid: 3ffac70d35524df195eb914b3cb0a23f, type: 2}
+  - {fileID: 11400000, guid: d0624c2f08db4d319117b984b10f36ef, type: 2}
+  - {fileID: 11400000, guid: 45f0c7a92ee846819bcb344e9644403d, type: 2}
+  - {fileID: 11400000, guid: e50c7e45476f4d34bcd9ed982f61ebcf, type: 2}
+  - {fileID: 11400000, guid: 7d494353d75a412397a986a9bf643ab3, type: 2}
+  - {fileID: 11400000, guid: f26fe0feb027460584c94a75ac39ec2f, type: 2}

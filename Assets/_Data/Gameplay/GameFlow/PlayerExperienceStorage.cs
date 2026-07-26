@@ -46,6 +46,7 @@ public static class PlayerExperienceStorage
         PlayerLevelSnapshot before = Snapshot;
         PlayerPrefs.DeleteKey(ExperienceKey);
         PlayerAttributePointStorage.Clear();
+        PlayerSkillTreeManager.Service.ClearAllProgress();
         PlayerPrefs.Save();
 
         PlayerLevelSnapshot after = Snapshot;

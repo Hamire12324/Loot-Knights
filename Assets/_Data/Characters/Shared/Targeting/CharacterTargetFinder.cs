@@ -6,15 +6,21 @@ public abstract class CharacterTargetFinder : BaseMonoBehaviour
     [SerializeField] protected LayerMask targetLayer;
     public LayerMask TargetLayer => targetLayer;
     [SerializeField] private float detectRadius = 3f;
+    public float DetectRadius => Mathf.Max(0f, detectRadius);
 
     [SerializeField] private Transform currentTarget;
     public Transform CurrentTarget => currentTarget;
 
     public virtual Transform FindClosestTarget()
     {
+        return FindClosestTarget(detectRadius);
+    }
+
+    public virtual Transform FindClosestTarget(float searchRadius)
+    {
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             transform.position,
-            detectRadius,
+            Mathf.Max(0f, searchRadius),
             targetLayer
         );
 

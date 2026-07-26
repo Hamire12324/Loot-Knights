@@ -5,7 +5,17 @@ using UnityEngine.UI;
 
 public class MobileSkillButton : MonoBehaviour, IPointerClickHandler
 {
+    private enum MobileSkillButtonMode
+    {
+        Skill,
+        BasicAttack,
+        ElementAbsorb,
+        ElementRelease
+    }
+
+    [SerializeField] private MobileSkillButtonMode mode;
     [SerializeField] private bool isBasicAttack;
+    [SerializeField] private bool isSpecialSkill;
     [SerializeField, Min(0)] private int skillIndex;
     [SerializeField] private Image icon;
     [SerializeField] private UICircleGraphic cooldownFill;
@@ -15,7 +25,33 @@ public class MobileSkillButton : MonoBehaviour, IPointerClickHandler
     public void Setup(bool basicAttack, int index, Image iconImage, UICircleGraphic cooldown, TMP_Text text, TMP_Text label)
     {
         isBasicAttack = basicAttack;
+        isSpecialSkill = false;
+        mode = basicAttack ? MobileSkillButtonMode.BasicAttack : MobileSkillButtonMode.Skill;
         skillIndex = Mathf.Max(0, index);
+        icon = iconImage;
+        cooldownFill = cooldown;
+        cooldownText = text;
+        fallbackLabel = label;
+    }
+
+    public void SetupSpecial(Image iconImage, UICircleGraphic cooldown, TMP_Text text, TMP_Text label)
+    {
+        isBasicAttack = false;
+        isSpecialSkill = true;
+        mode = MobileSkillButtonMode.ElementRelease;
+        skillIndex = 0;
+        icon = iconImage;
+        cooldownFill = cooldown;
+        cooldownText = text;
+        fallbackLabel = label;
+    }
+
+    public void SetupElementAbsorb(Image iconImage, UICircleGraphic cooldown, TMP_Text text, TMP_Text label)
+    {
+        isBasicAttack = false;
+        isSpecialSkill = false;
+        mode = MobileSkillButtonMode.ElementAbsorb;
+        skillIndex = 0;
         icon = iconImage;
         cooldownFill = cooldown;
         cooldownText = text;
@@ -32,8 +68,34 @@ public class MobileSkillButton : MonoBehaviour, IPointerClickHandler
         HeroCtrl hero = HeroCtrl.GetLocal();
         if (hero == null || hero.CharacterSkillController == null) return;
 
-        if (isBasicAttack)
-            hero.CharacterSkillController.TryCastBasicAttack();
+        if (mode == MobileSkillButtonMode.BasicAttack || isBasicAttack)
+        {
+            CharacterSkillRuntime basicRuntime = hero.CharacterSkillController.BasicAttackRuntime;
+            string basicSkillName = basicRuntime != null && basicRuntime.Definition != null
+                ? basicRuntime.Definition.name
+                : "null";
+
+            Debug.Log(
+                $"{nameof(MobileSkillButton)} basic attack clicked. hero={hero.name}, class={(hero.Profile != null ? hero.Profile.CharacterClass.ToString() : "no-profile")}, basicSkill={basicSkillName}.",
+                hero);
+
+            if (hero.CharacterSkillController.TryCastBasicAttack())
+            {
+                Debug.Log($"{nameof(MobileSkillButton)} cast basic skill {basicSkillName}.", hero);
+                return;
+            }
+
+            Debug.LogWarning(
+                $"{nameof(MobileSkillButton)} basic skill did not cast. basicSkill={basicSkillName}, isCasting={hero.CharacterSkillController.IsCasting}.",
+                hero);
+        }
+        else if (mode == MobileSkillButtonMode.ElementAbsorb && hero.HeroSkillController != null)
+            hero.HeroSkillController.TryAbsorbElementConduit();
+        else if ((mode == MobileSkillButtonMode.ElementRelease || isSpecialSkill) && hero.HeroSkillController != null)
+        {
+            if (hero.HeroSkillController.TryReleaseElementConduit())
+                RefreshStoredElementSlots();
+        }
         else
             hero.CharacterSkillController.TryCast(skillIndex);
     }
@@ -52,13 +114,17 @@ public class MobileSkillButton : MonoBehaviour, IPointerClickHandler
         if (fallbackLabel != null)
             fallbackLabel.enabled = icon == null || !icon.enabled;
 
-        float normalized = runtime != null ? runtime.Cooldown.Normalized : 0f;
+        float normalized = mode == MobileSkillButtonMode.ElementAbsorb
+            ? 0f
+            : runtime != null ? runtime.Cooldown.Normalized : 0f;
         if (cooldownFill != null)
             cooldownFill.FillAmount = normalized;
 
         if (cooldownText == null) return;
 
-        float remaining = runtime != null ? runtime.Cooldown.Remaining : 0f;
+        float remaining = mode == MobileSkillButtonMode.ElementAbsorb
+            ? 0f
+            : runtime != null ? runtime.Cooldown.Remaining : 0f;
         cooldownText.text = remaining > 0.05f ? Mathf.CeilToInt(remaining).ToString() : "";
     }
 
@@ -67,8 +133,22 @@ public class MobileSkillButton : MonoBehaviour, IPointerClickHandler
         HeroCtrl hero = HeroCtrl.GetLocal();
         if (hero == null || hero.CharacterSkillController == null) return null;
 
-        return isBasicAttack
-            ? hero.CharacterSkillController.BasicAttackRuntime
+        if (mode == MobileSkillButtonMode.BasicAttack || isBasicAttack)
+            return hero.CharacterSkillController.BasicAttackRuntime;
+
+        return mode == MobileSkillButtonMode.ElementAbsorb ||
+               mode == MobileSkillButtonMode.ElementRelease ||
+               isSpecialSkill
+            ? hero.CharacterSkillController.GetSpecialSkill()
             : hero.CharacterSkillController.GetSkill(skillIndex);
+    }
+
+    private void RefreshStoredElementSlots()
+    {
+        GameplayMobileSkillHud hud = GetComponentInParent<GameplayMobileSkillHud>();
+        if (hud == null)
+            hud = FindAnyObjectByType<GameplayMobileSkillHud>();
+
+        hud?.RefreshElementMeterNow();
     }
 }

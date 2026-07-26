@@ -5,11 +5,13 @@ public sealed class SkillTreeStatApplier : CharacterAbstract
     [SerializeField] private SkillTreeDefinition skillTree;
 
     private SkillTreeRuntime runtime;
+    private PlayerSkillTreeManager skillTreeManager;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        PlayerSkillTreeStorage.OnChanged += Apply;
+        skillTreeManager = PlayerSkillTreeManager.Service;
+        skillTreeManager.OnChanged += Apply;
         PlayerExperienceStorage.OnLevelSnapshotChanged += HandleLevelChanged;
         RefreshRuntime();
         Apply();
@@ -17,7 +19,10 @@ public sealed class SkillTreeStatApplier : CharacterAbstract
 
     protected override void OnDisable()
     {
-        PlayerSkillTreeStorage.OnChanged -= Apply;
+        if (skillTreeManager != null)
+            skillTreeManager.OnChanged -= Apply;
+
+        skillTreeManager = null;
         PlayerExperienceStorage.OnLevelSnapshotChanged -= HandleLevelChanged;
         base.OnDisable();
     }
@@ -39,15 +44,11 @@ public sealed class SkillTreeStatApplier : CharacterAbstract
 
     private void RefreshRuntime()
     {
-        runtime ??= new SkillTreeRuntime(skillTree);
-        if (skillTree == null)
-            skillTree = Resources.Load<SkillTreeDefinition>("SkillTrees/Hero_SkillTree");
-
         runtime = new SkillTreeRuntime(skillTree);
     }
 
     private void HandleLevelChanged(PlayerLevelSnapshot snapshot)
     {
-        PlayerSkillTreeStorage.EnsureLevelRewarded(snapshot.Level);
+        (skillTreeManager != null ? skillTreeManager : PlayerSkillTreeManager.Service).EnsureLevelRewarded(snapshot.Level);
     }
 }

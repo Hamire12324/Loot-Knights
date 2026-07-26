@@ -5,12 +5,16 @@ using UnityEngine;
 public class CharacterSkillController : CharacterAbstract
 {
     private const float AnimationEventFallbackDelay = 0.4f;
+    private const float MinAttackSpeedMultiplier = 0.1f;
 
     [Header("Basic Attack")]
     [SerializeField] protected CharacterSkillDefinition basicAttack;
 
     [Header("Active Skills")]
     [SerializeField] protected CharacterSkillDefinition[] equippedSkills = new CharacterSkillDefinition[4];
+
+    [Header("Special Skill")]
+    [SerializeField] protected CharacterSkillDefinition specialSkill;
     [SerializeField] protected bool cancelBasicAttackOnCast = true;
 
     private readonly CharacterSkillLoadout loadout = new();
@@ -24,6 +28,7 @@ public class CharacterSkillController : CharacterAbstract
     private CharacterSkillFacing facing;
 
     public CharacterSkillRuntime BasicAttackRuntime => loadout.BasicAttackRuntime;
+    public CharacterSkillRuntime SpecialSkillRuntime => loadout.SpecialSkillRuntime;
     public bool IsCasting => castingRoutine != null;
     public IReadOnlyList<CharacterSkillRuntime> RuntimeSkills => loadout.RuntimeSkills;
 
@@ -48,6 +53,11 @@ public class CharacterSkillController : CharacterAbstract
         return loadout.GetSkill(index);
     }
 
+    public CharacterSkillRuntime GetSpecialSkill()
+    {
+        return loadout.SpecialSkillRuntime;
+    }
+
     public bool TryCast(int index)
     {
         CharacterSkillRuntime runtime = GetSkill(index);
@@ -57,16 +67,70 @@ public class CharacterSkillController : CharacterAbstract
         return true;
     }
 
+    public bool TryCastSpecialSkill()
+    {
+        CharacterSkillRuntime runtime = GetSpecialSkill();
+        if (runtime == null || !runtime.CanCast(this)) return false;
+        if (!CanCastSpecialSkillRuntime(runtime)) return false;
+
+        castingRoutine = StartCoroutine(CastRoutine(runtime));
+        return true;
+    }
+
+    protected virtual bool CanCastSpecialSkillRuntime(CharacterSkillRuntime runtime)
+    {
+        return true;
+    }
+
     public bool TryCastBasicAttack()
     {
         if (BasicAttackRuntime == null)
+        {
+            Debug.LogWarning(
+                $"{nameof(CharacterSkillController)} basic attack runtime is null; using fallback combat attack.",
+                gameObject);
             return TryFallbackBasicAttack();
+        }
 
         if (!BasicAttackRuntime.CanCast(this))
+        {
+            Debug.LogWarning(
+                $"{nameof(CharacterSkillController)} cannot cast basic attack '{BasicAttackRuntime.Definition?.name ?? "null"}'. {GetBasicAttackBlockedReason(BasicAttackRuntime)}",
+                gameObject);
             return false;
+        }
 
         castingRoutine = StartCoroutine(CastRoutine(BasicAttackRuntime));
         return true;
+    }
+
+    private string GetBasicAttackBlockedReason(CharacterSkillRuntime runtime)
+    {
+        if (runtime == null)
+            return "Runtime is null.";
+
+        if (runtime.Definition == null)
+            return "Definition is null.";
+
+        if (!runtime.IsUnlocked)
+            return "Skill is locked.";
+
+        if (!runtime.Cooldown.IsReady)
+            return $"Cooldown remaining={runtime.Cooldown.Remaining:0.00}s.";
+
+        if (IsCasting)
+            return "Controller is already casting.";
+
+        if (characterCtrl == null)
+            return "CharacterCtrl is null.";
+
+        if (characterCtrl.CharacterDamReceiver != null && characterCtrl.CharacterDamReceiver.IsDead)
+            return "Character is dead.";
+
+        if (characterCtrl.CharacterDamReceiver != null && characterCtrl.CharacterDamReceiver.IsHitStunned)
+            return "Character is hit-stunned.";
+
+        return "Unknown reason.";
     }
 
     public void CancelCast(bool force = false)
@@ -103,11 +167,21 @@ public class CharacterSkillController : CharacterAbstract
         RebuildRuntimeSkills();
     }
 
+    public void SetSpecialSkill(CharacterSkillDefinition definition)
+    {
+        specialSkill = definition;
+        RebuildRuntimeSkills();
+    }
+
     protected virtual IEnumerator CastRoutine(CharacterSkillRuntime runtime)
     {
         CharacterSkillDefinition definition = runtime.Definition;
         currentCastingRuntime = runtime;
-        runtime.StartCooldown(definition.Cooldown);
+        runtime.StartCooldown(GetCooldownDuration(runtime, definition));
+
+        Debug.Log(
+            $"{nameof(CharacterSkillController)} started cast '{definition?.name ?? "null"}' on {(characterCtrl != null ? characterCtrl.name : "null")}. trigger={definition?.TriggerName ?? "null"}, castTime={(definition != null ? definition.CastTime : 0f):0.00}.",
+            gameObject);
 
         if (cancelBasicAttackOnCast && runtime != BasicAttackRuntime)
             characterCtrl.CharacterCombatController?.CancelAttack(force: true);
@@ -184,6 +258,9 @@ public class CharacterSkillController : CharacterAbstract
         foreach (CharacterSkillEffectDefinition effect in definition.Effects)
         {
             if (effect == null) continue;
+            Debug.Log(
+                $"{nameof(CharacterSkillController)} executing effect '{effect.name}' ({effect.GetType().Name}) for skill '{definition.name}', aim={aimDirection}.",
+                gameObject);
             effect.Execute(context);
         }
     }
@@ -224,7 +301,21 @@ public class CharacterSkillController : CharacterAbstract
 
     protected void RebuildRuntimeSkills()
     {
-        loadout.Rebuild(basicAttack, equippedSkills);
+        loadout.Rebuild(basicAttack, equippedSkills, specialSkill);
+    }
+
+    private float GetCooldownDuration(CharacterSkillRuntime runtime, CharacterSkillDefinition definition)
+    {
+        float cooldownDuration = definition != null ? definition.Cooldown : 0f;
+        if (runtime != BasicAttackRuntime)
+            return cooldownDuration;
+
+        StatValue attackSpeed = characterCtrl != null && characterCtrl.CharacterStat != null
+            ? characterCtrl.CharacterStat.GetStat(StatType.AttackSpeed)
+            : null;
+
+        float multiplier = 1f + (attackSpeed != null ? attackSpeed.FinalValue : 0f);
+        return cooldownDuration / Mathf.Max(MinAttackSpeedMultiplier, multiplier);
     }
 
     private bool TryFallbackBasicAttack()

@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: Shield Bash
   icon: {fileID: 21300000, guid: f6b8b85cbdc82ce439a41ae3d56d57ee, type: 3}
   castType: 0
-  castTime: 0.06
+  castTime: 0
   duration: 0
-  lockMovementWhileCasting: 1
+  lockMovementWhileCasting: 0
   canBeInterrupted: 1
   cooldown: 5
-  triggerName: Attack
+  triggerName: 
   animationIndex: 0
   castVfx: {fileID: 0}
   castSfx: {fileID: 0}

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.edge_training
   displayName: Edge Training
-  description: Sharpen basic weapon control. Gain flat Attack.
+  description: '+3 Attack per rank. Max rank 3: +9 Attack.'
   icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
   kind: 0
   branch: 0

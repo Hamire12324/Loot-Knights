@@ -16,12 +16,15 @@ public class CharacterElementalState : CharacterAbstract
     }
 
     private const float MinStatusDuration = 0.1f;
-    private static readonly Collider2D[] Hits = new Collider2D[24];
+    private static readonly Collider2D[] OverloadHits = new Collider2D[24];
 
     [Header("Reaction Tuning")]
     [SerializeField, Min(0f)] private float shatterBonusDamageMultiplier = 0.65f;
     [SerializeField, Min(0f)] private float overloadBonusDamageMultiplier = 0.45f;
-    [SerializeField, Min(0f)] private float overloadRadius = 1.6f;
+    [SerializeField, Min(1)] private int overloadMaxHits = 3;
+    [SerializeField, Min(0f)] private float overloadChainRadius = 2f;
+    [SerializeField, Min(0.01f)] private float overloadHitInterval = 0.12f;
+    [SerializeField, Min(0f)] private float overloadHitStunDuration = 0.35f;
     [SerializeField, Min(0f)] private float superconductArmorReduction = 0.25f;
     [SerializeField, Min(0f)] private float superconductDuration = 3f;
     [SerializeField, Min(0f)] private float burnoutTickMultiplier = 0.2f;
@@ -29,11 +32,14 @@ public class CharacterElementalState : CharacterAbstract
     [SerializeField, Min(0f)] private float burnoutDuration = 3f;
     [SerializeField, Min(0f)] private float neuroshockDamageMultiplier = 0.35f;
     [SerializeField, Min(0f)] private float neuroshockStunDuration = 0.45f;
-    [SerializeField, Min(0f)] private float brittleToxinArmorReduction = 0.15f;
+    [SerializeField, Min(0f)] private float brittleToxinInitialArmorReduction = 0.15f;
+    [SerializeField, Min(0f)] private float brittleToxinRampArmorReduction = 0.3f;
     [SerializeField, Min(0f)] private float brittleToxinDuration = 4f;
 
     private readonly List<ElementalStatus> statuses = new();
     private Coroutine burnoutRoutine;
+    private Coroutine overloadRoutine;
+    private Coroutine brittleToxinRoutine;
 
     public static void ApplyElementalHit(
         CharacterCtrl target,
@@ -55,6 +61,36 @@ public class CharacterElementalState : CharacterAbstract
     {
         RemoveExpiredStatuses();
         return statuses.Exists(status => status.Element == element);
+    }
+
+    public bool TryGetStrongestStatus(out ElementType element, out float power)
+    {
+        RemoveExpiredStatuses();
+
+        ElementalStatus strongest = null;
+        foreach (ElementalStatus status in statuses)
+        {
+            if (status == null || status.Element == ElementType.None)
+                continue;
+
+            if (strongest == null ||
+                status.Power > strongest.Power ||
+                Mathf.Approximately(status.Power, strongest.Power) && status.EndTime > strongest.EndTime)
+            {
+                strongest = status;
+            }
+        }
+
+        if (strongest == null)
+        {
+            element = ElementType.None;
+            power = 0f;
+            return false;
+        }
+
+        element = strongest.Element;
+        power = strongest.Power;
+        return true;
     }
 
     private void ApplyHit(CharacterCtrl attacker, float finalDamage, DamageData damageData)
@@ -108,12 +144,15 @@ public class CharacterElementalState : CharacterAbstract
         switch (reaction)
         {
             case ElementalReactionType.Shatter:
-                DealReactionDamage(attacker, baseReactionDamage * shatterBonusDamageMultiplier);
+                float shatterDamage = baseReactionDamage * shatterBonusDamageMultiplier;
+                DealReactionDamage(attacker, shatterDamage);
                 break;
 
             case ElementalReactionType.Overload:
-                DealReactionDamage(attacker, baseReactionDamage * overloadBonusDamageMultiplier);
-                DealOverloadSplash(attacker, baseReactionDamage * overloadBonusDamageMultiplier);
+                float overloadDamage = baseReactionDamage * overloadBonusDamageMultiplier;
+                float overloadHoldDuration = GetOverloadHoldDuration();
+                ApplyHitStun(attacker, overloadHoldDuration);
+                StartOverloadChain(attacker, overloadDamage);
                 break;
 
             case ElementalReactionType.Superconduct:
@@ -121,21 +160,23 @@ public class CharacterElementalState : CharacterAbstract
                 break;
 
             case ElementalReactionType.Burnout:
-                StartBurnout(attacker, baseReactionDamage * burnoutTickMultiplier);
+                float burnoutTickDamage = baseReactionDamage * burnoutTickMultiplier;
+                StartBurnout(attacker, burnoutTickDamage);
                 break;
 
             case ElementalReactionType.Neuroshock:
-                DealReactionDamage(attacker, baseReactionDamage * neuroshockDamageMultiplier);
+                float neuroshockDamage = baseReactionDamage * neuroshockDamageMultiplier;
+                DealReactionDamage(attacker, neuroshockDamage);
                 ApplyHitStun(attacker, neuroshockStunDuration);
                 break;
 
             case ElementalReactionType.BrittleToxin:
-                ApplyArmorReduction(brittleToxinArmorReduction, brittleToxinDuration);
+                StartBrittleToxin();
                 break;
         }
     }
 
-    private static ElementalReactionType GetReaction(ElementType a, ElementType b)
+    public static ElementalReactionType GetReaction(ElementType a, ElementType b)
     {
         if (IsPair(a, b, ElementType.Fire, ElementType.Frost))
             return ElementalReactionType.Shatter;
@@ -165,43 +206,19 @@ public class CharacterElementalState : CharacterAbstract
 
     private void DealReactionDamage(CharacterCtrl attacker, float damage)
     {
-        if (damage <= 0f || characterCtrl == null || characterCtrl.CharacterDamReceiver == null)
+        DealReactionDamageTo(characterCtrl, attacker, damage);
+    }
+
+    private static void DealReactionDamageTo(CharacterCtrl target, CharacterCtrl attacker, float damage)
+    {
+        if (damage <= 0f || target == null || target.CharacterDamReceiver == null)
             return;
 
         Transform attackerTransform = attacker != null ? attacker.transform : null;
-        characterCtrl.CharacterDamReceiver.ReceiveDamage(
+        target.CharacterDamReceiver.ReceiveDamage(
             damage,
             attackerTransform,
             new DamageData(1f, false));
-    }
-
-    private void DealOverloadSplash(CharacterCtrl attacker, float damage)
-    {
-        if (damage <= 0f || characterCtrl == null)
-            return;
-
-        ContactFilter2D filter = new()
-        {
-            useTriggers = true,
-            useLayerMask = false
-        };
-
-        int count = Physics2D.OverlapCircle(characterCtrl.transform.position, overloadRadius, filter, Hits);
-        for (int i = 0; i < count; i++)
-        {
-            Collider2D hit = Hits[i];
-            if (hit == null) continue;
-
-            CharacterCtrl splashTarget = hit.GetComponentInParent<CharacterCtrl>();
-            if (splashTarget == null || splashTarget == characterCtrl || splashTarget == attacker) continue;
-            if (splashTarget.CharacterDamReceiver == null || splashTarget.CharacterDamReceiver.IsDead) continue;
-            if (attacker != null && !FactionManager.CanAttack(attacker.Faction, splashTarget.Faction)) continue;
-
-            splashTarget.CharacterDamReceiver.ReceiveDamage(
-                damage,
-                attacker != null ? attacker.transform : null,
-                new DamageData(1f, false));
-        }
     }
 
     private void ApplyArmorReduction(float amount, float duration)
@@ -221,6 +238,174 @@ public class CharacterElementalState : CharacterAbstract
 
         armor.NotifyValueChanged();
         characterCtrl.CharacterStat.NotifyAllStatsChanged();
+    }
+
+    private void StartBrittleToxin()
+    {
+        if (brittleToxinDuration <= 0f ||
+            characterCtrl == null ||
+            characterCtrl.CharacterStat == null ||
+            characterCtrl.CharacterStat.Armor == null)
+        {
+            return;
+        }
+
+        if (brittleToxinRoutine != null)
+            StopCoroutine(brittleToxinRoutine);
+
+        brittleToxinRoutine = StartCoroutine(BrittleToxinRoutine());
+    }
+
+    private IEnumerator BrittleToxinRoutine()
+    {
+        ApplyArmorReduction(brittleToxinInitialArmorReduction, brittleToxinDuration);
+
+        float rampDelay = brittleToxinDuration * 0.5f;
+        if (rampDelay > 0f)
+            yield return new WaitForSeconds(rampDelay);
+
+        if (characterCtrl != null &&
+            characterCtrl.CharacterStat != null &&
+            characterCtrl.CharacterStat.Armor != null &&
+            characterCtrl.CharacterDamReceiver != null &&
+            !characterCtrl.CharacterDamReceiver.IsDead)
+        {
+            ApplyArmorReduction(
+                brittleToxinRampArmorReduction,
+                Mathf.Max(0.05f, brittleToxinDuration - rampDelay));
+        }
+
+        brittleToxinRoutine = null;
+    }
+
+    private void StartOverloadChain(CharacterCtrl attacker, float damage)
+    {
+        if (damage <= 0f || overloadMaxHits <= 0)
+            return;
+
+        if (overloadRoutine != null)
+            StopCoroutine(overloadRoutine);
+
+        overloadRoutine = StartCoroutine(OverloadChainRoutine(attacker, damage));
+    }
+
+    private float GetOverloadHoldDuration()
+    {
+        int maxHits = Mathf.Max(1, overloadMaxHits);
+        float chainDuration = Mathf.Max(0.01f, overloadHitInterval) * Mathf.Max(0, maxHits - 1);
+        return Mathf.Max(overloadHitStunDuration, chainDuration + 0.05f);
+    }
+
+    private IEnumerator OverloadChainRoutine(CharacterCtrl attacker, float damage)
+    {
+        int maxHits = Mathf.Max(1, overloadMaxHits);
+        WaitForSeconds wait = new(Mathf.Max(0.01f, overloadHitInterval));
+        HashSet<CharacterCtrl> hitTargets = new();
+        CharacterCtrl currentTarget = characterCtrl;
+
+        for (int hitIndex = 1; hitIndex <= maxHits; hitIndex++)
+        {
+            if (currentTarget == null ||
+                currentTarget.CharacterDamReceiver == null ||
+                currentTarget.CharacterDamReceiver.IsDead)
+            {
+                break;
+            }
+
+            hitTargets.Add(currentTarget);
+            DealReactionDamageTo(currentTarget, attacker, damage);
+
+            if (hitIndex < maxHits)
+            {
+                yield return wait;
+                currentTarget = FindNextOverloadTarget(currentTarget, attacker, hitTargets);
+                if (currentTarget == null)
+                {
+                    break;
+                }
+
+                ApplyHitStunTo(currentTarget, attacker, GetOverloadHoldDuration());
+            }
+        }
+
+        overloadRoutine = null;
+    }
+
+    private CharacterCtrl FindNextOverloadTarget(
+        CharacterCtrl fromTarget,
+        CharacterCtrl attacker,
+        HashSet<CharacterCtrl> hitTargets)
+    {
+        if (fromTarget == null || overloadChainRadius <= 0f)
+            return null;
+
+        Vector2 origin = fromTarget.transform.position;
+        ContactFilter2D filter = new()
+        {
+            useLayerMask = true,
+            useTriggers = true,
+            layerMask = 1 << fromTarget.gameObject.layer
+        };
+        int count = Physics2D.OverlapCircle(origin, overloadChainRadius, filter, OverloadHits);
+
+        CharacterCtrl bestTarget = null;
+        float bestDistanceSqr = Mathf.Infinity;
+        int candidateCount = 0;
+
+        for (int i = 0; i < count; i++)
+        {
+            Collider2D hit = OverloadHits[i];
+            OverloadHits[i] = null;
+
+            if (!TryGetOverloadBodyTarget(hit, fromTarget, attacker, hitTargets, out CharacterCtrl candidate))
+            {
+                continue;
+            }
+
+            candidateCount++;
+            float distanceSqr = ((Vector2)candidate.transform.position - origin).sqrMagnitude;
+            if (distanceSqr < bestDistanceSqr)
+            {
+                bestDistanceSqr = distanceSqr;
+                bestTarget = candidate;
+            }
+        }
+
+        return bestTarget;
+    }
+
+    private static bool TryGetOverloadBodyTarget(
+        Collider2D hit,
+        CharacterCtrl fromTarget,
+        CharacterCtrl attacker,
+        HashSet<CharacterCtrl> hitTargets,
+        out CharacterCtrl target)
+    {
+        target = hit != null ? hit.GetComponentInParent<CharacterCtrl>() : null;
+        if (target == null || target == fromTarget)
+            return false;
+
+        if (hitTargets != null && hitTargets.Contains(target))
+            return false;
+
+        if (!IsCharacterBodyCollider(hit, target))
+            return false;
+
+        if (target.CharacterDamReceiver == null || target.CharacterDamReceiver.IsDead)
+            return false;
+
+        return attacker == null || FactionManager.CanAttack(attacker.Faction, target.Faction);
+    }
+
+    private static bool IsCharacterBodyCollider(Collider2D hit, CharacterCtrl target)
+    {
+        if (hit == null || target == null)
+            return false;
+
+        if (target.Collider2D != null)
+            return hit == target.Collider2D;
+
+        return hit == target.GetComponent<Collider2D>();
     }
 
     private void StartBurnout(CharacterCtrl attacker, float tickDamage)
@@ -258,7 +443,12 @@ public class CharacterElementalState : CharacterAbstract
 
     private void ApplyHitStun(CharacterCtrl attacker, float duration)
     {
-        if (duration <= 0f || characterCtrl == null || characterCtrl.CharacterDamReceiver == null)
+        ApplyHitStunTo(characterCtrl, attacker, duration);
+    }
+
+    private static void ApplyHitStunTo(CharacterCtrl target, CharacterCtrl attacker, float duration)
+    {
+        if (duration <= 0f || target == null || target.CharacterDamReceiver == null)
             return;
 
         DamageData stunData = new(0f, false)
@@ -269,7 +459,7 @@ public class CharacterElementalState : CharacterAbstract
             InterruptsAttack = true
         };
 
-        characterCtrl.CharacterDamReceiver.ReceiveDamage(
+        target.CharacterDamReceiver.ReceiveDamage(
             0f,
             attacker != null ? attacker.transform : null,
             stunData);

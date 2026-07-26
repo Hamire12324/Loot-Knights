@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.plate_discipline
   displayName: Plate Discipline
-  description: Better armor habits. Gain flat Armor.
+  description: '+1.5 Armor per rank. Max rank 3: +4.5 Armor.'
   icon: {fileID: 21300000, guid: f6b8b85cbdc82ce439a41ae3d56d57ee, type: 3}
   kind: 0
   branch: 1

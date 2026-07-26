@@ -51,8 +51,30 @@ public class VFXManager : BaseSingleton<VFXManager>
         Transform parent = definition.ParentToAnchor ? anchor : null;
 
         PoolObj spawned = poolManager.Spawn(definition.Prefab, finalPosition, Quaternion.identity, parent);
+        ApplyScale(spawned, definition);
         ApplyRendererFlip(spawned, definition.FlipX ^ mirrorHorizontally, definition.FlipY);
+        RestartVfxAfterRuntimeTransform(spawned);
         return spawned;
+    }
+
+    private static void ApplyScale(PoolObj spawned, VFXDefinition definition)
+    {
+        if (spawned == null || definition == null || definition.Prefab == null)
+            return;
+
+        spawned.transform.localScale = definition.Prefab.transform.localScale * definition.EffectiveScale;
+    }
+
+    private static void RestartVfxAfterRuntimeTransform(PoolObj spawned)
+    {
+        if (spawned == null)
+            return;
+
+        VFXPoolObj vfxPoolObj = spawned as VFXPoolObj;
+        if (vfxPoolObj == null)
+            vfxPoolObj = spawned.GetComponent<VFXPoolObj>();
+
+        vfxPoolObj?.RestartIfPlayOnSpawn();
     }
 
     private static void ApplyRendererFlip(PoolObj spawned, bool flipX, bool flipY)

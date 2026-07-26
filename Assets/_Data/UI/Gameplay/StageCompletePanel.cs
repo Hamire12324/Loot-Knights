@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,10 +19,20 @@ public class StageCompletePanel : BaseMonoBehaviour
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private TMP_Text nextStageButtonText;
     [SerializeField] private TMP_Text mainMenuButtonText;
+    [SerializeField] private Text legacyNextStageButtonText;
+    [SerializeField] private Text legacyMainMenuButtonText;
     [SerializeField] private TMP_Text rewardCoinsText;
     [SerializeField] private TMP_Text rewardDiamondsText;
     [SerializeField] private TMP_Text rewardExperienceText;
     [SerializeField] private TMP_Text levelResultText;
+    [SerializeField] private Text legacyRewardCoinsText;
+    [SerializeField] private Text legacyRewardDiamondsText;
+    [SerializeField] private Text legacyRewardExperienceText;
+    [SerializeField] private Text legacyLevelResultText;
+    [SerializeField] private Slider experienceSlider;
+    [SerializeField] private float experienceFillDuration = 0.6f;
+
+    private Coroutine experienceFillCoroutine;
 
     protected override void Start()
     {
@@ -37,14 +48,15 @@ public class StageCompletePanel : BaseMonoBehaviour
     {
         LoadComponents();
         BindButtons();
-        RefreshRewardTexts(completedStage, experienceResult);
         RefreshButtonState(hasNextStage);
 
         SetActive(true);
+        RefreshRewardTexts(completedStage, experienceResult);
     }
 
     public void Hide()
     {
+        StopExperienceFillCoroutine();
         SetActive(false);
     }
 
@@ -69,6 +81,8 @@ public class StageCompletePanel : BaseMonoBehaviour
         LoadButtons();
         LoadButtonTexts();
         LoadRewardTexts();
+        LoadLegacyRewardTexts();
+        LoadExperienceSlider();
     }
 
     private void LoadButtons()
@@ -136,6 +150,12 @@ public class StageCompletePanel : BaseMonoBehaviour
 
         if (mainMenuButtonText == null)
             mainMenuButtonText = GetButtonText(mainMenuButton);
+
+        if (legacyNextStageButtonText == null)
+            legacyNextStageButtonText = GetLegacyButtonText(nextStageButton);
+
+        if (legacyMainMenuButtonText == null)
+            legacyMainMenuButtonText = GetLegacyButtonText(mainMenuButton);
     }
 
     private void LoadRewardTexts()
@@ -174,6 +194,64 @@ public class StageCompletePanel : BaseMonoBehaviour
         }
     }
 
+    private void LoadLegacyRewardTexts()
+    {
+        Text[] texts = GetComponentsInChildren<Text>(true);
+
+        foreach (Text foundText in texts)
+        {
+            if (foundText == null) continue;
+
+            string textName = foundText.name.ToLowerInvariant();
+
+            if (legacyRewardCoinsText == null && textName.Contains("coin"))
+            {
+                legacyRewardCoinsText = foundText;
+                continue;
+            }
+
+            if (legacyRewardDiamondsText == null && textName.Contains("diamond"))
+            {
+                legacyRewardDiamondsText = foundText;
+                continue;
+            }
+
+            if (legacyRewardExperienceText == null &&
+                (textName.Contains("experience") || textName.Contains("exp") || textName.Contains("xp")))
+            {
+                legacyRewardExperienceText = foundText;
+                continue;
+            }
+
+            if (legacyLevelResultText == null &&
+                (textName.Contains("level") || textName.Contains("lvl")))
+            {
+                legacyLevelResultText = foundText;
+            }
+        }
+    }
+
+    private void LoadExperienceSlider()
+    {
+        if (experienceSlider != null) return;
+
+        Slider[] sliders = GetComponentsInChildren<Slider>(true);
+
+        foreach (Slider foundSlider in sliders)
+        {
+            if (foundSlider == null) continue;
+
+            string sliderName = foundSlider.name.ToLowerInvariant();
+            if (sliderName.Contains("experience") ||
+                sliderName.Contains("exp") ||
+                sliderName.Contains("xp"))
+            {
+                experienceSlider = foundSlider;
+                return;
+            }
+        }
+    }
+
     private void RefreshRewardTexts(
         DungeonStageConfig completedStage,
         PlayerLevelRewardResult? experienceResult)
@@ -185,18 +263,95 @@ public class StageCompletePanel : BaseMonoBehaviour
         SetText(rewardCoinsText, coins.ToString("N0"));
         SetText(rewardDiamondsText, diamonds.ToString("N0"));
         SetText(rewardExperienceText, experience.ToString("N0"));
+        SetText(legacyRewardCoinsText, coins.ToString("N0"));
+        SetText(legacyRewardDiamondsText, diamonds.ToString("N0"));
+        SetText(legacyRewardExperienceText, experience.ToString("N0"));
         SetText(levelResultText, GetLevelResultText(experienceResult));
+        SetText(legacyLevelResultText, GetLevelResultText(experienceResult));
+        RefreshExperienceSlider(experienceResult);
     }
 
     private string GetLevelResultText(PlayerLevelRewardResult? experienceResult)
     {
         if (!experienceResult.HasValue)
-            return "Lv. " + PlayerExperienceStorage.Level;
+            return "Lv:" + PlayerExperienceStorage.Level;
 
         PlayerLevelRewardResult result = experienceResult.Value;
-        return result.LeveledUp
-            ? "LEVEL UP! " + result.Before.Level + " -> " + result.After.Level
-            : "Lv. " + result.After.Level;
+        return "Lv:" + result.After.Level;
+    }
+
+    private void RefreshExperienceSlider(PlayerLevelRewardResult? experienceResult)
+    {
+        if (experienceSlider == null) return;
+
+        experienceSlider.minValue = 0f;
+        experienceSlider.maxValue = 1f;
+        experienceSlider.wholeNumbers = false;
+
+        if (experienceFillCoroutine != null)
+            StopExperienceFillCoroutine();
+
+        if (!experienceResult.HasValue || !gameObject.activeInHierarchy || experienceFillDuration <= 0f)
+        {
+            PlayerLevelSnapshot snapshot = experienceResult.HasValue
+                ? experienceResult.Value.After
+                : PlayerExperienceStorage.Snapshot;
+            experienceSlider.value = snapshot.Progress01;
+            return;
+        }
+
+        experienceFillCoroutine = StartCoroutine(AnimateExperienceSlider(experienceResult.Value));
+    }
+
+    private void StopExperienceFillCoroutine()
+    {
+        if (experienceFillCoroutine == null) return;
+
+        StopCoroutine(experienceFillCoroutine);
+        experienceFillCoroutine = null;
+    }
+
+    private IEnumerator AnimateExperienceSlider(PlayerLevelRewardResult result)
+    {
+        PlayerLevelSnapshot before = result.Before;
+        PlayerLevelSnapshot after = result.After;
+
+        experienceSlider.value = before.Progress01;
+
+        if (!result.LeveledUp)
+        {
+            yield return AnimateSliderValue(before.Progress01, after.Progress01);
+            experienceFillCoroutine = null;
+            yield break;
+        }
+
+        yield return AnimateSliderValue(before.Progress01, 1f);
+
+        for (int level = before.Level + 1; level < after.Level; level++)
+        {
+            experienceSlider.value = 0f;
+            yield return AnimateSliderValue(0f, 1f);
+        }
+
+        experienceSlider.value = 0f;
+        yield return AnimateSliderValue(0f, after.Progress01);
+        experienceFillCoroutine = null;
+    }
+
+    private IEnumerator AnimateSliderValue(float from, float to)
+    {
+        float duration = Mathf.Max(0.01f, experienceFillDuration);
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float progress = Mathf.Clamp01(elapsed / duration);
+            experienceSlider.value = Mathf.Lerp(from, to, progress);
+            yield return null;
+        }
+
+        experienceSlider.value = to;
     }
 
     private void RefreshButtonState(bool hasNextStage)
@@ -206,9 +361,18 @@ public class StageCompletePanel : BaseMonoBehaviour
 
         SetText(nextStageButtonText, hasNextStage ? NextStageLabel : FinalStageLabel);
         SetText(mainMenuButtonText, HomeLabel);
+        SetText(legacyNextStageButtonText, hasNextStage ? NextStageLabel : FinalStageLabel);
+        SetText(legacyMainMenuButtonText, HomeLabel);
     }
 
     private void SetText(TMP_Text targetText, string value)
+    {
+        if (targetText == null) return;
+
+        targetText.text = value;
+    }
+
+    private void SetText(Text targetText, string value)
     {
         if (targetText == null) return;
 
@@ -219,6 +383,13 @@ public class StageCompletePanel : BaseMonoBehaviour
     {
         return targetButton != null
             ? targetButton.GetComponentInChildren<TMP_Text>(true)
+            : null;
+    }
+
+    private Text GetLegacyButtonText(Button targetButton)
+    {
+        return targetButton != null
+            ? targetButton.GetComponentInChildren<Text>(true)
             : null;
     }
 }

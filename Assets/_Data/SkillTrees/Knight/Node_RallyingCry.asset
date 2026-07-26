@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.rallying_cry
   displayName: Rallying Cry
-  description: Turn control chains into team momentum. Gain Attack and attack speed.
+  description: '+3 Attack and +4% Attack Speed per rank. Also upgrades Charge Strike per rank: +8% Attack Speed for 3s and heals you for 5% of damage dealt. Max rank 2.'
   icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
   kind: 2
   branch: 2

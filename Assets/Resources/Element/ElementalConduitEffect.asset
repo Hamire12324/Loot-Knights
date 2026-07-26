@@ -1,0 +1,85 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d23fc3c1872546639dca89005d3f1b2e, type: 3}
+  m_Name: ElementalConduitEffect
+  m_EditorClassIdentifier: 
+  fallbackSkillTree: {fileID: 11400000, guid: b7f0e128d5444be18a5f4af914a3ce6b, type: 2}
+  conduitNodeId: common.elemental_conduit
+  fallbackRank: 1
+  requireElementUnlocks: 1
+  requireReactionUnlocks: 1
+  unlockAllReactionsForTesting: 0
+  baseAbsorbRadius: 3
+  absorbRadiusPerRank: 0.35
+  baseStoredElements: 4
+  ranksPerExtraStoredElement: 2
+  maxStoredElements: 4
+  maxStacksPerElement: 3
+  stackPowerGain: 0.5
+  allowAbsorbingLockedElements: 1
+  baseReleaseRadius: 1.45
+  releaseRadiusPerRank: 0.18
+  angle: 120
+  forwardOffset: 0.75
+  sideOffset: 0
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  primaryDamage:
+    multiplier: 1.1
+    canCrit: 1
+    causesHitStun: 1
+    hitStunDuration: 0.18
+    hitStunImmunityDuration: 0.5
+    interruptsAttack: 1
+  reactionPrimerDamage:
+    multiplier: 0.35
+    canCrit: 0
+    causesHitStun: 0
+    hitStunDuration: 0.2
+    hitStunImmunityDuration: 0.75
+    interruptsAttack: 1
+  primaryMultiplierPerRank: 0.12
+  primerMultiplierPerRank: 0.04
+  flatBonusDamage: 0
+  flatBonusDamagePerRank: 2
+  baseElementalPower: 1
+  elementalPowerPerRank: 0.15
+  primerPowerScale: 0.75
+  damageBonusPerStack: 0.25
+  baseStatusDuration: 4
+  statusDurationPerRank: 0.35
+  reactionVfxOverrides:
+  - reaction: 1
+    impactVfx: {fileID: 11400000, guid: 4c6b470331daecb4ba98a7f9f2327cb3, type: 2}
+    impactSfx: {fileID: 0}
+  - reaction: 2
+    impactVfx: {fileID: 11400000, guid: a71167f2158518a489dca825a0c0c983, type: 2}
+    impactSfx: {fileID: 0}
+  - reaction: 3
+    impactVfx: {fileID: 11400000, guid: d801eaef352136a41af8456898f9a0c9, type: 2}
+    impactSfx: {fileID: 0}
+  - reaction: 4
+    impactVfx: {fileID: 11400000, guid: 1cf937b57a2367a4496c083cf9c86a64, type: 2}
+    impactSfx: {fileID: 0}
+  - reaction: 5
+    impactVfx: {fileID: 11400000, guid: a15d1345d287b464abf8ab9254d5f659, type: 2}
+    impactSfx: {fileID: 0}
+  - reaction: 6
+    impactVfx: {fileID: 11400000, guid: fac8950fa71e2864abc90bc840f92d45, type: 2}
+    impactSfx: {fileID: 0}
+  useImpactVfxColliderForDamage: 1
+  debugHitArea: 0
+  debugLogHits: 0
+  debugDrawDuration: 0.75
+  debugHitColor: {r: 0, g: 1, b: 1, a: 1}
+  debugRejectedColor: {r: 1, g: 0.15, b: 0.05, a: 1}

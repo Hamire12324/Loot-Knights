@@ -73,6 +73,7 @@ public class DungeonStageManager : DungeonAbstract
         StopShowDefeatPanelCoroutine();
         stageCompletePanel?.Hide();
         stageDefeatPanel?.Hide();
+        ClearActivePickupsForNewStage();
         PrepareHeroForStage();
         SubscribeHeroDeath();
 
@@ -438,6 +439,23 @@ public class DungeonStageManager : DungeonAbstract
 
         if (hero.Rb != null)
             hero.Rb.linearVelocity = Vector2.zero;
+    }
+
+    private void ClearActivePickupsForNewStage()
+    {
+        ReturnActivePickupsToPool(FindObjectsByType<ItemPickup>(FindObjectsInactive.Exclude));
+        ReturnActivePickupsToPool(FindObjectsByType<CurrencyPickup>(FindObjectsInactive.Exclude));
+    }
+
+    private static void ReturnActivePickupsToPool<T>(T[] pickups) where T : PoolObj
+    {
+        if (pickups == null) return;
+
+        foreach (T pickup in pickups)
+        {
+            if (pickup == null || pickup.IsInPool) continue;
+            pickup.ReturnToPool();
+        }
     }
 
     private void SetGameplayPanelActive(bool active)

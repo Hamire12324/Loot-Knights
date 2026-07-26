@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: knight.riposte_training
   displayName: Riposte Training
-  description: Turn guarded openings into sharper counter attacks. Gain crit chance.
+  description: '+1.5% Crit Chance per rank. Max rank 3: +4.5% Crit Chance.'
   icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
   kind: 0
   branch: 0
