@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 
 public class CharacterDamReceiver : CharacterAbstract
 {
@@ -23,13 +22,7 @@ public class CharacterDamReceiver : CharacterAbstract
     public bool IsHitStunImmune => Time.time < hitStunImmunityEndTime;
 
     [Header("Damage Feedback")]
-    [SerializeField] private bool flashOnDamage = true;
-    [SerializeField] private Color damageFlashColor = new(1f, 0.35f, 0.35f, 1f);
-    [SerializeField] private float damageFlashDuration = 0.08f;
-
-    private SpriteRenderer[] spriteRenderers;
-    private Color[] originalSpriteColors;
-    private Coroutine damageFlashCoroutine;
+    [SerializeField] private CharacterDamageFlash damageFlash;
 
     public delegate void OnDeathDelegate(CharacterDamReceiver self);
     public event OnDeathDelegate OnDeath;
@@ -46,24 +39,32 @@ public class CharacterDamReceiver : CharacterAbstract
     protected override void Awake()
     {
         base.Awake();
-        LoadSpriteRenderers();
 
         if (characterCtrl.CharacterStat != null)
         {
             characterCtrl.CharacterStat.OnHealthChanged += HandleHealthChanged;
-            characterCtrl.CharacterStat.OnStatChanged += OnStatChanged;
         }
     }
-
     protected override void OnDestroy()
     {
         if (characterCtrl.CharacterStat != null)
         {
             characterCtrl.CharacterStat.OnHealthChanged -= HandleHealthChanged;
-            characterCtrl.CharacterStat.OnStatChanged -= OnStatChanged;
         }
     }
 
+
+    protected override void LoadComponents()
+    {
+        base.LoadComponents();
+        LoadDamageFlash();
+    }
+    private void LoadDamageFlash()
+    {
+        if (damageFlash != null) return;
+
+        damageFlash = GetComponentInChildren<CharacterDamageFlash>(true);
+    }
     public virtual void ReceiveDamage(float damage, Transform attacker = null, DamageData damageData = null)
     {
         if (isDead || isInvincible || characterCtrl.CharacterStat == null)
@@ -75,8 +76,7 @@ public class CharacterDamReceiver : CharacterAbstract
 
         characterCtrl.CharacterStat.SetCurrentHealth(characterCtrl.CharacterStat.CurrentHealth - finalDamage);
 
-        if (finalDamage > 0f)
-            PlayDamageFeedback();
+        if (finalDamage > 0f) damageFlash?.Play();
 
         TryApplyHitStun(damageData);
 
@@ -159,25 +159,6 @@ public class CharacterDamReceiver : CharacterAbstract
         );
     }
 
-    protected virtual void OnStatChanged(StatType type)
-    {
-        if (type != StatType.MaxHealth || characterCtrl.CharacterStat == null)
-            return;
-
-        float oldMax = characterCtrl.CharacterStat.PreviousMaxHealth;
-
-        if (oldMax <= 0f)
-            return;
-
-        float percent = characterCtrl.CharacterStat.CurrentHealth / oldMax;
-
-        float newMax = characterCtrl.CharacterStat.MaxHealth.FinalValue;
-
-        characterCtrl.CharacterStat.SetCurrentHealth(newMax * percent);
-
-        characterCtrl.CharacterStat.SetPreviousMaxHealth(newMax);
-    }
-
     public void SetInvincible(bool value)
     {
         isInvincible = value;
@@ -186,58 +167,5 @@ public class CharacterDamReceiver : CharacterAbstract
     public void SetDead(bool value)
     {
         isDead = value;
-    }
-
-    private void PlayDamageFeedback()
-    {
-        if (!flashOnDamage) return;
-
-        if (spriteRenderers == null || spriteRenderers.Length == 0)
-            LoadSpriteRenderers();
-
-        if (spriteRenderers == null || spriteRenderers.Length == 0) return;
-
-        if (damageFlashCoroutine != null)
-            StopCoroutine(damageFlashCoroutine);
-
-        damageFlashCoroutine = StartCoroutine(DamageFlashCoroutine());
-    }
-
-    private IEnumerator DamageFlashCoroutine()
-    {
-        SetSpriteColors(damageFlashColor);
-        yield return new WaitForSeconds(damageFlashDuration);
-        RestoreSpriteColors();
-        damageFlashCoroutine = null;
-    }
-
-    private void LoadSpriteRenderers()
-    {
-        spriteRenderers = characterCtrl != null
-            ? characterCtrl.GetComponentsInChildren<SpriteRenderer>(true)
-            : GetComponentsInChildren<SpriteRenderer>(true);
-
-        originalSpriteColors = new Color[spriteRenderers.Length];
-
-        for (int i = 0; i < spriteRenderers.Length; i++)
-            originalSpriteColors[i] = spriteRenderers[i].color;
-    }
-
-    private void SetSpriteColors(Color color)
-    {
-        for (int i = 0; i < spriteRenderers.Length; i++)
-        {
-            if (spriteRenderers[i] == null) continue;
-            spriteRenderers[i].color = color;
-        }
-    }
-
-    private void RestoreSpriteColors()
-    {
-        for (int i = 0; i < spriteRenderers.Length; i++)
-        {
-            if (spriteRenderers[i] == null) continue;
-            spriteRenderers[i].color = originalSpriteColors[i];
-        }
     }
 }

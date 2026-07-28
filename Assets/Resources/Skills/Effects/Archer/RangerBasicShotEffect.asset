@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90ca20f85f804c949917f13f06f04c01, type: 3}
+  m_Script: {fileID: 11500000, guid: 426bb6a0d91f4daa8670e2bcb401b7c2, type: 3}
   m_Name: RangerBasicShotEffect
   m_EditorClassIdentifier: 
   length: 5.5
@@ -30,10 +30,11 @@ MonoBehaviour:
     HitSfx: {fileID: 11400000, guid: 9fba50e016f647349bb5ad82ddeea5fd, type: 2}
     HitSfxOffset: {x: 0, y: 0, z: 0}
   flatBonusDamage: 0
-  wavebreakerStunDurationPerRank: 0
+  damageMultiplierPerPowerShotRank: 0.08
+  piercingDamageMultiplierPerRank: 0.06
+  trickArrowHitStunPerRank: 0.08
   projectileVfx: {fileID: 11400000, guid: 683064399f39c51418c86940208aa884, type: 2}
   projectileSpeed: 12
   projectileRotationOffset: 0
-  projectileColliderDealsDamage: 1
   projectilePenetration: 0
   logProjectileDebug: 1

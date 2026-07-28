@@ -23,6 +23,7 @@ public abstract class CharacterVFXController : CharacterAbstract
     [SerializeField] private VFXDefinition defaultDeathVfx;
     [SerializeField] private Transform deathAnchor;
     [SerializeField] private SFXDefinition defaultDeathSfx;
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -34,49 +35,34 @@ public abstract class CharacterVFXController : CharacterAbstract
         Unsubscribe();
         base.OnDisable();
     }
+
     protected override void LoadComponents()
     {
         base.LoadComponents();
-        this.LoadAnchors();
-        this.LoadDefinitions();
+        LoadAnchors();
+        LoadDefinitions();
     }
 
     protected virtual void LoadAnchors()
     {
         if (characterCtrl == null) return;
 
-        Transform defaultAnchor = characterCtrl.transform;
-
-        if (hitAnchor == null)
-            hitAnchor = defaultAnchor;
-
-        if (attackAnchor == null)
-            attackAnchor = defaultAnchor;
-
-        if (deathAnchor == null)
-            deathAnchor = defaultAnchor;
+        hitAnchor ??= characterCtrl.transform;
+        attackAnchor ??= characterCtrl.transform;
+        deathAnchor ??= characterCtrl.transform;
     }
 
     protected virtual void LoadDefinitions()
     {
-        if (attackVfx == null)
-            attackVfx = Resources.Load<VFXDefinition>(DefaultAttackVfxPath);
-
-        if (defaultHitVfx == null)
-            defaultHitVfx = Resources.Load<VFXDefinition>(DefaultHitVfxPath);
-
-        if (attackSfx == null)
-            attackSfx = Resources.Load<SFXDefinition>(DefaultAttackSfxPath);
-
-        if (defaultHitSfx == null)
-            defaultHitSfx = Resources.Load<SFXDefinition>(DefaultHitSfxPath);
+        attackVfx ??= Resources.Load<VFXDefinition>(DefaultAttackVfxPath);
+        defaultHitVfx ??= Resources.Load<VFXDefinition>(DefaultHitVfxPath);
+        attackSfx ??= Resources.Load<SFXDefinition>(DefaultAttackSfxPath);
+        defaultHitSfx ??= Resources.Load<SFXDefinition>(DefaultHitSfxPath);
     }
 
     private void Subscribe()
     {
-        CharacterDamReceiver receiver = characterCtrl != null
-            ? characterCtrl.CharacterDamReceiver
-            : null;
+        CharacterDamReceiver receiver = GetDamageReceiver();
 
         if (receiver == null)
             return;
@@ -89,9 +75,7 @@ public abstract class CharacterVFXController : CharacterAbstract
 
     private void Unsubscribe()
     {
-        CharacterDamReceiver receiver = characterCtrl != null
-            ? characterCtrl.CharacterDamReceiver
-            : null;
+        CharacterDamReceiver receiver = GetDamageReceiver();
 
         if (receiver == null)
             return;
@@ -112,20 +96,13 @@ public abstract class CharacterVFXController : CharacterAbstract
         if (onlyPlayHitWhenDamagePositive && damage <= 0f)
             return;
 
-        bool useDamageOverride = damageData != null && damageData.HitVfx != null;
-        VFXDefinition definition = useDamageOverride ? damageData.HitVfx : defaultHitVfx;
         Transform anchor = GetHitAnchor();
         Vector3 direction = rotateHitAwayFromAttacker
             ? GetDirectionAwayFromAttacker(attacker, anchor)
             : Vector3.right;
-        Vector3 extraOffset = useDamageOverride ? damageData.HitVfxOffset : Vector3.zero;
 
-        PlayDefinition(definition, anchor, direction, extraOffset);
-
-        bool useSfxOverride = damageData != null && damageData.HitSfx != null;
-        SFXDefinition sfx = useSfxOverride ? damageData.HitSfx : defaultHitSfx;
-        Vector3 sfxOffset = useSfxOverride ? damageData.HitSfxOffset : Vector3.zero;
-        PlaySfx(sfx, anchor, sfxOffset);
+        PlayDefinition(GetHitVfx(damageData), anchor, direction, GetHitVfxOffset(damageData));
+        PlaySfx(GetHitSfx(damageData), anchor, GetHitSfxOffset(damageData));
     }
 
     private void HandleDeath(CharacterDamReceiver self)
@@ -164,9 +141,7 @@ public abstract class CharacterVFXController : CharacterAbstract
     private Vector3 GetAttackDirection()
     {
         Transform anchor = GetAttackAnchor();
-        Transform target = characterCtrl != null && characterCtrl.CharacterTargetFinder != null
-            ? characterCtrl.CharacterTargetFinder.CurrentTarget
-            : null;
+        Transform target = characterCtrl?.CharacterTargetFinder?.CurrentTarget;
 
         if (target != null && anchor != null)
         {
@@ -175,7 +150,7 @@ public abstract class CharacterVFXController : CharacterAbstract
                 return toTarget.normalized;
         }
 
-        if (characterCtrl != null && characterCtrl.CharacterMovement != null)
+        if (characterCtrl?.CharacterMovement != null)
         {
             Vector2 lookDirection = characterCtrl.CharacterMovement.LookDirection;
             if (lookDirection.sqrMagnitude > 0.0001f)
@@ -193,6 +168,40 @@ public abstract class CharacterVFXController : CharacterAbstract
         Vector2 direction = anchor.position - attacker.position;
         return direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector3.right;
     }
+
+    private CharacterDamReceiver GetDamageReceiver()
+    {
+        return characterCtrl != null ? characterCtrl.CharacterDamReceiver : null;
+    }
+
+    private VFXDefinition GetHitVfx(DamageData damageData)
+    {
+        return damageData != null && damageData.HitVfx != null
+            ? damageData.HitVfx
+            : defaultHitVfx;
+    }
+
+    private Vector3 GetHitVfxOffset(DamageData damageData)
+    {
+        return damageData != null && damageData.HitVfx != null
+            ? damageData.HitVfxOffset
+            : Vector3.zero;
+    }
+
+    private SFXDefinition GetHitSfx(DamageData damageData)
+    {
+        return damageData != null && damageData.HitSfx != null
+            ? damageData.HitSfx
+            : defaultHitSfx;
+    }
+
+    private Vector3 GetHitSfxOffset(DamageData damageData)
+    {
+        return damageData != null && damageData.HitSfx != null
+            ? damageData.HitSfxOffset
+            : Vector3.zero;
+    }
+
     private Transform GetHitAnchor()
     {
         return hitAnchor != null ? hitAnchor : transform;

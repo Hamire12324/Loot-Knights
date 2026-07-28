@@ -11943,6 +11943,11 @@ MonoBehaviour:
   closeButton: {fileID: 8493183133941611317}
   equipmentView: {fileID: 0}
   hideOnStart: 1
+  classSkillTrees:
+  - characterClass: 0
+    skillTree: {fileID: 11400000, guid: 643fea38551349279f5bf26d6b6cf45b, type: 2}
+  - characterClass: 1
+    skillTree: {fileID: 11400000, guid: 10f499f829f449b3a2533ba8a26f2162, type: 2}
   elementalSkillTree: {fileID: 11400000, guid: b7f0e128d5444be18a5f4af914a3ce6b, type: 2}
   classSkillTreeLabel: CLASS
   elementalSkillTreeLabel: ELEMENT

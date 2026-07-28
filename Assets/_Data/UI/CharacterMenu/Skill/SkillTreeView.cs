@@ -1747,10 +1747,10 @@ public sealed class SkillTreeView : MonoBehaviour
         if (treeScrollRect == null)
             return;
 
+        ConfigureActiveTreeScroll();
         Canvas.ForceUpdateCanvases();
         treeScrollRect.horizontalNormalizedPosition = 0.5f;
         treeScrollRect.verticalNormalizedPosition = 1f;
-        ConfigureActiveTreeScroll();
     }
 
     private void ConfigureActiveTreeScroll()
@@ -1761,27 +1761,30 @@ public sealed class SkillTreeView : MonoBehaviour
         if (treeScrollRect == null)
             return;
 
-        if (skillTree == PrimarySkillTree)
-        {
-            treeScrollRect.vertical = true;
-            return;
-        }
+        RectTransform scrollContent = FindContentChild("TreeArea/Viewport/Content") as RectTransform;
+        if (scrollContent != null && treeScrollRect.content != scrollContent)
+            treeScrollRect.content = scrollContent;
 
-        bool needsVerticalScroll = ActiveTreeNeedsVerticalScroll();
-        treeScrollRect.vertical = needsVerticalScroll;
-        if (!needsVerticalScroll)
-            treeScrollRect.velocity = Vector2.zero;
-    }
-
-    private bool ActiveTreeNeedsVerticalScroll()
-    {
-        RectTransform viewport = treeScrollRect != null && treeScrollRect.viewport != null
+        RectTransform viewport = treeScrollRect.viewport != null
             ? treeScrollRect.viewport
             : FindContentChild("TreeArea/Viewport") as RectTransform;
 
+        if (scrollContent == null || viewport == null)
+            return;
+
+        treeScrollRect.horizontal = false;
+        treeScrollRect.horizontalNormalizedPosition = 0.5f;
+        treeScrollRect.vertical = ActiveTreeNeedsVerticalScroll(viewport);
+
+        if (!treeScrollRect.horizontal && !treeScrollRect.vertical)
+            treeScrollRect.velocity = Vector2.zero;
+    }
+
+    private bool ActiveTreeNeedsVerticalScroll(RectTransform viewport)
+    {
         Transform treeRoot = GetTreeContentRoot(skillTree);
         if (viewport == null || treeRoot == null)
-            return true;
+            return false;
 
         SkillTreeNodeView[] nodeViews = treeRoot.GetComponentsInChildren<SkillTreeNodeView>(true);
         if (nodeViews == null || nodeViews.Length == 0)
@@ -1817,9 +1820,7 @@ public sealed class SkillTreeView : MonoBehaviour
         if (!hasBounds)
             return false;
 
-        float activeTreeHeight = maxY - minY;
-        float viewportHeight = Mathf.Max(1f, viewport.rect.height);
-        return activeTreeHeight > viewportHeight - 24f;
+        return maxY - minY > viewport.rect.height - 24f;
     }
 
     private Transform GetTreeContentRoot(SkillTreeDefinition tree)

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70486753260b49368ad212bf632e1f64, type: 3}
   m_Name: IronGuard_Buff_VFXDefinition
   m_EditorClassIdentifier: Assembly-CSharp::VFXDefinition
-  Prefab: {fileID: 1249450820882650551, guid: c740878022e1f8f499b63cb2178ac274, type: 3}
-  Offset: {x: 0, y: 0.3, z: 0}
-  Scale: 0.3
+  Prefab: {fileID: -9196718261737037245, guid: 480925e3a2b11634f9e118a30bc2efbd, type: 3}
+  Offset: {x: 0, y: 0, z: 0}
+  Scale: 0.2
   MirrorHorizontallyByDirection: 0
   FlipX: 0
   FlipY: 0

@@ -10,6 +10,7 @@ public class CharacterMenuPanel : BaseMonoBehaviour
     [SerializeField] private CharacterMenuEquipmentPanel equipmentView;
     [SerializeField] private bool hideOnStart = true;
     [Header("Skill Trees")]
+    [SerializeField] private CharacterClassSkillTreeBinding[] classSkillTrees;
     [SerializeField] private SkillTreeDefinition elementalSkillTree;
     [SerializeField] private string classSkillTreeLabel = "CLASS";
     [SerializeField] private string elementalSkillTreeLabel = "ELEMENT";
@@ -149,11 +150,49 @@ public class CharacterMenuPanel : BaseMonoBehaviour
         if (skillTreeView == null || elementalSkillTree == null)
             return;
 
+        SkillTreeDefinition classSkillTree = ResolveClassSkillTree(skillTreeView);
         skillTreeView.SetSkillTrees(
-            skillTreeView.PrimarySkillTree,
+            classSkillTree,
             elementalSkillTree,
             classSkillTreeLabel,
             elementalSkillTreeLabel);
+    }
+
+    private SkillTreeDefinition ResolveClassSkillTree(SkillTreeView skillTreeView)
+    {
+        HeroCtrl hero = HeroCtrl.GetLocal();
+        HeroSkillLoadoutPhotonSync loadoutSync = hero != null
+            ? hero.GetComponent<HeroSkillLoadoutPhotonSync>()
+            : null;
+
+        if (loadoutSync != null && loadoutSync.SkillTree != null)
+            return loadoutSync.SkillTree;
+
+        CreatedCharacterData savedCharacter = CharacterProfileStorage.Load();
+        if (savedCharacter != null)
+        {
+            SkillTreeDefinition savedClassTree = FindClassSkillTree(savedCharacter.CharacterClass);
+            if (savedClassTree != null)
+                return savedClassTree;
+        }
+
+        return skillTreeView.PrimarySkillTree;
+    }
+
+    private SkillTreeDefinition FindClassSkillTree(CharacterClass characterClass)
+    {
+        if (classSkillTrees == null)
+            return null;
+
+        foreach (CharacterClassSkillTreeBinding binding in classSkillTrees)
+        {
+            if (binding == null) continue;
+            if (binding.CharacterClass != characterClass) continue;
+
+            return binding.SkillTree;
+        }
+
+        return null;
     }
 
     private void LoadCloseButton()
@@ -209,4 +248,14 @@ public class CharacterMenuPanel : BaseMonoBehaviour
     {
         sections ??= new List<CharacterMenuSectionBinding>();
     }
+}
+
+[System.Serializable]
+public sealed class CharacterClassSkillTreeBinding
+{
+    [SerializeField] private CharacterClass characterClass = CharacterClass.Knight;
+    [SerializeField] private SkillTreeDefinition skillTree;
+
+    public CharacterClass CharacterClass => characterClass;
+    public SkillTreeDefinition SkillTree => skillTree;
 }

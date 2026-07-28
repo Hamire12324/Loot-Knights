@@ -2,50 +2,8 @@ using UnityEngine;
 
 public class CharacterLevel : CharacterAbstract
 {
-    [SerializeField] private bool usePlayerProgression = true;
-
-    [Header("Attribute Points")]
-    [SerializeField] private bool healByAddedMaxHealth = true;
-
     [SerializeField] private int currentLevel = 1;
     public int CurrentLevel => Mathf.Max(1, currentLevel);
-    public PlayerLevelSnapshot CurrentSnapshot { get; private set; }
-
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-        SubscribePlayerLevel();
-        SubscribeAttributePoints();
-        RefreshFromPlayerProgression();
-    }
-
-    protected override void OnDisable()
-    {
-        UnsubscribePlayerLevel();
-        UnsubscribeAttributePoints();
-        base.OnDisable();
-    }
-
-    protected override void LoadComponents()
-    {
-        base.LoadComponents();
-    }
-
-    public void RefreshFromPlayerProgression()
-    {
-        if (!usePlayerProgression) return;
-
-        PlayerAttributePointStorage.EnsureLevelRewarded(PlayerExperienceStorage.Level);
-        ApplySnapshot(PlayerExperienceStorage.Snapshot);
-    }
-
-    public void ApplySnapshot(PlayerLevelSnapshot snapshot)
-    {
-        CurrentSnapshot = snapshot;
-        currentLevel = Mathf.Max(1, snapshot.Level);
-        ApplyAllocatedStats();
-    }
-
     public void ApplyLevel(int level)
     {
         currentLevel = Mathf.Max(1, level);
@@ -61,22 +19,18 @@ public class CharacterLevel : CharacterAbstract
         float previousMaxHealth = stat.MaxHealth != null
             ? stat.MaxHealth.FinalValue
             : 0f;
+        float previousCurrentHealth = stat.CurrentHealth;
 
-        stat.RemoveModifiersFromSource(this);
+        stat.RemoveModifiersFromSource(this, updateHealthByMaxHealthDelta: false);
 
-        foreach (StatType statType in PlayerAttributePointStorage.GetSpendableStats())
-            ApplyFlatModifier(statType, PlayerAttributePointStorage.GetBonusValue(statType));
+        foreach (StatType statType in GetAllocatedStatTypes())
+            ApplyFlatModifier(statType, GetAllocatedStatBonus(statType));
 
         float nextMaxHealth = stat.MaxHealth != null
             ? stat.MaxHealth.FinalValue
             : previousMaxHealth;
 
-        if (healByAddedMaxHealth && nextMaxHealth > previousMaxHealth)
-            stat.SetCurrentHealth(stat.CurrentHealth + nextMaxHealth - previousMaxHealth);
-        else if (stat.CurrentHealth > nextMaxHealth)
-            stat.SetCurrentHealth(nextMaxHealth);
-
-        stat.SetPreviousMaxHealth(previousMaxHealth);
+        stat.ApplyMaxHealthDelta(previousMaxHealth, previousCurrentHealth);
         stat.NotifyAllStatsChanged();
     }
 
@@ -99,39 +53,13 @@ public class CharacterLevel : CharacterAbstract
             this));
     }
 
-    private void SubscribePlayerLevel()
+    protected virtual StatType[] GetAllocatedStatTypes()
     {
-        PlayerExperienceStorage.OnLevelSnapshotChanged -= HandleLevelSnapshotChanged;
-        PlayerExperienceStorage.OnLevelSnapshotChanged += HandleLevelSnapshotChanged;
+        return System.Array.Empty<StatType>();
     }
 
-    private void UnsubscribePlayerLevel()
+    protected virtual float GetAllocatedStatBonus(StatType statType)
     {
-        PlayerExperienceStorage.OnLevelSnapshotChanged -= HandleLevelSnapshotChanged;
-    }
-
-    private void SubscribeAttributePoints()
-    {
-        PlayerAttributePointStorage.OnPointsChanged -= HandleAttributePointsChanged;
-        PlayerAttributePointStorage.OnPointsChanged += HandleAttributePointsChanged;
-    }
-
-    private void UnsubscribeAttributePoints()
-    {
-        PlayerAttributePointStorage.OnPointsChanged -= HandleAttributePointsChanged;
-    }
-
-    private void HandleLevelSnapshotChanged(PlayerLevelSnapshot snapshot)
-    {
-        if (!usePlayerProgression) return;
-
-        ApplySnapshot(snapshot);
-    }
-
-    private void HandleAttributePointsChanged()
-    {
-        if (!usePlayerProgression) return;
-
-        ApplyAllocatedStats();
+        return 0f;
     }
 }

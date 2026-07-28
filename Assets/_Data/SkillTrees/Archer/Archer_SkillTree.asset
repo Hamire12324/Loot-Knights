@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 062da7d0656f4b0284fc01925fa3fa00, type: 3}
+  m_Name: Archer_SkillTree
+  m_EditorClassIdentifier: 
+  treeId: archer_skill_tree
+  displayName: Archer Skill Tree
+  nodes:
+  - {fileID: 11400000, guid: 845f610329a84d3581e35af22b1fb058, type: 2}
+  - {fileID: 11400000, guid: 3221f5fc29b1456584e9050d7d96e4b0, type: 2}
+  - {fileID: 11400000, guid: b2e9b0368b984bcf81f1ab0560934b6b, type: 2}
+  - {fileID: 11400000, guid: 0ab338d7277a4f75b8130743a1558371, type: 2}
+  - {fileID: 11400000, guid: 50c28b4bd28b4525a3d14febc3fa2510, type: 2}
+  - {fileID: 11400000, guid: ae886e89c2b043cfbede92f04da2e3f6, type: 2}
+  - {fileID: 11400000, guid: 1bc74ca590f948b1b86d511331247fa4, type: 2}
+  - {fileID: 11400000, guid: 1ed340f62af54dd8807725fdca99d126, type: 2}
+  - {fileID: 11400000, guid: 43fcb3f45b2c4c6d8a190251d1f72676, type: 2}
+  - {fileID: 11400000, guid: ec1bdc0f1bc74fbf89b4325a25166acb, type: 2}
+  - {fileID: 11400000, guid: bae83f5e18fc4044a5db77ff3a883f88, type: 2}
+  - {fileID: 11400000, guid: 1d1bf997f4934c11be3722bae8c66671, type: 2}
+  - {fileID: 11400000, guid: 53063ebcaff24bf78791c3ce675a3365, type: 2}
+  - {fileID: 11400000, guid: e4dba9771a944eee9911e42e60319922, type: 2}
+  - {fileID: 11400000, guid: 62166832d7fc45e58e16d6d373fbe057, type: 2}
+  - {fileID: 11400000, guid: db1af2491a6843c99b1ccc48d2763743, type: 2}
+  - {fileID: 11400000, guid: 45d43c07812b47cca9346ce9fa130ed4, type: 2}
+  - {fileID: 11400000, guid: 7cc92f512e5b4d3281df72000693c277, type: 2}
+  - {fileID: 11400000, guid: bdcd6fc1c6ae42acadcc8f594ee96b79, type: 2}
+  - {fileID: 11400000, guid: 05ac1c1f4f744bd89b8b6cbf1cfb8eb3, type: 2}
+  - {fileID: 11400000, guid: 4b0517c9a0e54268a2d63d4fb6afec58, type: 2}
+  - {fileID: 11400000, guid: 7a8627f369d847c097463b8af1ac191a, type: 2}
+  - {fileID: 11400000, guid: e0966902914b4ae9a49d9ef8a3b49a45, type: 2}
+  - {fileID: 11400000, guid: b7da540a147c4b46bf3ee79445c1d142, type: 2}
+  viewSettings:
+    overrideBuilderSettings: 1
+    contentSize: {x: 1100, y: 860}
+    contentOffset: {x: 0, y: 120}
+    contentScale: 0.9
+    autoExpandScrollContent: 1
+    scrollContentPadding: {x: 160, y: 160}
+    horizontalScroll: 0
+    startTreeAtTop: 1

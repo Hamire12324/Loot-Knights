@@ -30,18 +30,6 @@ public class HeroGameplaySpawner : BaseMonoBehaviour
             : CharacterClass.Knight;
 
         HeroCtrl heroPrefab = GetHeroPrefab(characterClass);
-        if (heroPrefab == null)
-        {
-            Debug.LogError($"{nameof(HeroGameplaySpawner)} could not spawn {characterClass}: no hero prefab is assigned.", gameObject);
-            return null;
-        }
-
-        Debug.Log(
-            $"{nameof(HeroGameplaySpawner)} loading profile: {CharacterProfileStorage.GetDebugSummary()}",
-            gameObject);
-        Debug.Log(
-            $"{nameof(HeroGameplaySpawner)} spawning class={characterClass}, prefab={heroPrefab.name}.",
-            gameObject);
 
         Vector3 spawnPosition = GetSpawnPosition();
 
@@ -54,9 +42,6 @@ public class HeroGameplaySpawner : BaseMonoBehaviour
 
         PlayerEquipmentManager.InstanceOrNull?.ApplyToHero(SpawnedHero);
         ApplySkillLoadout(SpawnedHero, characterClass);
-        Debug.Log(
-            $"{nameof(HeroGameplaySpawner)} spawned hero={SpawnedHero.name}, skillController={(SpawnedHero.CharacterSkillController != null ? SpawnedHero.CharacterSkillController.name : "null")}, basicSkill={(SpawnedHero.CharacterSkillController != null && SpawnedHero.CharacterSkillController.BasicAttackRuntime != null && SpawnedHero.CharacterSkillController.BasicAttackRuntime.Definition != null ? SpawnedHero.CharacterSkillController.BasicAttackRuntime.Definition.name : "null")}.",
-            SpawnedHero);
         BindCinemachineCameras(SpawnedHero.transform);
 
         return SpawnedHero;
@@ -74,11 +59,6 @@ public class HeroGameplaySpawner : BaseMonoBehaviour
 
                 return classPrefab.HeroPrefab;
             }
-        }
-
-        if (defaultHeroPrefab != null)
-        {
-            Debug.LogWarning($"{nameof(HeroGameplaySpawner)} has no prefab mapped for {characterClass}; using default hero prefab.", gameObject);
         }
 
         return defaultHeroPrefab;
@@ -131,15 +111,16 @@ public class HeroGameplaySpawner : BaseMonoBehaviour
         if (hero == null)
             return;
 
-        if (characterClass != CharacterClass.Knight)
+        SkillTreeDefinition classSkillTree = ResolveClassSkillTree(hero);
+        if (classSkillTree == null)
             return;
 
         const int defaultSlotCount = 4;
         PlayerSkillTreeManager skillTreeManager = PlayerSkillTreeManager.Service;
         skillTreeManager.EnsureLevelRewarded(PlayerExperienceStorage.Level);
-        ApplySkillTreeStats(hero);
+        ApplySkillTreeStats(hero, classSkillTree);
 
-        IReadOnlyList<SkillTreeDefinition> loadoutTrees = GetLoadoutTrees();
+        IReadOnlyList<SkillTreeDefinition> loadoutTrees = GetLoadoutTrees(classSkillTree);
         foreach (SkillTreeDefinition tree in loadoutTrees)
             skillTreeManager.EnsureUnlockedActiveSkillsEquipped(tree, defaultSlotCount);
 
@@ -149,17 +130,28 @@ public class HeroGameplaySpawner : BaseMonoBehaviour
         if (loadoutSync == null)
             loadoutSync = hero.gameObject.AddComponent<HeroSkillLoadoutPhotonSync>();
 
-        loadoutSync.SetSkillTrees(skillTree, elementalSkillTree);
+        loadoutSync.SetSkillTrees(classSkillTree, elementalSkillTree);
         loadoutSync.PublishLocalLoadout();
     }
 
-    private void ApplySkillTreeStats(HeroCtrl hero)
+    private SkillTreeDefinition ResolveClassSkillTree(HeroCtrl hero)
+    {
+        HeroSkillLoadoutPhotonSync loadoutSync = hero != null
+            ? hero.GetComponent<HeroSkillLoadoutPhotonSync>()
+            : null;
+
+        return loadoutSync != null && loadoutSync.SkillTree != null
+            ? loadoutSync.SkillTree
+            : skillTree;
+    }
+
+    private void ApplySkillTreeStats(HeroCtrl hero, SkillTreeDefinition classSkillTree)
     {
         if (hero == null || hero.CharacterStat == null)
             return;
 
         List<StatModifier> modifiers = new();
-        foreach (SkillTreeDefinition tree in GetLoadoutTrees())
+        foreach (SkillTreeDefinition tree in GetLoadoutTrees(classSkillTree))
         {
             SkillTreeRuntime runtime = new(tree);
             modifiers.AddRange(runtime.CreateStatModifiers());
@@ -168,11 +160,11 @@ public class HeroGameplaySpawner : BaseMonoBehaviour
         hero.CharacterStat.RecalculateSkillTree(modifiers);
     }
 
-    private IReadOnlyList<SkillTreeDefinition> GetLoadoutTrees()
+    private IReadOnlyList<SkillTreeDefinition> GetLoadoutTrees(SkillTreeDefinition classSkillTree)
     {
         List<SkillTreeDefinition> trees = new();
-        if (skillTree != null)
-            trees.Add(skillTree);
+        if (classSkillTree != null)
+            trees.Add(classSkillTree);
 
         if (elementalSkillTree != null && !trees.Contains(elementalSkillTree))
             trees.Add(elementalSkillTree);

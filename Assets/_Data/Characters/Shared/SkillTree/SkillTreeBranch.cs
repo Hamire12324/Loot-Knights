@@ -7,5 +7,8 @@ public enum SkillTreeBranch
     GauntletFrost,
     GauntletLightning,
     GauntletPoison,
-    GauntletReaction
+    GauntletReaction,
+    ArcherMarksmanship,
+    ArcherMobility,
+    ArcherTrickShots
 }

@@ -26,3 +26,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e50c7e45476f4d34bcd9ed982f61ebcf, type: 2}
   - {fileID: 11400000, guid: 7d494353d75a412397a986a9bf643ab3, type: 2}
   - {fileID: 11400000, guid: f26fe0feb027460584c94a75ac39ec2f, type: 2}
+  viewSettings:
+    overrideBuilderSettings: 0
+    contentSize: {x: 1100, y: 860}
+    contentOffset: {x: 0, y: 0}
+    contentScale: 1
+    autoExpandScrollContent: 1
+    scrollContentPadding: {x: 160, y: 160}
+    horizontalScroll: 0
+    startTreeAtTop: 1

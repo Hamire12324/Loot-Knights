@@ -42,31 +42,9 @@ public class StatModifier
         if (duration < 0f) return false;
         return Time.time >= startTime + duration;
     }
-    public void AddStack(int count = 1)
-    {
-        stack += count;
-    }
-    public bool RemoveStack(int count = 1)
-    {
-        stack -= count;
-        if (stack <= 0)
-        {
-            stack = 0;
-            return false;
-        }
-        return true;
-    }
     public float GetEffectiveValue()
     {
         if (!isEnabled) return 0f;
         return amount * stack;
-    }
-    public void Enable()
-    {
-        isEnabled = true;
-    }
-    public void Disable()
-    {
-        isEnabled = false;
     }
 }

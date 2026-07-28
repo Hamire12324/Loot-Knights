@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
+  m_Name: Node_Deadeye
+  m_EditorClassIdentifier: 
+  nodeId: archer.deadeye
+  displayName: Deadeye
+  description: '+20% Crit Damage. Requires Piercing Mastery and Trick Arrow.'
+  icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
+  kind: 0
+  branch: 8
+  treePosition: {x: 0, y: -460}
+  maxRank: 1
+  pointCost: 3
+  requiredPlayerLevel: 10
+  prerequisites:
+  - node: {fileID: 11400000, guid: e4dba9771a944eee9911e42e60319922, type: 2}
+    requiredRank: 1
+  - node: {fileID: 11400000, guid: 7a8627f369d847c097463b8af1ac191a, type: 2}
+    requiredRank: 1
+  - node: {fileID: 11400000, guid: e0966902914b4ae9a49d9ef8a3b49a45, type: 2}
+    requiredRank: 1
+  scaleStatModifiersByRank: 1
+  statModifiers:
+  - statType: 8
+    modifierType: 1
+    amount: 0.2
+  activeSkill: {fileID: 0}
+  preferredEquipSlot: -1
+  element: 0
+  reaction: 0

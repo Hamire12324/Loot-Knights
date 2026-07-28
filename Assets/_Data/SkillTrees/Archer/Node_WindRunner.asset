@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
+  m_Name: Node_WindRunner
+  m_EditorClassIdentifier: 
+  nodeId: archer.wind_runner
+  displayName: Wind Runner
+  description: '+4% Attack Speed. Fire faster while repositioning.'
+  icon: {fileID: 0}
+  kind: 0
+  branch: 9
+  treePosition: {x: 410, y: -160}
+  maxRank: 1
+  pointCost: 1
+  requiredPlayerLevel: 1
+  prerequisites:
+  - node: {fileID: 11400000, guid: bae83f5e18fc4044a5db77ff3a883f88, type: 2}
+    requiredRank: 1
+  - node: {fileID: 11400000, guid: 45d43c07812b47cca9346ce9fa130ed4, type: 2}
+    requiredRank: 1
+  scaleStatModifiersByRank: 1
+  statModifiers:
+  - statType: 6
+    modifierType: 0
+    amount: 0.04
+  activeSkill: {fileID: 0}
+  preferredEquipSlot: -1
+  element: 0
+  reaction: 0

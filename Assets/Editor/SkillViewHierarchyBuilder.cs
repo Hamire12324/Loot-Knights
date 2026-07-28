@@ -24,21 +24,11 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         "EquipSkillPanel"
     };
 
-    private readonly struct BranchDepthKey
-    {
-        public readonly SkillTreeBranch Branch;
-        public readonly int Depth;
-
-        public BranchDepthKey(SkillTreeBranch branch, int depth)
-        {
-            Branch = branch;
-            Depth = depth;
-        }
-    }
-
     [SerializeField] private GameObject skillViewRoot;
     [SerializeField] private SkillTreeDefinition skillTree;
     [SerializeField] private SkillTreeDefinition secondarySkillTree;
+    [SerializeField] private bool buildAllClassSkillTrees = true;
+    [SerializeField] private List<SkillTreeDefinition> classSkillTrees = new();
     [SerializeField] private bool replaceExisting = true;
 
     [Header("Tree Switcher")]
@@ -64,18 +54,6 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     [SerializeField] private Vector2 contentSize = new(1100f, 860f);
     [SerializeField] private Vector2 contentOffset = Vector2.zero;
     [SerializeField, Range(0.75f, 2.25f)] private float contentScale = 1f;
-    [SerializeField] private bool useAuthoredNodePositions = true;
-    [SerializeField] private bool useBranchColumnLayout = true;
-    [SerializeField] private bool showBranchHeaders = true;
-    [SerializeField] private float branchColumnSpacing = 300f;
-    [SerializeField] private float branchRowSpacing = 112f;
-    [SerializeField] private float branchSiblingSpacing = 86f;
-    [SerializeField] private float branchStartY = 160f;
-    [SerializeField] private float branchHeaderOffsetY = 92f;
-    [SerializeField] private float branchHeaderTextSize = 18f;
-    [SerializeField] private bool useBranchLaneLayout = true;
-    [SerializeField] private float branchLaneSpacing = 112f;
-    [SerializeField] private float branchSameColumnSpacing = 62f;
     [SerializeField] private Vector2 skillPointsInset = new(30f, 54f);
     [SerializeField] private Vector2 skillPointsSize = new(180f, 28f);
     [SerializeField] private float skillPointsTextSize = 16f;
@@ -83,10 +61,6 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     [SerializeField] private Vector2 resetButtonSize = new(92f, 26f);
     [SerializeField] private float resetButtonTextSize = 10f;
     [SerializeField] private bool resetButtonTopRight = false;
-    [SerializeField, Range(0.25f, 3f)] private float nodeColumnSpacingScale = 1f;
-    [SerializeField, Range(0.25f, 3f)] private float nodeRowSpacingScale = 1f;
-    [SerializeField] private float autoColumnSpacing = 130f;
-    [SerializeField] private float autoRowSpacing = 70f;
     [SerializeField] private bool autoExpandScrollContent = true;
     [SerializeField] private Vector2 scrollContentPadding = new(160f, 160f);
     [SerializeField] private bool horizontalScroll = false;
@@ -211,9 +185,13 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
             if (GUILayout.Button("Find Elemental Tree"))
                 secondarySkillTree = FindElementalSkillTreeAsset();
 
+            if (GUILayout.Button("Find Class Trees"))
+                FindClassSkillTreeAssets();
         }
 
         DrawFields();
+        DrawSkillTreeViewSettings(skillTree, "Primary Tree View Settings");
+        DrawSkillTreeViewSettings(secondarySkillTree, "Secondary Tree View Settings");
         DrawNodePositionEditor();
 
         EditorGUILayout.Space(10f);
@@ -237,7 +215,8 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         SerializedObject so = new(this);
 
         DrawGroup(so, "Tree Switcher", nameof(buildTreeSwitcher), nameof(primarySkillTreeLabel), nameof(secondarySkillTreeLabel), nameof(treeSwitcherInset), nameof(treeSwitcherSize), nameof(treeSwitcherButtonSize), nameof(treeSwitcherButtonSpacing), nameof(treeSwitcherTextSize));
-        DrawGroup(so, "Layout", nameof(treeWidthRatio), nameof(padding), nameof(panelGap), nameof(treeInnerPadding), nameof(treeClipHorizontalPadding), nameof(treeClipTopPadding), nameof(treeClipBottomPadding), nameof(detailHeightRatio), nameof(contentSize), nameof(contentOffset), nameof(contentScale), nameof(useAuthoredNodePositions), nameof(useBranchColumnLayout), nameof(showBranchHeaders), nameof(branchColumnSpacing), nameof(branchRowSpacing), nameof(branchSiblingSpacing), nameof(branchStartY), nameof(branchHeaderOffsetY), nameof(branchHeaderTextSize), nameof(useBranchLaneLayout), nameof(branchLaneSpacing), nameof(branchSameColumnSpacing), nameof(skillPointsInset), nameof(skillPointsSize), nameof(skillPointsTextSize), nameof(resetButtonInset), nameof(resetButtonSize), nameof(resetButtonTextSize), nameof(resetButtonTopRight), nameof(nodeColumnSpacingScale), nameof(nodeRowSpacingScale), nameof(autoColumnSpacing), nameof(autoRowSpacing), nameof(autoExpandScrollContent), nameof(scrollContentPadding), nameof(horizontalScroll), nameof(startTreeAtTop), nameof(scrollSensitivity));
+        DrawGroup(so, "Skill Trees", nameof(buildAllClassSkillTrees), nameof(classSkillTrees));
+        DrawGroup(so, "Layout", nameof(treeWidthRatio), nameof(padding), nameof(panelGap), nameof(treeInnerPadding), nameof(treeClipHorizontalPadding), nameof(treeClipTopPadding), nameof(treeClipBottomPadding), nameof(detailHeightRatio), nameof(contentSize), nameof(contentOffset), nameof(contentScale), nameof(skillPointsInset), nameof(skillPointsSize), nameof(skillPointsTextSize), nameof(resetButtonInset), nameof(resetButtonSize), nameof(resetButtonTextSize), nameof(resetButtonTopRight), nameof(autoExpandScrollContent), nameof(scrollContentPadding), nameof(horizontalScroll), nameof(startTreeAtTop), nameof(scrollSensitivity));
         DrawGroup(so, "Node", nameof(nodeSize), nameof(iconSize), nameof(lineThickness), nameof(textSize), nameof(nodeIconFramePadding), nameof(useMajorMinorNodeSizes), nameof(majorNodeSize), nameof(majorIconSize), nameof(minorNodeSize), nameof(minorIconSize), nameof(showNodeRankText), nameof(showNodeCostText), nameof(nodeRankTextOffset), nameof(nodeCostTextOffset));
         DrawGroup(so, "Equip Skills", nameof(equipSlotCount), nameof(equipContentScale), nameof(equipSlotSize), nameof(equipSlotIconSize), nameof(equipSlotSpacing), nameof(equipIndexSpacingOffset), nameof(equipIndexTextOffset), nameof(equipIndexTextSize), nameof(equipTitleHeight), nameof(equipPanelInnerPadding));
         DrawGroup(so, "Detail Content", nameof(detailContentScale), nameof(detailIconSize), nameof(detailTextWidth), nameof(detailButtonSize), nameof(detailTitleFontSize), nameof(detailBodyFontSize), nameof(detailCostInset), nameof(detailCostSize));
@@ -246,6 +225,24 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         DrawGroup(so, "Sprites", nameof(treeFrameSprite), nameof(detailFrameSprite), nameof(equipFrameSprite), nameof(equipIllustrationSprite), nameof(equipSlotSprite), nameof(nodeSprite), nameof(selectedSprite), nameof(lockedSprite), nameof(lineSprite), nameof(buttonSprite));
 
         so.ApplyModifiedProperties();
+    }
+
+    private static void DrawSkillTreeViewSettings(SkillTreeDefinition tree, string title)
+    {
+        if (tree == null)
+            return;
+
+        SerializedObject treeSo = new(tree);
+        SerializedProperty settings = treeSo.FindProperty("viewSettings");
+        if (settings == null)
+            return;
+
+        EditorGUILayout.Space(8f);
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+        EditorGUILayout.LabelField(title, EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(settings, true);
+        treeSo.ApplyModifiedProperties();
+        EditorGUILayout.EndVertical();
     }
 
     private void DrawNodePositionEditor()
@@ -354,6 +351,28 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         return null;
     }
 
+    private void FindClassSkillTreeAssets()
+    {
+        classSkillTrees.Clear();
+
+        string[] guids = AssetDatabase.FindAssets("t:SkillTreeDefinition");
+        foreach (string guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            SkillTreeDefinition tree = AssetDatabase.LoadAssetAtPath<SkillTreeDefinition>(path);
+            if (tree == null || IsElementalSkillTree(tree))
+                continue;
+
+            if (!classSkillTrees.Contains(tree))
+                classSkillTrees.Add(tree);
+        }
+
+        classSkillTrees.Sort((a, b) => string.CompareOrdinal(a != null ? a.TreeId : string.Empty, b != null ? b.TreeId : string.Empty));
+
+        if (skillTree == null && classSkillTrees.Count > 0)
+            skillTree = classSkillTrees[0];
+    }
+
     private string[] GetNodeDisplayNames()
     {
         string[] names = new string[skillTree.Nodes.Count];
@@ -446,6 +465,8 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
 
     private void Build()
     {
+        CaptureBuildTreePairFromRuntimeView();
+
         if (skillViewRoot == null)
         {
             Debug.LogError("SkillView Root is missing.");
@@ -460,6 +481,9 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
 
         if (secondarySkillTree == null)
             secondarySkillTree = FindElementalSkillTreeAsset();
+
+        if (buildAllClassSkillTrees && classSkillTrees.Count == 0)
+            FindClassSkillTreeAssets();
 
         EnsureDefaultSprites();
         activeTextFont = textFont;
@@ -487,6 +511,50 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
 
         EditorSceneManager.MarkSceneDirty(skillViewRoot.scene);
         Debug.Log("Skill tree UI built.");
+    }
+
+    private void CaptureBuildTreePairFromRuntimeView()
+    {
+        SkillTreeView view = skillViewRoot != null ? skillViewRoot.GetComponent<SkillTreeView>() : null;
+        if (view == null)
+            return;
+
+        SkillTreeDefinition existingPrimary = view.PrimarySkillTree;
+        SkillTreeDefinition existingSecondary = GetExistingSecondarySkillTree(view);
+
+        if (skillTree == null && existingPrimary != null)
+            skillTree = existingPrimary;
+
+        if (skillTree != null && IsElementalSkillTree(skillTree) && existingPrimary != null && existingPrimary != skillTree)
+        {
+            secondarySkillTree = skillTree;
+            skillTree = existingPrimary;
+            return;
+        }
+
+        if (skillTree != null && !IsElementalSkillTree(skillTree) && !classSkillTrees.Contains(skillTree))
+            classSkillTrees.Add(skillTree);
+
+        if (secondarySkillTree == null &&
+            existingSecondary != null &&
+            existingSecondary != skillTree)
+        {
+            secondarySkillTree = existingSecondary;
+        }
+    }
+
+    private static SkillTreeDefinition GetExistingSecondarySkillTree(SkillTreeView view)
+    {
+        if (view == null)
+            return null;
+
+        foreach (SkillTreeDefinition tree in view.GetSkillTrees())
+        {
+            if (tree != null && tree != view.PrimarySkillTree)
+                return tree;
+        }
+
+        return null;
     }
 
     private void BuildTree(RectTransform root)
@@ -532,12 +600,20 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
             scrollContentSize = Max(scrollContentSize, treeScrollContentSize);
         }
 
-        if (startTreeAtTop)
+        if (AnyTreeStartsAtTop(trees))
         {
             foreach (SkillTreeDefinition tree in trees)
             {
-                if (tree != skillTree)
-                    treePositions[tree] = AlignPositionsToTop(treePositions[tree], scrollContentSize);
+                if (tree != skillTree && GetStartTreeAtTop(tree))
+                {
+                    Vector2 treeOffset = GetContentOffset(tree);
+                    treePositions[tree] = AddOffset(
+                        AlignPositionsToTop(
+                            AddOffset(treePositions[tree], -treeOffset),
+                            scrollContentSize,
+                            GetScrollContentPadding(tree)),
+                        treeOffset);
+                }
             }
         }
 
@@ -547,7 +623,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         ScrollRect scrollRect = treeArea.gameObject.AddComponent<ScrollRect>();
         scrollRect.viewport = viewport;
         scrollRect.content = content;
-        scrollRect.horizontal = horizontalScroll;
+        scrollRect.horizontal = false;
         scrollRect.vertical = true;
         scrollRect.movementType = ScrollRect.MovementType.Clamped;
         scrollRect.inertia = true;
@@ -560,7 +636,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
 
         Canvas.ForceUpdateCanvases();
         scrollRect.horizontalNormalizedPosition = 0.5f;
-        scrollRect.verticalNormalizedPosition = startTreeAtTop ? 1f : 0.5f;
+        scrollRect.verticalNormalizedPosition = GetStartTreeAtTop(skillTree) ? 1f : 0.5f;
     }
 
     private void BuildTreeContent(
@@ -584,13 +660,8 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
             RectTransform linesRoot = CreateEmpty(treeContent, "Lines");
             Stretch(linesRoot);
 
-            RectTransform headersRoot = CreateEmpty(treeContent, "BranchHeaders");
-            Stretch(headersRoot);
-
             RectTransform nodesRoot = CreateEmpty(treeContent, "Nodes");
             Stretch(nodesRoot);
-
-            CreateBranchHeaders(headersRoot, positions);
 
             foreach (SkillTreeNodeDefinition node in tree.Nodes)
                 CreateNodeLines(linesRoot, node, positions);
@@ -823,242 +894,117 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         }
     }
 
+    private SkillTreeViewSettings GetTreeViewSettings(SkillTreeDefinition tree)
+    {
+        SkillTreeViewSettings settings = tree != null ? tree.ViewSettings : null;
+        return settings != null && settings.OverrideBuilderSettings ? settings : null;
+    }
+
+    private Vector2 GetContentSize(SkillTreeDefinition tree)
+    {
+        return GetTreeViewSettings(tree)?.ContentSize ?? contentSize;
+    }
+
+    private Vector2 GetContentOffset(SkillTreeDefinition tree)
+    {
+        return GetTreeViewSettings(tree)?.ContentOffset ?? contentOffset;
+    }
+
+    private float GetContentScale(SkillTreeDefinition tree)
+    {
+        return GetTreeViewSettings(tree)?.ContentScale ?? Mathf.Max(0.01f, contentScale);
+    }
+
+    private bool GetAutoExpandScrollContent(SkillTreeDefinition tree)
+    {
+        return GetTreeViewSettings(tree)?.AutoExpandScrollContent ?? autoExpandScrollContent;
+    }
+
+    private Vector2 GetScrollContentPadding(SkillTreeDefinition tree)
+    {
+        return GetTreeViewSettings(tree)?.ScrollContentPadding ?? scrollContentPadding;
+    }
+
+    private bool GetHorizontalScroll(SkillTreeDefinition tree)
+    {
+        return GetTreeViewSettings(tree)?.HorizontalScroll ?? horizontalScroll;
+    }
+
+    private bool GetStartTreeAtTop(SkillTreeDefinition tree)
+    {
+        return GetTreeViewSettings(tree)?.StartTreeAtTop ?? startTreeAtTop;
+    }
+
+    private bool AnyTreeUsesHorizontalScroll(IEnumerable<SkillTreeDefinition> trees)
+    {
+        foreach (SkillTreeDefinition tree in trees)
+        {
+            if (GetHorizontalScroll(tree))
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool AnyTreeStartsAtTop(IEnumerable<SkillTreeDefinition> trees)
+    {
+        foreach (SkillTreeDefinition tree in trees)
+        {
+            if (GetStartTreeAtTop(tree))
+                return true;
+        }
+
+        return false;
+    }
+
     private Dictionary<SkillTreeNodeDefinition, Vector2> GetNodePositions(out Vector2 scrollSize)
     {
-        if (!useAuthoredNodePositions && useBranchColumnLayout)
-            return GetBranchColumnNodePositions(out scrollSize);
-
         Dictionary<SkillTreeNodeDefinition, Vector2> positions = new();
-        Dictionary<SkillTreeBranch, int> branchRows = new();
+        float treeContentScale = GetContentScale(skillTree);
+        Vector2 treeContentOffset = GetContentOffset(skillTree);
 
         foreach (SkillTreeNodeDefinition node in skillTree.Nodes)
         {
             if (node == null) continue;
 
-            Vector2 position = node.TreePosition;
-            if (IsZero(position))
-                position = GetAutoPosition(node.Branch, branchRows);
-
-            Vector2 spacedPosition = new(
-                position.x * Mathf.Max(0.01f, nodeColumnSpacingScale),
-                position.y * Mathf.Max(0.01f, nodeRowSpacingScale));
-
-            positions[node] = spacedPosition * contentScale + contentOffset;
+            positions[node] = node.TreePosition * treeContentScale;
         }
 
-        scrollSize = GetScrollContentSize(positions);
-        return startTreeAtTop ? AlignPositionsToTop(positions, scrollSize) : positions;
+        scrollSize = GetScrollContentSize(positions, skillTree);
+        Dictionary<SkillTreeNodeDefinition, Vector2> alignedPositions = GetStartTreeAtTop(skillTree)
+            ? AlignPositionsToTop(positions, scrollSize, GetScrollContentPadding(skillTree))
+            : positions;
+
+        Dictionary<SkillTreeNodeDefinition, Vector2> offsetPositions = AddOffset(alignedPositions, treeContentOffset);
+        scrollSize = GetScrollContentSize(offsetPositions, skillTree);
+        return offsetPositions;
     }
 
-    private Dictionary<SkillTreeNodeDefinition, Vector2> GetBranchColumnNodePositions(out Vector2 scrollSize)
+    private static Dictionary<SkillTreeNodeDefinition, Vector2> AddOffset(
+        IReadOnlyDictionary<SkillTreeNodeDefinition, Vector2> positions,
+        Vector2 offset)
     {
-        Dictionary<SkillTreeNodeDefinition, Vector2> positions = new();
-        List<SkillTreeBranch> branches = GetVisibleBranches();
-        Dictionary<SkillTreeBranch, int> branchColumns = new();
-        for (int i = 0; i < branches.Count; i++)
-            branchColumns[branches[i]] = i;
+        Dictionary<SkillTreeNodeDefinition, Vector2> offsetPositions = new();
+        if (positions == null)
+            return offsetPositions;
 
-        Dictionary<SkillTreeNodeDefinition, int> depths = new();
-        Dictionary<BranchDepthKey, List<SkillTreeNodeDefinition>> groups = new();
+        foreach (KeyValuePair<SkillTreeNodeDefinition, Vector2> pair in positions)
+            offsetPositions[pair.Key] = pair.Value + offset;
 
-        foreach (SkillTreeNodeDefinition node in skillTree.Nodes)
-        {
-            if (node == null) continue;
-
-            int depth = GetNodeDepth(node, depths, new HashSet<SkillTreeNodeDefinition>());
-            BranchDepthKey key = new BranchDepthKey(node.Branch, depth);
-            if (!groups.TryGetValue(key, out List<SkillTreeNodeDefinition> group))
-            {
-                group = new List<SkillTreeNodeDefinition>();
-                groups[key] = group;
-            }
-
-            group.Add(node);
-        }
-
-        foreach (KeyValuePair<BranchDepthKey, List<SkillTreeNodeDefinition>> pair in groups)
-        {
-            List<SkillTreeNodeDefinition> group = pair.Value;
-            group.Sort(CompareNodesForBranchLane);
-
-            int columnIndex = branchColumns.TryGetValue(pair.Key.Branch, out int index) ? index : 0;
-            float baseX = (columnIndex - (branches.Count - 1) * 0.5f) * Mathf.Max(1f, branchColumnSpacing);
-            float y = branchStartY - pair.Key.Depth * Mathf.Max(1f, branchRowSpacing);
-            Dictionary<int, int> laneRows = new();
-
-            for (int i = 0; i < group.Count; i++)
-            {
-                int lane = GetBranchLane(group[i], pair.Key.Depth);
-                laneRows.TryGetValue(lane, out int laneRow);
-                laneRows[lane] = laneRow + 1;
-
-                float siblingOffset = GetBranchLaneOffset(lane, i, group.Count);
-                float rowOffset = GetBranchLaneRowOffset(laneRow);
-                Vector2 rawPosition = new Vector2(baseX + siblingOffset, y - rowOffset);
-                positions[group[i]] = rawPosition * contentScale + contentOffset;
-            }
-        }
-
-        scrollSize = GetScrollContentSize(positions);
-        return startTreeAtTop ? AlignPositionsToTop(positions, scrollSize) : positions;
+        return offsetPositions;
     }
 
-    private int CompareNodesForBranchLane(SkillTreeNodeDefinition a, SkillTreeNodeDefinition b)
+    private Vector2 GetScrollContentSize(
+        IReadOnlyDictionary<SkillTreeNodeDefinition, Vector2> positions,
+        SkillTreeDefinition tree)
     {
-        int laneCompare = GetBranchLane(a, 0).CompareTo(GetBranchLane(b, 0));
-        if (laneCompare != 0)
-            return laneCompare;
+        Vector2 treeContentSize = GetContentSize(tree);
+        Vector2 treeScrollPadding = GetScrollContentPadding(tree);
+        bool treeAutoExpand = GetAutoExpandScrollContent(tree);
+        bool treeStartAtTop = GetStartTreeAtTop(tree);
 
-        return GetNodeOrder(a).CompareTo(GetNodeOrder(b));
-    }
-
-    private float GetBranchLaneOffset(int lane, int index, int count)
-    {
-        if (!useBranchLaneLayout)
-            return (index - (count - 1) * 0.5f) * Mathf.Max(0f, branchSiblingSpacing);
-
-        float laneSpacing = Mathf.Max(0f, branchLaneSpacing);
-        return (lane == 0 ? -0.5f : 0.5f) * laneSpacing;
-    }
-
-    private float GetBranchLaneRowOffset(int laneRow)
-    {
-        if (!useBranchLaneLayout || laneRow <= 0)
-            return 0f;
-
-        return laneRow * Mathf.Max(1f, branchSameColumnSpacing);
-    }
-
-    private int GetBranchLane(SkillTreeNodeDefinition node, int depth)
-    {
-        if (useBranchLaneLayout && node != null && !IsZero(node.TreePosition))
-        {
-            float branchCenterX = GetAuthoredBranchCenterX(node.Branch);
-            return node.TreePosition.x < branchCenterX ? 0 : 1;
-        }
-
-        int branchOrder = GetBranchNodeOrder(node);
-        if (branchOrder >= 0)
-            return branchOrder % 2;
-
-        return Mathf.Abs(depth) % 2;
-    }
-
-    private float GetAuthoredBranchCenterX(SkillTreeBranch branch)
-    {
-        if (skillTree == null)
-            return 0f;
-
-        float min = 0f;
-        float max = 0f;
-        bool hasPosition = false;
-
-        foreach (SkillTreeNodeDefinition node in skillTree.Nodes)
-        {
-            if (node == null || node.Branch != branch || IsZero(node.TreePosition))
-                continue;
-
-            float x = node.TreePosition.x;
-            if (!hasPosition)
-            {
-                min = x;
-                max = x;
-                hasPosition = true;
-                continue;
-            }
-
-            min = Mathf.Min(min, x);
-            max = Mathf.Max(max, x);
-        }
-
-        return hasPosition ? (min + max) * 0.5f : 0f;
-    }
-
-    private int GetBranchNodeOrder(SkillTreeNodeDefinition node)
-    {
-        if (skillTree == null || node == null)
-            return -1;
-
-        int order = 0;
-        foreach (SkillTreeNodeDefinition candidate in skillTree.Nodes)
-        {
-            if (candidate == null || candidate.Branch != node.Branch)
-                continue;
-
-            if (candidate == node)
-                return order;
-
-            order++;
-        }
-
-        return -1;
-    }
-
-    private int GetNodeDepth(
-        SkillTreeNodeDefinition node,
-        Dictionary<SkillTreeNodeDefinition, int> depths,
-        HashSet<SkillTreeNodeDefinition> visiting)
-    {
-        if (node == null)
-            return 0;
-
-        if (depths.TryGetValue(node, out int cachedDepth))
-            return cachedDepth;
-
-        if (!visiting.Add(node))
-            return 0;
-
-        int depth = 0;
-        foreach (SkillTreePrerequisite prerequisite in node.Prerequisites)
-        {
-            SkillTreeNodeDefinition prerequisiteNode = prerequisite?.Node;
-            if (prerequisiteNode == null)
-                continue;
-
-            depth = Mathf.Max(depth, GetNodeDepth(prerequisiteNode, depths, visiting) + 1);
-        }
-
-        visiting.Remove(node);
-        depths[node] = depth;
-        return depth;
-    }
-
-    private List<SkillTreeBranch> GetVisibleBranches()
-    {
-        List<SkillTreeBranch> branches = new();
-        foreach (SkillTreeNodeDefinition node in skillTree.Nodes)
-        {
-            if (node == null || branches.Contains(node.Branch))
-                continue;
-
-            branches.Add(node.Branch);
-        }
-
-        branches.Sort((a, b) => GetBranchColumn(a).CompareTo(GetBranchColumn(b)));
-        if (branches.Count == 0)
-            branches.Add(SkillTreeBranch.KnightDefense);
-
-        return branches;
-    }
-
-    private int GetNodeOrder(SkillTreeNodeDefinition node)
-    {
-        if (skillTree == null || node == null)
-            return int.MaxValue;
-
-        for (int i = 0; i < skillTree.Nodes.Count; i++)
-        {
-            if (skillTree.Nodes[i] == node)
-                return i;
-        }
-
-        return int.MaxValue;
-    }
-
-    private Vector2 GetScrollContentSize(IReadOnlyDictionary<SkillTreeNodeDefinition, Vector2> positions)
-    {
-        Vector2 size = new(Mathf.Max(1f, contentSize.x), Mathf.Max(1f, contentSize.y));
-        if (!autoExpandScrollContent || positions == null || positions.Count == 0)
+        Vector2 size = new(Mathf.Max(1f, treeContentSize.x), Mathf.Max(1f, treeContentSize.y));
+        if (!treeAutoExpand || positions == null || positions.Count == 0)
             return size;
 
         bool hasPosition = false;
@@ -1082,16 +1028,17 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         if (!hasPosition)
             return size;
 
-        Vector2 boundsSize = startTreeAtTop
-            ? max - min + new Vector2(GetMaxNodeFrameSize(), GetMaxNodeFrameSize()) + scrollContentPadding * 2f
-            : Vector2.Max(Abs(min), Abs(max)) * 2f + new Vector2(GetMaxNodeFrameSize(), GetMaxNodeFrameSize()) + scrollContentPadding * 2f;
+        Vector2 boundsSize = treeStartAtTop
+            ? max - min + new Vector2(GetMaxNodeFrameSize(), GetMaxNodeFrameSize()) + treeScrollPadding * 2f
+            : Vector2.Max(Abs(min), Abs(max)) * 2f + new Vector2(GetMaxNodeFrameSize(), GetMaxNodeFrameSize()) + treeScrollPadding * 2f;
 
         return Vector2.Max(size, boundsSize);
     }
 
     private Dictionary<SkillTreeNodeDefinition, Vector2> AlignPositionsToTop(
         IReadOnlyDictionary<SkillTreeNodeDefinition, Vector2> positions,
-        Vector2 scrollSize)
+        Vector2 scrollSize,
+        Vector2 treeScrollPadding)
     {
         Dictionary<SkillTreeNodeDefinition, Vector2> aligned = new();
         if (positions == null || positions.Count == 0)
@@ -1115,7 +1062,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
             max = Vector2.Max(max, position);
         }
 
-        float targetTopY = scrollSize.y * 0.5f - scrollContentPadding.y - GetMaxNodeFrameSize() * 0.5f;
+        float targetTopY = scrollSize.y * 0.5f - treeScrollPadding.y - GetMaxNodeFrameSize() * 0.5f;
         float yOffset = targetTopY - max.y;
         float xOffset = -(min.x + max.x) * 0.5f;
 
@@ -1130,31 +1077,6 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         return new Vector2(Mathf.Abs(value.x), Mathf.Abs(value.y));
     }
 
-    private Vector2 GetAutoPosition(SkillTreeBranch branch, Dictionary<SkillTreeBranch, int> branchRows)
-    {
-        branchRows.TryGetValue(branch, out int row);
-        branchRows[branch] = row + 1;
-
-        float column = GetBranchColumn(branch);
-        return new Vector2((column - 3.5f) * autoColumnSpacing, 180f - row * autoRowSpacing);
-    }
-
-    private static float GetBranchColumn(SkillTreeBranch branch)
-    {
-        return branch switch
-        {
-            SkillTreeBranch.KnightTechnique => 0f,
-            SkillTreeBranch.KnightDefense => 1f,
-            SkillTreeBranch.KnightControl => 2f,
-            SkillTreeBranch.GauntletFire => 3f,
-            SkillTreeBranch.GauntletFrost => 4f,
-            SkillTreeBranch.GauntletLightning => 5f,
-            SkillTreeBranch.GauntletPoison => 6f,
-            SkillTreeBranch.GauntletReaction => 7f,
-            _ => 0f
-        };
-    }
-
     private void CreateNodeLines(Transform parent, SkillTreeNodeDefinition node, IReadOnlyDictionary<SkillTreeNodeDefinition, Vector2> positions)
     {
         if (node == null || !positions.TryGetValue(node, out Vector2 to))
@@ -1167,48 +1089,6 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
                 continue;
 
             CreateLine(parent, $"Line_{fromNode.NodeId}_To_{node.NodeId}", from, to, GetConnectionLineColor(fromNode, node));
-        }
-    }
-
-    private void CreateBranchHeaders(Transform parent, IReadOnlyDictionary<SkillTreeNodeDefinition, Vector2> positions)
-    {
-        if (useAuthoredNodePositions || !useBranchColumnLayout || !showBranchHeaders || positions == null || positions.Count == 0)
-            return;
-
-        List<SkillTreeBranch> branches = GetVisibleBranches();
-        foreach (SkillTreeBranch branch in branches)
-        {
-            bool hasNode = false;
-            float xSum = 0f;
-            int count = 0;
-            float maxY = float.MinValue;
-
-            foreach (KeyValuePair<SkillTreeNodeDefinition, Vector2> pair in positions)
-            {
-                if (pair.Key == null || pair.Key.Branch != branch)
-                    continue;
-
-                hasNode = true;
-                xSum += pair.Value.x;
-                count++;
-                maxY = Mathf.Max(maxY, pair.Value.y);
-            }
-
-            if (!hasNode || count <= 0)
-                continue;
-
-            Vector2 position = new Vector2(xSum / count, maxY + branchHeaderOffsetY * contentScale);
-            TMP_Text header = CreateText(
-                parent,
-                $"Header_{branch}",
-                GetBranchDisplayName(branch),
-                Mathf.Max(8f, branchHeaderTextSize * contentScale),
-                TextAlignmentOptions.Center,
-                position,
-                new Vector2(Mathf.Max(120f, branchColumnSpacing * 0.9f) * contentScale, 38f * contentScale));
-
-            header.fontStyle = FontStyles.Bold;
-            header.color = new Color(0.9f, 0.96f, 1f, 0.9f);
         }
     }
 
@@ -1308,29 +1188,22 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         return Mathf.Max(1f, Mathf.Max(majorNodeSize, minorNodeSize));
     }
 
-    private static string GetBranchDisplayName(SkillTreeBranch branch)
-    {
-        return branch switch
-        {
-            SkillTreeBranch.KnightTechnique => "TECHNIQUE",
-            SkillTreeBranch.KnightDefense => "DEFENSE",
-            SkillTreeBranch.KnightControl => "CONTROL",
-            SkillTreeBranch.GauntletFire => "FIRE",
-            SkillTreeBranch.GauntletFrost => "FROST",
-            SkillTreeBranch.GauntletLightning => "LIGHTNING",
-            SkillTreeBranch.GauntletPoison => "POISON",
-            SkillTreeBranch.GauntletReaction => "REACTION",
-            _ => branch.ToString().ToUpperInvariant()
-        };
-    }
-
     private List<SkillTreeDefinition> GetBuildSkillTrees()
     {
         List<SkillTreeDefinition> trees = new();
-        if (skillTree != null)
+        if (buildAllClassSkillTrees)
+        {
+            foreach (SkillTreeDefinition classTree in classSkillTrees)
+            {
+                if (classTree != null && !IsElementalSkillTree(classTree) && !trees.Contains(classTree))
+                    trees.Add(classTree);
+            }
+        }
+
+        if (skillTree != null && !trees.Contains(skillTree))
             trees.Add(skillTree);
 
-        if (HasSecondarySkillTree())
+        if (HasSecondarySkillTree() && !trees.Contains(secondarySkillTree))
             trees.Add(secondarySkillTree);
 
         return trees;
@@ -1463,6 +1336,26 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
                 definition.Reaction != ElementalReactionType.None);
     }
 
+    private static bool IsElementalSkillTree(SkillTreeDefinition tree)
+    {
+        if (tree == null)
+            return false;
+
+        if (!string.IsNullOrWhiteSpace(tree.TreeId) &&
+            tree.TreeId.IndexOf("element", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return true;
+        }
+
+        foreach (SkillTreeNodeDefinition node in tree.Nodes)
+        {
+            if (IsElementalTreeNode(node))
+                return true;
+        }
+
+        return false;
+    }
+
     private Sprite GetFirstIcon()
     {
         foreach (SkillTreeNodeDefinition node in skillTree.Nodes)
@@ -1534,18 +1427,6 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         contentSize = new Vector2(1100f, 860f);
         contentOffset = Vector2.zero;
         contentScale = 1f;
-        useAuthoredNodePositions = true;
-        useBranchColumnLayout = false;
-        showBranchHeaders = false;
-        branchColumnSpacing = 300f;
-        branchRowSpacing = 112f;
-        branchSiblingSpacing = 86f;
-        branchStartY = 160f;
-        branchHeaderOffsetY = 92f;
-        branchHeaderTextSize = 18f;
-        useBranchLaneLayout = true;
-        branchLaneSpacing = 112f;
-        branchSameColumnSpacing = 62f;
         treeSwitcherSize = new Vector2(420f, 56f);
         treeSwitcherButtonSize = new Vector2(200f, 46f);
         treeSwitcherButtonSpacing = 20f;

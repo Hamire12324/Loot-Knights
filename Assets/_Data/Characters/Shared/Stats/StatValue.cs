@@ -89,59 +89,6 @@ public class StatValue
         equipmentModifiers.Clear();
         this.MarkDirty();
     }
-    public void ClearBuffModifiers()
-    {
-        buffModifiers.Clear();
-        this.MarkDirty();
-    }
-    public void AddFlatModifier(
-        StatType statType,
-        float amount,
-        UnityEngine.Object source = null,
-        float duration = -1f,
-        int stack = 1)
-    {
-        AddBuffModifier(
-            new StatModifier(
-                statType,
-                ModifierType.Flat,
-                amount,
-                source,
-                duration,
-                stack));
-    }
-    public void AddPercentAddModifier(
-        StatType statType,
-        float amount,
-        UnityEngine.Object source = null,
-        float duration = -1f,
-        int stack = 1)
-    {
-        AddBuffModifier(
-            new StatModifier(
-                statType,
-                ModifierType.PercentAdd,
-                amount,
-                source,
-                duration,
-                stack));
-    }
-    public void AddPercentMultiplyModifier(
-        StatType statType,
-        float amount,
-        UnityEngine.Object source = null,
-        float duration = -1f,
-        int stack = 1)
-    {
-        AddBuffModifier(
-            new StatModifier(
-                statType,
-                ModifierType.PercentMultiply,
-                amount,
-                source,
-                duration,
-                stack));
-    }
     private void Recalculate()
     {
         this.RemoveExpiredModifiers();

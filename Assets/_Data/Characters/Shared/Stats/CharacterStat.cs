@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CharacterStat : CharacterAbstract
 {
+    private static readonly StatType[] StatTypes = (StatType[])Enum.GetValues(typeof(StatType));
+
     [Header("Offense")]
     public StatValue Attack;
     public StatValue CritChance;
@@ -20,9 +22,6 @@ public class CharacterStat : CharacterAbstract
     public StatValue HealthRegen;
     public StatValue ManaRegen;
 
-    [SerializeField] private float previousMaxHealth;
-    public float PreviousMaxHealth => previousMaxHealth;
-
     [SerializeField] private float currentHealth;
     public float CurrentHealth => currentHealth;
 
@@ -35,7 +34,6 @@ public class CharacterStat : CharacterAbstract
         InitBaseStats();
 
         currentHealth = MaxHealth.FinalValue;
-        previousMaxHealth = MaxHealth.FinalValue;
 
         RegisterStatValueListeners();
     }
@@ -64,9 +62,9 @@ public class CharacterStat : CharacterAbstract
 
     private void RegisterStatValueListeners()
     {
-        foreach (StatType type in Enum.GetValues(typeof(StatType)))
+        foreach (StatType type in StatTypes)
         {
-            var stat = GetStat(type);
+            StatValue stat = GetStat(type);
 
             if (stat == null)
                 continue;
@@ -87,40 +85,37 @@ public class CharacterStat : CharacterAbstract
         OnHealthChanged?.Invoke(currentHealth);
     }
 
-    private void ClampHealthToMax()
-    {
-        if (MaxHealth == null) return;
-
-        if (currentHealth > MaxHealth.FinalValue)
-        {
-            SetCurrentHealth(MaxHealth.FinalValue);
-        }
-    }
-
     public virtual void RecalculateSkillTree(List<StatModifier> skillTreeModifiers)
     {
+        float previousMaxHealth = GetMaxHealth();
+        float previousCurrentHealth = currentHealth;
+
         ClearSkillTreeModifiers();
 
-        foreach (var mod in skillTreeModifiers)
+        if (skillTreeModifiers != null)
         {
-            GetStat(mod.StatType)?.AddSkillTreeModifier(mod);
+            foreach (StatModifier mod in skillTreeModifiers)
+            {
+                if (mod == null) continue;
+
+                GetStat(mod.StatType)?.AddSkillTreeModifier(mod);
+            }
         }
 
-        ClampHealthToMax();
-
+        ApplyMaxHealthDelta(previousMaxHealth, previousCurrentHealth);
         NotifyAllStatsChanged();
     }
 
     protected virtual void ClearSkillTreeModifiers()
     {
-        foreach (StatType type in Enum.GetValues(typeof(StatType)))
-        {
-            GetStat(type)?.ClearSkillTreeModifiers();
-        }
+        ForEachStat(stat => stat.ClearSkillTreeModifiers());
     }
 
     public virtual void RecalculateEquipment(IEnumerable<StatModifier> equipmentModifiers)
     {
+        float previousMaxHealth = GetMaxHealth();
+        float previousCurrentHealth = currentHealth;
+
         ClearEquipmentModifiers();
 
         if (equipmentModifiers != null)
@@ -133,47 +128,44 @@ public class CharacterStat : CharacterAbstract
             }
         }
 
-        ClampHealthToMax();
-
+        ApplyMaxHealthDelta(previousMaxHealth, previousCurrentHealth);
         NotifyAllStatsChanged();
     }
 
     protected virtual void ClearEquipmentModifiers()
     {
-        foreach (StatType type in Enum.GetValues(typeof(StatType)))
-        {
-            GetStat(type)?.ClearEquipmentModifiers();
-        }
+        ForEachStat(stat => stat.ClearEquipmentModifiers());
     }
 
     public virtual void ClearAllModifiers()
     {
-        foreach (StatType type in Enum.GetValues(typeof(StatType)))
-        {
-            GetStat(type)?.ClearAllModifiers();
-        }
+        float previousMaxHealth = GetMaxHealth();
+        float previousCurrentHealth = currentHealth;
 
-        ClampHealthToMax();
+        ForEachStat(stat => stat.ClearAllModifiers());
 
+        ApplyMaxHealthDelta(previousMaxHealth, previousCurrentHealth);
         NotifyAllStatsChanged();
     }
 
-    public virtual void RemoveModifiersFromSource(UnityEngine.Object source)
+    public virtual void RemoveModifiersFromSource(UnityEngine.Object source, bool updateHealthByMaxHealthDelta = true)
     {
         if (source == null) return;
 
-        foreach (StatType type in Enum.GetValues(typeof(StatType)))
-        {
-            GetStat(type)?.RemoveModifierFromSource(source);
-        }
+        float previousMaxHealth = GetMaxHealth();
+        float previousCurrentHealth = currentHealth;
 
-        ClampHealthToMax();
+        ForEachStat(stat => stat.RemoveModifierFromSource(source));
+
+        if (updateHealthByMaxHealthDelta)
+            ApplyMaxHealthDelta(previousMaxHealth, previousCurrentHealth);
+
         NotifyAllStatsChanged();
     }
 
     public void NotifyAllStatsChanged()
     {
-        foreach (StatType type in Enum.GetValues(typeof(StatType)))
+        foreach (StatType type in StatTypes)
         {
             NotifyStatChanged(type);
         }
@@ -203,6 +195,26 @@ public class CharacterStat : CharacterAbstract
         SetCurrentHealth(currentHealth + regenPerSecond * Time.deltaTime);
     }
 
+    public void ApplyMaxHealthDelta(float previousMaxHealth, float previousCurrentHealth)
+    {
+        SetCurrentHealth(previousCurrentHealth + GetMaxHealth() - previousMaxHealth);
+    }
+
+    private float GetMaxHealth()
+    {
+        return MaxHealth != null ? MaxHealth.FinalValue : 0f;
+    }
+
+    private void ForEachStat(Action<StatValue> action)
+    {
+        foreach (StatType type in StatTypes)
+        {
+            StatValue stat = GetStat(type);
+            if (stat != null)
+                action(stat);
+        }
+    }
+
     public virtual StatValue GetStat(StatType type)
     {
         return type switch
@@ -219,10 +231,5 @@ public class CharacterStat : CharacterAbstract
             StatType.ManaRegen => ManaRegen,
             _ => null
         };
-    }
-
-    public void SetPreviousMaxHealth(float value)
-    {
-        previousMaxHealth = value;
     }
 }

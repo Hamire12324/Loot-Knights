@@ -5,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class CharacterDamSender : CharacterAbstract
 {
+    private const int MaxOverlapResults = 20;
+
     [Header("Damage Settings")]
     [SerializeField] protected DamageData hitDamage;
 
@@ -12,124 +14,193 @@ public class CharacterDamSender : CharacterAbstract
     [SerializeField] private Collider2D hitboxCollider;
     [SerializeField] protected LayerMask targetLayer;
 
-    [Header("Runtime")]
-    [SerializeField, HideInInspector] 
-    private HashSet<CharacterDamReceiver> damagedTargets = new();
+    private readonly HashSet<CharacterDamReceiver> damagedTargets = new();
+    private readonly Dictionary<CharacterDamReceiver, Coroutine> dotCoroutines = new();
+    private readonly Collider2D[] overlapResults =
+        new Collider2D[MaxOverlapResults];
 
-    private Dictionary<CharacterDamReceiver, Coroutine> dotCoroutines = new();
     protected override void LoadComponents()
     {
         base.LoadComponents();
-
-        this.LoadCollider2D();
+        LoadCollider2D();
     }
+
     protected virtual void LoadCollider2D()
     {
-        if (this.hitboxCollider != null) return;
-        this.hitboxCollider = GetComponent<Collider2D>();
-        Debug.Log(transform.name + ": LoadCollider2D", gameObject);
-    }
-    public void DealHitboxDamage()
-    {
-        if (hitboxCollider == null) return;
+        if (hitboxCollider != null) return;
 
-        ContactFilter2D filter = new ContactFilter2D();
+        hitboxCollider = GetComponent<Collider2D>();
+        Debug.Log($"{transform.name}: LoadCollider2D", gameObject);
+    }
+
+    public virtual void DealHitboxDamage()
+    {
+        if (hitboxCollider == null || characterCtrl == null)
+            return;
+
+        ContactFilter2D filter = new();
         filter.SetLayerMask(targetLayer);
         filter.useTriggers = true;
 
-        Collider2D[] results = new Collider2D[20];
-        int count = hitboxCollider.Overlap(filter, results);
+        int count = hitboxCollider.Overlap(filter, overlapResults);
 
         for (int i = 0; i < count; i++)
         {
-            Collider2D hitCollider = results[i];
-            CharacterCtrl targetCtrl = hitCollider.GetComponentInParent<CharacterCtrl>();
-            if (targetCtrl == null) continue;
-            if (targetCtrl == characterCtrl) continue;
-            if (!IsTargetBodyCollider(hitCollider, targetCtrl)) continue;
-            if (targetCtrl.CharacterDamReceiver == null || targetCtrl.CharacterDamReceiver.IsDead) continue;
+            Collider2D hitCollider = overlapResults[i];
 
-            CharacterDamReceiver receiver = targetCtrl.CharacterDamReceiver;
-            if (CharacterCtrl == null || targetCtrl.Faction == characterCtrl.Faction) continue;
-            if (!FactionManager.CanAttack(CharacterCtrl.Faction, targetCtrl.Faction)) continue;
+            CharacterCtrl targetCtrl =
+                hitCollider.GetComponentInParent<CharacterCtrl>();
 
-            if (!damagedTargets.Add(receiver)) continue;
+            if (!IsValidTarget(hitCollider, targetCtrl))
+                continue;
 
-            this.DealDamage(receiver);
+            CharacterDamReceiver receiver =
+                targetCtrl.CharacterDamReceiver;
+
+            if (!damagedTargets.Add(receiver))
+                continue;
+
+            DealDamage(receiver);
         }
     }
-    private bool IsTargetBodyCollider(Collider2D hitCollider, CharacterCtrl targetCtrl)
+
+    protected virtual bool IsValidTarget(
+        Collider2D hitCollider,
+        CharacterCtrl targetCtrl)
     {
-        if (hitCollider == null || targetCtrl == null) return false;
+        if (targetCtrl == null || targetCtrl == characterCtrl)
+            return false;
 
-        Collider2D targetCollider = targetCtrl.Collider2D;
-        if (targetCollider == null)
-            targetCollider = targetCtrl.GetComponent<Collider2D>();
+        CharacterDamReceiver receiver =
+            targetCtrl.CharacterDamReceiver;
 
-        return hitCollider == targetCollider;
+        if (receiver == null || receiver.IsDead)
+            return false;
+
+        if (!IsTargetBodyCollider(hitCollider, targetCtrl))
+            return false;
+
+        return FactionManager.CanAttack(
+            characterCtrl.Faction,
+            targetCtrl.Faction);
     }
+
+    private bool IsTargetBodyCollider(
+        Collider2D hitCollider,
+        CharacterCtrl targetCtrl)
+    {
+        Collider2D bodyCollider = targetCtrl.Collider2D;
+
+        if (bodyCollider == null)
+            bodyCollider = targetCtrl.GetComponent<Collider2D>();
+
+        return hitCollider == bodyCollider;
+    }
+
     public virtual void DealDamage(CharacterDamReceiver target)
     {
-        if (target == null || target.IsDead) return;
+        if (target == null || target.IsDead)
+            return;
 
-        float finalDamage = CalculateDamage();
-        target.ReceiveDamage(finalDamage, this.transform, hitDamage);
-
+        target.ReceiveDamage(
+            CalculateDamage(),
+            transform,
+            hitDamage
+        );
     }
-    public virtual void DealDamageOverTime(CharacterDamReceiver target, float totalDamage, float duration, int ticks = 5)
+
+    public virtual void DealDamageOverTime(
+        CharacterDamReceiver target,
+        float totalDamage,
+        float duration,
+        int ticks = 5)
     {
-        if (target == null || target.IsDead) return;
+        if (target == null || target.IsDead)
+            return;
 
-        if (dotCoroutines.TryGetValue(target, out var existing))
+        ticks = Mathf.Max(1, ticks);
+        duration = Mathf.Max(0f, duration);
+
+        if (dotCoroutines.TryGetValue(target, out Coroutine existing))
+        {
             StopCoroutine(existing);
+            dotCoroutines.Remove(target);
+        }
 
-        Coroutine c = StartCoroutine(DamageOverTimeCoroutine(target, totalDamage, duration, ticks));
-        dotCoroutines[target] = c;
+        Coroutine coroutine = StartCoroutine(
+            DamageOverTimeCoroutine(
+                target,
+                totalDamage,
+                duration,
+                ticks
+            )
+        );
+
+        dotCoroutines[target] = coroutine;
     }
-    private IEnumerator DamageOverTimeCoroutine(CharacterDamReceiver target, float totalDamage, float duration, int ticks)
+
+    private IEnumerator DamageOverTimeCoroutine(
+        CharacterDamReceiver target,
+        float totalDamage,
+        float duration,
+        int ticks)
     {
         float damagePerTick = totalDamage / ticks;
         float interval = duration / ticks;
 
         for (int i = 0; i < ticks; i++)
         {
-            if (target == null || target.IsDead) yield break;
+            if (target == null || target.IsDead)
+            {
+                dotCoroutines.Remove(target);
+                yield break;
+            }
 
             target.ReceiveDamage(damagePerTick);
-            yield return new WaitForSeconds(interval);
+
+            if (i < ticks - 1 && interval > 0f)
+                yield return new WaitForSeconds(interval);
         }
 
         dotCoroutines.Remove(target);
     }
+
     protected virtual float CalculateDamage()
     {
-        if (characterCtrl == null || characterCtrl.CharacterStat == null)
+        if (characterCtrl?.CharacterStat == null)
             return 0f;
 
-        var stats = characterCtrl.CharacterStat;
+        CharacterStat stats = characterCtrl.CharacterStat;
 
-        float damageMultiplier = hitDamage != null ? hitDamage.Multiplier : 1f;
-        float damage = stats.Attack.FinalValue * damageMultiplier;
+        float multiplier = hitDamage?.Multiplier ?? 1f;
+        float damage = stats.Attack.FinalValue * multiplier;
 
         if (hitDamage != null &&
             hitDamage.CanCrit &&
-            Random.value <= stats.CritChance.FinalValue)
+            Random.value <= Mathf.Clamp01(stats.CritChance.FinalValue))
         {
             damage *= stats.CritDamage.FinalValue;
         }
 
         return damage;
     }
-    public void EnableHitbox()
+
+    public virtual void EnableHitbox()
     {
         damagedTargets.Clear();
-        if (hitboxCollider != null) hitboxCollider.enabled = true;
+
+        if (hitboxCollider != null)
+            hitboxCollider.enabled = true;
     }
 
-    public void DisableHitbox()
+    public virtual void DisableHitbox()
     {
-        damagedTargets.Clear();
-        if (hitboxCollider != null) hitboxCollider.enabled = false;
+        if (hitboxCollider != null)
+            hitboxCollider.enabled = false;
     }
-    public void SetDamageData(DamageData data) => hitDamage = data;
+
+    public virtual void SetDamageData(DamageData data)
+    {
+        hitDamage = data;
+    }
 }
