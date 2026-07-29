@@ -164,6 +164,14 @@ public class EnemyAIController : CharacterAbstract
 
         nextTargetRefreshTime = Time.time + targetRefreshInterval;
 
+        Transform decoyTarget = ArcherAfterimageDecoy.FindClosest(characterCtrl.transform.position, loseRange);
+        if (decoyTarget != null && target != decoyTarget)
+        {
+            target = decoyTarget;
+            characterCtrl.CharacterTargetFinder?.SetTarget(target);
+            return;
+        }
+
         if (IsTargetValid() && GetTargetDistance() <= loseRange) return;
 
         target = characterCtrl.CharacterTargetFinder != null
@@ -188,6 +196,9 @@ public class EnemyAIController : CharacterAbstract
 
     private bool IsTargetValid()
     {
+        if (ArcherAfterimageDecoy.IsValidTarget(target))
+            return true;
+
         return GetTargetReceiver() != null;
     }
 
@@ -265,7 +276,7 @@ public class EnemyAIController : CharacterAbstract
     private bool TryReserveAttackSlot()
     {
         CharacterDamReceiver receiver = GetTargetReceiver();
-        if (receiver == null) return false;
+        if (receiver == null) return ArcherAfterimageDecoy.IsValidTarget(target);
 
         if (reservedAttackTarget == receiver)
             return true;

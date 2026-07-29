@@ -53,7 +53,8 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     [SerializeField, Range(0.45f, 0.85f)] private float detailHeightRatio = 0.68f;
     [SerializeField] private Vector2 contentSize = new(1100f, 860f);
     [SerializeField] private Vector2 contentOffset = Vector2.zero;
-    [SerializeField, Range(0.75f, 2.25f)] private float contentScale = 1f;
+    [SerializeField, HideInInspector] private float contentScale = 1f;
+    [SerializeField] private Vector2 contentScale2D = Vector2.one;
     [SerializeField] private Vector2 skillPointsInset = new(30f, 54f);
     [SerializeField] private Vector2 skillPointsSize = new(180f, 28f);
     [SerializeField] private float skillPointsTextSize = 16f;
@@ -216,7 +217,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
 
         DrawGroup(so, "Tree Switcher", nameof(buildTreeSwitcher), nameof(primarySkillTreeLabel), nameof(secondarySkillTreeLabel), nameof(treeSwitcherInset), nameof(treeSwitcherSize), nameof(treeSwitcherButtonSize), nameof(treeSwitcherButtonSpacing), nameof(treeSwitcherTextSize));
         DrawGroup(so, "Skill Trees", nameof(buildAllClassSkillTrees), nameof(classSkillTrees));
-        DrawGroup(so, "Layout", nameof(treeWidthRatio), nameof(padding), nameof(panelGap), nameof(treeInnerPadding), nameof(treeClipHorizontalPadding), nameof(treeClipTopPadding), nameof(treeClipBottomPadding), nameof(detailHeightRatio), nameof(contentSize), nameof(contentOffset), nameof(contentScale), nameof(skillPointsInset), nameof(skillPointsSize), nameof(skillPointsTextSize), nameof(resetButtonInset), nameof(resetButtonSize), nameof(resetButtonTextSize), nameof(resetButtonTopRight), nameof(autoExpandScrollContent), nameof(scrollContentPadding), nameof(horizontalScroll), nameof(startTreeAtTop), nameof(scrollSensitivity));
+        DrawGroup(so, "Layout", nameof(treeWidthRatio), nameof(padding), nameof(panelGap), nameof(treeInnerPadding), nameof(treeClipHorizontalPadding), nameof(treeClipTopPadding), nameof(treeClipBottomPadding), nameof(detailHeightRatio), nameof(contentSize), nameof(contentOffset), nameof(contentScale2D), nameof(skillPointsInset), nameof(skillPointsSize), nameof(skillPointsTextSize), nameof(resetButtonInset), nameof(resetButtonSize), nameof(resetButtonTextSize), nameof(resetButtonTopRight), nameof(autoExpandScrollContent), nameof(scrollContentPadding), nameof(horizontalScroll), nameof(startTreeAtTop), nameof(scrollSensitivity));
         DrawGroup(so, "Node", nameof(nodeSize), nameof(iconSize), nameof(lineThickness), nameof(textSize), nameof(nodeIconFramePadding), nameof(useMajorMinorNodeSizes), nameof(majorNodeSize), nameof(majorIconSize), nameof(minorNodeSize), nameof(minorIconSize), nameof(showNodeRankText), nameof(showNodeCostText), nameof(nodeRankTextOffset), nameof(nodeCostTextOffset));
         DrawGroup(so, "Equip Skills", nameof(equipSlotCount), nameof(equipContentScale), nameof(equipSlotSize), nameof(equipSlotIconSize), nameof(equipSlotSpacing), nameof(equipIndexSpacingOffset), nameof(equipIndexTextOffset), nameof(equipIndexTextSize), nameof(equipTitleHeight), nameof(equipPanelInnerPadding));
         DrawGroup(so, "Detail Content", nameof(detailContentScale), nameof(detailIconSize), nameof(detailTextWidth), nameof(detailButtonSize), nameof(detailTitleFontSize), nameof(detailBodyFontSize), nameof(detailCostInset), nameof(detailCostSize));
@@ -910,9 +911,16 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         return GetTreeViewSettings(tree)?.ContentOffset ?? contentOffset;
     }
 
-    private float GetContentScale(SkillTreeDefinition tree)
+    private Vector2 GetContentScale(SkillTreeDefinition tree)
     {
-        return GetTreeViewSettings(tree)?.ContentScale ?? Mathf.Max(0.01f, contentScale);
+        SkillTreeViewSettings settings = GetTreeViewSettings(tree);
+        if (settings != null)
+            return settings.ContentScale2D;
+
+        if (contentScale2D.x <= 0f || contentScale2D.y <= 0f)
+            contentScale2D = new Vector2(contentScale, contentScale);
+
+        return new Vector2(Mathf.Max(0.01f, contentScale2D.x), Mathf.Max(0.01f, contentScale2D.y));
     }
 
     private bool GetAutoExpandScrollContent(SkillTreeDefinition tree)
@@ -960,14 +968,14 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     private Dictionary<SkillTreeNodeDefinition, Vector2> GetNodePositions(out Vector2 scrollSize)
     {
         Dictionary<SkillTreeNodeDefinition, Vector2> positions = new();
-        float treeContentScale = GetContentScale(skillTree);
+        Vector2 treeContentScale = GetContentScale(skillTree);
         Vector2 treeContentOffset = GetContentOffset(skillTree);
 
         foreach (SkillTreeNodeDefinition node in skillTree.Nodes)
         {
             if (node == null) continue;
 
-            positions[node] = node.TreePosition * treeContentScale;
+            positions[node] = Vector2.Scale(node.TreePosition, treeContentScale);
         }
 
         scrollSize = GetScrollContentSize(positions, skillTree);
@@ -1095,7 +1103,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     private void CreateSkillNode(Transform parent, SkillTreeNodeDefinition definition, Vector2 position)
     {
         float frameSize = GetNodeFrameSize(definition);
-        float iconSizeValue = Mathf.Min(GetNodeIconSize(definition), Mathf.Max(1f, frameSize - Mathf.Max(0f, nodeIconFramePadding) * 2f));
+        float iconSizeValue = Mathf.Min(GetNodeIconSize(definition), Mathf.Max(1f, frameSize - GetNodeIconFramePadding(skillTree) * 2f));
 
         RectTransform node = CreatePanel(parent, $"Node_{SanitizeName(definition.NodeId)}", nodeSprite);
         SetCentered(node, position, new Vector2(frameSize, frameSize));
@@ -1153,7 +1161,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
 
     private bool IsMajorNode(SkillTreeNodeDefinition definition)
     {
-        if (!useMajorMinorNodeSizes || definition == null)
+        if (!GetUseMajorMinorNodeSizes(skillTree) || definition == null)
             return true;
 
         return definition.Kind == SkillTreeNodeKind.ActiveSkill ||
@@ -1166,26 +1174,45 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
 
     private float GetNodeFrameSize(SkillTreeNodeDefinition definition)
     {
-        if (!useMajorMinorNodeSizes)
-            return Mathf.Max(1f, nodeSize);
+        SkillTreeViewSettings settings = GetTreeViewSettings(skillTree);
+        if (!GetUseMajorMinorNodeSizes(skillTree))
+            return settings != null ? settings.NodeSize : Mathf.Max(1f, nodeSize);
 
-        return Mathf.Max(1f, IsMajorNode(definition) ? majorNodeSize : minorNodeSize);
+        return IsMajorNode(definition)
+            ? (settings != null ? settings.MajorNodeSize : Mathf.Max(1f, majorNodeSize))
+            : (settings != null ? settings.MinorNodeSize : Mathf.Max(1f, minorNodeSize));
     }
 
     private float GetNodeIconSize(SkillTreeNodeDefinition definition)
     {
-        if (!useMajorMinorNodeSizes)
-            return Mathf.Max(1f, iconSize);
+        SkillTreeViewSettings settings = GetTreeViewSettings(skillTree);
+        if (!GetUseMajorMinorNodeSizes(skillTree))
+            return settings != null ? settings.IconSize : Mathf.Max(1f, iconSize);
 
-        return Mathf.Max(1f, IsMajorNode(definition) ? majorIconSize : minorIconSize);
+        return IsMajorNode(definition)
+            ? (settings != null ? settings.MajorIconSize : Mathf.Max(1f, majorIconSize))
+            : (settings != null ? settings.MinorIconSize : Mathf.Max(1f, minorIconSize));
     }
 
     private float GetMaxNodeFrameSize()
     {
-        if (!useMajorMinorNodeSizes)
-            return Mathf.Max(1f, nodeSize);
+        SkillTreeViewSettings settings = GetTreeViewSettings(skillTree);
+        if (!GetUseMajorMinorNodeSizes(skillTree))
+            return settings != null ? settings.NodeSize : Mathf.Max(1f, nodeSize);
 
-        return Mathf.Max(1f, Mathf.Max(majorNodeSize, minorNodeSize));
+        float major = settings != null ? settings.MajorNodeSize : Mathf.Max(1f, majorNodeSize);
+        float minor = settings != null ? settings.MinorNodeSize : Mathf.Max(1f, minorNodeSize);
+        return Mathf.Max(1f, Mathf.Max(major, minor));
+    }
+
+    private bool GetUseMajorMinorNodeSizes(SkillTreeDefinition tree)
+    {
+        return GetTreeViewSettings(tree)?.UseMajorMinorNodeSizes ?? useMajorMinorNodeSizes;
+    }
+
+    private float GetNodeIconFramePadding(SkillTreeDefinition tree)
+    {
+        return GetTreeViewSettings(tree)?.NodeIconFramePadding ?? Mathf.Max(0f, nodeIconFramePadding);
     }
 
     private List<SkillTreeDefinition> GetBuildSkillTrees()
@@ -1427,6 +1454,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         contentSize = new Vector2(1100f, 860f);
         contentOffset = Vector2.zero;
         contentScale = 1f;
+        contentScale2D = Vector2.one;
         treeSwitcherSize = new Vector2(420f, 56f);
         treeSwitcherButtonSize = new Vector2(200f, 46f);
         treeSwitcherButtonSpacing = 20f;

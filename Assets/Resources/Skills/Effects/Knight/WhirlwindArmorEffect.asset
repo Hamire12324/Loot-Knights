@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a092a5350ceb46f1b7d850b8361daa2b, type: 3}
+  m_Name: WhirlwindArmorEffect
+  m_EditorClassIdentifier: 
+  applyToCaster: 1
+  statType: 2
+  modifierType: 0
+  amount: 0
+  duration: 2.2
+  skillTreeNodeId: knight.spinning_guard
+  amountPerRank: 1.5
+  durationPerRank: 0.2
+  vfx: {fileID: 0}
+  vfxInterval: 0.65

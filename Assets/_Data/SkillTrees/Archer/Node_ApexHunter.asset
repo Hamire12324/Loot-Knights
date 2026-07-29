@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
+  m_Name: Node_ApexHunter
+  m_EditorClassIdentifier: 
+  nodeId: archer.apex_hunter
+  displayName: Apex Hunter
+  description: "Final Archer mastery. Combines the class path into a finishing hunter stance with bonus Attack, Crit Chance, and Crit Damage."
+  icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
+  kind: 0
+  branch: 8
+  treePosition: {x: 0, y: -450}
+  maxRank: 1
+  pointCost: 3
+  requiredPlayerLevel: 12
+  prerequisites:
+  - node: {fileID: 11400000, guid: b82d04cc4e25408c9ed09aa208174d62, type: 2}
+    requiredRank: 1
+  - node: {fileID: 11400000, guid: d44d87611bd544438da149638bd0d7ce, type: 2}
+    requiredRank: 1
+  - node: {fileID: 11400000, guid: f74ac743338444048154108a755ca2ae, type: 2}
+    requiredRank: 1
+  - node: {fileID: 11400000, guid: bc695a47929b47c69339bb604caf2a9e, type: 2}
+    requiredRank: 1
+  scaleStatModifiersByRank: 1
+  statModifiers:
+  - statType: 1
+    modifierType: 0
+    amount: 8
+  - statType: 7
+    modifierType: 0
+    amount: 0.1
+  - statType: 8
+    modifierType: 0
+    amount: 0.15
+  activeSkill: {fileID: 0}
+  preferredEquipSlot: -1
+  element: 0
+  reaction: 0

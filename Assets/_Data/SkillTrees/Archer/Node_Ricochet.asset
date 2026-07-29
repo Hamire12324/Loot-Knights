@@ -12,24 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
   m_Name: Node_Ricochet
   m_EditorClassIdentifier: 
-  nodeId: archer.ricochet
-  displayName: Ricochet
-  description: '+4 Attack. Opens trick shot routes.'
-  icon: {fileID: 0}
-  kind: 0
-  branch: 10
-  treePosition: {x: 520, y: -20}
+  nodeId: archer.recall_arrow.soul_tether
+  displayName: Soul Tether
+  description: The arrow attaches an energy tether to the first target hit; on return,
+    it pulls the target or staggers large enemies.
+  icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
+  kind: 2
+  branch: 9
+  treePosition: {x: -450, y: -190}
   maxRank: 1
-  pointCost: 1
-  requiredPlayerLevel: 1
+  pointCost: 2
+  requiredPlayerLevel: 6
   prerequisites:
-  - node: {fileID: 11400000, guid: 50c28b4bd28b4525a3d14febc3fa2510, type: 2}
+  - node: {fileID: 11400000, guid: 1ed340f62af54dd8807725fdca99d126, type: 2}
     requiredRank: 1
   scaleStatModifiersByRank: 1
-  statModifiers:
-  - statType: 1
-    modifierType: 0
-    amount: 4
+  statModifiers: []
   activeSkill: {fileID: 0}
   preferredEquipSlot: -1
   element: 0

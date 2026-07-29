@@ -12,20 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
   m_Name: Node_PowerShot
   m_EditorClassIdentifier: 
-  nodeId: archer.power_shot
-  displayName: Power Shot
-  description: Basic Shot and Piercing Shot gain +8% Attack damage per rank.
+  nodeId: archer.shockbind_arrow.chain_radius
+  displayName: Binding Radius
+  description: Increases Shockbind Arrow's chain stun radius by 0.35 units per rank.
   icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
   kind: 2
-  branch: 8
-  treePosition: {x: -420, y: -170}
+  branch: 10
+  treePosition: {x: -200, y: -70}
   maxRank: 3
   pointCost: 1
   requiredPlayerLevel: 4
   prerequisites:
   - node: {fileID: 11400000, guid: ae886e89c2b043cfbede92f04da2e3f6, type: 2}
-    requiredRank: 1
-  - node: {fileID: 11400000, guid: 1bc74ca590f948b1b86d511331247fa4, type: 2}
     requiredRank: 1
   scaleStatModifiersByRank: 1
   statModifiers: []

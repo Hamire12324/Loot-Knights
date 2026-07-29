@@ -12,26 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
   m_Name: Node_WindRunner
   m_EditorClassIdentifier: 
-  nodeId: archer.wind_runner
-  displayName: Wind Runner
-  description: '+4% Attack Speed. Fire faster while repositioning.'
-  icon: {fileID: 0}
-  kind: 0
+  nodeId: archer.arrowstep.silent_footwork
+  displayName: Silent Footwork
+  description: After dashing, briefly ignore enemy collision and gain movement speed.
+  icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
+  kind: 2
   branch: 9
-  treePosition: {x: 410, y: -160}
+  treePosition: {x: 50, y: -70}
   maxRank: 1
   pointCost: 1
-  requiredPlayerLevel: 1
+  requiredPlayerLevel: 4
   prerequisites:
-  - node: {fileID: 11400000, guid: bae83f5e18fc4044a5db77ff3a883f88, type: 2}
-    requiredRank: 1
-  - node: {fileID: 11400000, guid: 45d43c07812b47cca9346ce9fa130ed4, type: 2}
+  - node: {fileID: 11400000, guid: ec1bdc0f1bc74fbf89b4325a25166acb, type: 2}
     requiredRank: 1
   scaleStatModifiersByRank: 1
-  statModifiers:
-  - statType: 6
-    modifierType: 0
-    amount: 0.04
+  statModifiers: []
   activeSkill: {fileID: 0}
   preferredEquipSlot: -1
   element: 0

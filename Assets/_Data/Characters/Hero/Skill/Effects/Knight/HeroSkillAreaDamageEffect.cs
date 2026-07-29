@@ -106,18 +106,11 @@ public class HeroSkillAreaDamageEffect : CharacterSkillEffectDefinition
 
     private float CalculateDamage(CharacterCtrl caster, int shieldWallRank)
     {
-        float multiplier = damageData != null ? damageData.Multiplier : 1f;
-        multiplier += shieldWallRank * 0.06f;
-        float damage = caster.CharacterStat.Attack.FinalValue * multiplier + flatBonusDamage;
-
-        if (damageData != null &&
-            damageData.CanCrit &&
-            Random.value <= caster.CharacterStat.CritChance.FinalValue)
-        {
-            damage *= caster.CharacterStat.CritDamage.FinalValue;
-        }
-
-        return damage;
+        return CharacterSkillDamageUtility.CalculateDamage(
+            caster,
+            damageData,
+            flatBonusDamage,
+            shieldWallRank * 0.06f);
     }
 
     private void ApplyShieldWallArmor(CharacterCtrl caster, int rank)

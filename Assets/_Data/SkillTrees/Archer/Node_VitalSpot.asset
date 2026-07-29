@@ -12,24 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
   m_Name: Node_VitalSpot
   m_EditorClassIdentifier: 
-  nodeId: archer.vital_spot
-  displayName: Vital Spot
-  description: '+3% Crit Chance. Helps arrows find weak points.'
-  icon: {fileID: 0}
-  kind: 0
+  nodeId: archer.heartseeker.hawk_avatar
+  displayName: Hawk Avatar
+  description: "All arrows combine into an energy hawk that marks enemies, dives into the primary target, and explodes in an area."
+  icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
+  kind: 2
   branch: 8
-  treePosition: {x: 80, y: 10}
+  treePosition: {x: 350, y: -70}
   maxRank: 1
-  pointCost: 1
-  requiredPlayerLevel: 1
+  pointCost: 2
+  requiredPlayerLevel: 6
   prerequisites:
   - node: {fileID: 11400000, guid: b2e9b0368b984bcf81f1ab0560934b6b, type: 2}
     requiredRank: 1
   scaleStatModifiersByRank: 1
-  statModifiers:
-  - statType: 7
-    modifierType: 0
-    amount: 0.03
+  statModifiers: []
   activeSkill: {fileID: 0}
   preferredEquipSlot: -1
   element: 0

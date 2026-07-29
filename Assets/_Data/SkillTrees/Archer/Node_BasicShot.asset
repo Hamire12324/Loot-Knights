@@ -12,21 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
   m_Name: Node_BasicShot
   m_EditorClassIdentifier: 
-  nodeId: archer.basic_shot
-  displayName: Basic Shot
-  description: Unlock Basic Shot. Fires an arrow for 90% Attack damage with a short
-    cooldown.
+  nodeId: archer.heartseeker_volley
+  displayName: Heartseeker Barrage
+  description: "Unlock the Ultimate: fire a fixed barrage at the best target. Stored Ultimate Charges add extra arrows to the barrage."
   icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
   kind: 1
   branch: 8
-  treePosition: {x: 0, y: 300}
+  treePosition: {x: 390, y: 170}
   maxRank: 1
   pointCost: 1
   requiredPlayerLevel: 1
-  prerequisites: []
+  prerequisites:
+  - node: {fileID: 11400000, guid: d72f38ef732241c9a7d07b4208f24f91, type: 2}
+    requiredRank: 1
   scaleStatModifiersByRank: 1
   statModifiers: []
-  activeSkill: {fileID: 11400000, guid: d6ad3815ec17414e849c7e6dd327ca04, type: 2}
-  preferredEquipSlot: 0
+  activeSkill: {fileID: 11400000, guid: 731f8544eed242d6a28ad7d63b4e780e, type: 2}
+  preferredEquipSlot: 3
   element: 0
   reaction: 0

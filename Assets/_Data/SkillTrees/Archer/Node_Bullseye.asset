@@ -12,26 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
   m_Name: Node_Bullseye
   m_EditorClassIdentifier: 
-  nodeId: archer.bullseye
-  displayName: Bullseye
-  description: '+12% Crit Damage. Rewards precision shots.'
-  icon: {fileID: 0}
+  nodeId: archer.shockbind_arrow.deep_stun
+  displayName: Deep Stun
+  description: Increases Shockbind Arrow stun duration by 0.25 seconds per rank.
+  icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
   kind: 2
-  branch: 8
-  treePosition: {x: 80, y: -170}
-  maxRank: 1
+  branch: 10
+  treePosition: {x: -210, y: 50}
+  maxRank: 3
   pointCost: 1
-  requiredPlayerLevel: 1
+  requiredPlayerLevel: 2
   prerequisites:
-  - node: {fileID: 11400000, guid: 62166832d7fc45e58e16d6d373fbe057, type: 2}
-    requiredRank: 1
-  - node: {fileID: 11400000, guid: 43fcb3f45b2c4c6d8a190251d1f72676, type: 2}
+  - node: {fileID: 11400000, guid: e0966902914b4ae9a49d9ef8a3b49a45, type: 2}
     requiredRank: 1
   scaleStatModifiersByRank: 1
-  statModifiers:
-  - statType: 8
-    modifierType: 0
-    amount: 0.12
+  statModifiers: []
   activeSkill: {fileID: 0}
   preferredEquipSlot: -1
   element: 0

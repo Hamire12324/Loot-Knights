@@ -12,24 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
   m_Name: Node_EvasiveRoll
   m_EditorClassIdentifier: 
-  nodeId: archer.evasive_roll
-  displayName: Evasive Roll
-  description: '+3 Armor. Helps survive close pressure.'
-  icon: {fileID: 0}
-  kind: 0
+  nodeId: archer.arrowstep.hunter_afterimage
+  displayName: Hunter Afterimage
+  description: "After dashing, leave an afterimage for 2 seconds. Nearby enemies prioritize attacking it."
+  icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
+  kind: 2
   branch: 9
-  treePosition: {x: 420, y: 0}
+  treePosition: {x: 50, y: 50}
   maxRank: 1
   pointCost: 1
-  requiredPlayerLevel: 1
+  requiredPlayerLevel: 2
   prerequisites:
-  - node: {fileID: 11400000, guid: 0ab338d7277a4f75b8130743a1558371, type: 2}
+  - node: {fileID: 11400000, guid: 62166832d7fc45e58e16d6d373fbe057, type: 2}
     requiredRank: 1
   scaleStatModifiersByRank: 1
-  statModifiers:
-  - statType: 2
-    modifierType: 0
-    amount: 3
+  statModifiers: []
   activeSkill: {fileID: 0}
   preferredEquipSlot: -1
   element: 0

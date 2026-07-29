@@ -9,6 +9,7 @@ public class HeroSkillSlotUI : BaseMonoBehaviour
     [SerializeField] private Image icon;
     [SerializeField] private Image cooldownOverlay;
     [SerializeField] private TMP_Text cooldownText;
+    [SerializeField] private TMP_Text ultimateChargeText;
     [SerializeField] private Sprite emptyIcon;
     [SerializeField] private Color lockedColor = new(0.45f, 0.45f, 0.45f, 1f);
     [SerializeField] private Color readyColor = Color.white;
@@ -33,6 +34,7 @@ public class HeroSkillSlotUI : BaseMonoBehaviour
         base.Update();
         RebindIfRuntimeChanged();
         RefreshCooldown();
+        RefreshUltimateCharge();
     }
 
     protected override void LoadComponents()
@@ -129,6 +131,27 @@ public class HeroSkillSlotUI : BaseMonoBehaviour
         cooldownText.text = remaining > 0.05f ? Mathf.CeilToInt(remaining).ToString() : "";
     }
 
+    private void RefreshUltimateCharge()
+    {
+        bool shouldShow = !isSpecialSkill && skillIndex == 3;
+        if (!shouldShow)
+        {
+            if (ultimateChargeText != null)
+                ultimateChargeText.gameObject.SetActive(false);
+            return;
+        }
+
+        LoadUltimateChargeText();
+
+        if (ultimateChargeText == null)
+            return;
+
+        HeroCtrl hero = HeroCtrl.GetLocal();
+        int charges = hero != null ? ArcherUltimateCharge.GetCharges(hero) : 0;
+        ultimateChargeText.text = charges.ToString();
+        ultimateChargeText.gameObject.SetActive(true);
+    }
+
     private void LoadIcon()
     {
         if (icon != null) return;
@@ -152,5 +175,34 @@ public class HeroSkillSlotUI : BaseMonoBehaviour
         if (cooldownText != null) return;
 
         cooldownText = GetComponentInChildren<TMP_Text>(true);
+    }
+
+    private void LoadUltimateChargeText()
+    {
+        if (ultimateChargeText != null)
+            return;
+
+        Transform child = transform.Find("UltimateChargeText");
+        if (child != null)
+            ultimateChargeText = child.GetComponent<TMP_Text>();
+
+        if (ultimateChargeText != null)
+            return;
+
+        GameObject textObject = new("UltimateChargeText");
+        textObject.transform.SetParent(transform, false);
+        ultimateChargeText = textObject.AddComponent<TextMeshProUGUI>();
+        ultimateChargeText.alignment = TextAlignmentOptions.Center;
+        ultimateChargeText.fontSize = 24f;
+        ultimateChargeText.fontStyle = FontStyles.Bold;
+        ultimateChargeText.color = new Color(1f, 0.95f, 0.55f, 1f);
+        ultimateChargeText.raycastTarget = false;
+
+        RectTransform rect = ultimateChargeText.rectTransform;
+        rect.anchorMin = new Vector2(1f, 0.5f);
+        rect.anchorMax = new Vector2(1f, 0.5f);
+        rect.pivot = new Vector2(0f, 0.5f);
+        rect.anchoredPosition = new Vector2(8f, 0f);
+        rect.sizeDelta = new Vector2(42f, 30f);
     }
 }

@@ -14,6 +14,8 @@ public sealed class HeroSkillProjectileDamage : MonoBehaviour
     private float multiplierBonus;
     private int remainingPenetration;
     private bool configured;
+    private Vector2 baseBoxColliderSize;
+    private bool hasBaseBoxColliderSize;
 
     private void OnDisable()
     {
@@ -26,7 +28,8 @@ public sealed class HeroSkillProjectileDamage : MonoBehaviour
         DamageData damageData,
         float flatBonusDamage,
         float multiplierBonus,
-        int penetration)
+        int penetration,
+        float widthScale = 1f)
     {
         this.caster = caster;
         this.targetLayer = targetLayer;
@@ -36,6 +39,23 @@ public sealed class HeroSkillProjectileDamage : MonoBehaviour
         remainingPenetration = Mathf.Max(0, penetration);
         configured = true;
         damagedTargets.Clear();
+        ApplyWidthScale(widthScale);
+    }
+
+    private void ApplyWidthScale(float widthScale)
+    {
+        BoxCollider2D boxCollider = GetComponent<BoxCollider2D>();
+        if (boxCollider == null)
+            return;
+
+        if (!hasBaseBoxColliderSize)
+        {
+            baseBoxColliderSize = boxCollider.size;
+            hasBaseBoxColliderSize = true;
+        }
+
+        float safeWidthScale = Mathf.Max(0.1f, widthScale);
+        boxCollider.size = new Vector2(baseBoxColliderSize.x, baseBoxColliderSize.y * safeWidthScale);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -54,7 +74,7 @@ public sealed class HeroSkillProjectileDamage : MonoBehaviour
         if (!damagedTargets.Add(receiver))
             return;
 
-        receiver.ReceiveDamage(CalculateDamage(), caster.transform, damageData);
+        receiver.ReceiveDamage(CalculateDamage(target), caster.transform, damageData);
 
         if (remainingPenetration <= 0)
         {
@@ -88,22 +108,43 @@ public sealed class HeroSkillProjectileDamage : MonoBehaviour
         return targetCollider == null || hitCollider == targetCollider;
     }
 
-    private float CalculateDamage()
+    private float CalculateDamage(CharacterCtrl target)
     {
         if (caster == null || caster.CharacterStat == null)
             return 0f;
 
+        float ambushMultiplierBonus = 0f;
+        float ambushCritChanceBonus = 0f;
+        ArcherAmbushStance.TryConsume(caster, out ambushMultiplierBonus, out ambushCritChanceBonus);
+
         float multiplier = (damageData != null ? damageData.Multiplier : 1f) + multiplierBonus;
+        multiplier += IsBehindTarget(target) ? ambushMultiplierBonus * 1.5f : ambushMultiplierBonus;
         float damage = caster.CharacterStat.Attack.FinalValue * multiplier + flatBonusDamage;
 
         if (damageData != null &&
             damageData.CanCrit &&
-            Random.value <= caster.CharacterStat.CritChance.FinalValue)
+            Random.value <= caster.CharacterStat.CritChance.FinalValue + ambushCritChanceBonus)
         {
             damage *= caster.CharacterStat.CritDamage.FinalValue;
         }
 
         return damage;
+    }
+
+    private bool IsBehindTarget(CharacterCtrl target)
+    {
+        if (caster == null || target == null || target.CharacterMovement == null)
+            return false;
+
+        Vector2 targetLookDirection = target.CharacterMovement.LookDirection;
+        if (targetLookDirection == Vector2.zero)
+            return false;
+
+        Vector2 directionToCaster = caster.transform.position - target.transform.position;
+        if (directionToCaster == Vector2.zero)
+            return false;
+
+        return Vector2.Dot(targetLookDirection.normalized, directionToCaster.normalized) < -0.45f;
     }
 
     private void ReturnProjectile()

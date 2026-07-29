@@ -185,32 +185,16 @@ public static class ElementalConduitPulse
             0f,
             damageData.Multiplier + Mathf.Max(0, request.Rank - 1) * multiplierPerRank);
 
-        float damage = CalculateDamage(caster, damageData, request, stacks);
+        float flatBonus = request.FlatBonusDamage +
+                          Mathf.Max(0, request.Rank - 1) * request.FlatBonusDamagePerRank;
+        float stackMultiplier = Mathf.Max(0, stacks - 1) * Mathf.Max(0f, request.DamageBonusPerStack);
+        float damage = CharacterSkillDamageUtility.CalculateDamage(
+            caster,
+            damageData,
+            flatBonus,
+            stackMultiplier);
+
         target.CharacterDamReceiver.ReceiveDamage(damage, caster.transform, damageData);
-    }
-
-    private static float CalculateDamage(
-        CharacterCtrl caster,
-        DamageData damageData,
-        ElementalConduitPulseRequest request,
-        int stacks)
-    {
-        float attack = caster.CharacterStat.Attack != null ? caster.CharacterStat.Attack.FinalValue : 0f;
-        float damage = attack * damageData.Multiplier +
-                       request.FlatBonusDamage +
-                       Mathf.Max(0, request.Rank - 1) * request.FlatBonusDamagePerRank;
-
-        damage *= 1f + Mathf.Max(0, stacks - 1) * Mathf.Max(0f, request.DamageBonusPerStack);
-
-        if (damageData.CanCrit &&
-            caster.CharacterStat.CritChance != null &&
-            caster.CharacterStat.CritDamage != null &&
-            Random.value <= caster.CharacterStat.CritChance.FinalValue)
-        {
-            damage *= caster.CharacterStat.CritDamage.FinalValue;
-        }
-
-        return damage;
     }
 
     private static PoolObj PlayImpactFeedback(

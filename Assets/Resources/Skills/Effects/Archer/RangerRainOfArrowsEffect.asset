@@ -12,29 +12,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 426bb6a0d91f4daa8670e2bcb401b7c2, type: 3}
   m_Name: RangerRainOfArrowsEffect
   m_EditorClassIdentifier: 
-  length: 7.5
-  width: 1.2
+  length: 7
+  width: 0.65
   startOffset: 0.55
   targetLayer:
     serializedVersion: 2
     m_Bits: 64
+  skillPattern: 2
   damageData:
-    Multiplier: 1.35
+    Multiplier: 1
     CanCrit: 1
     CausesHitStun: 1
-    HitStunDuration: 0.2
+    HitStunDuration: 0.85
     HitStunImmunityDuration: 0.75
     InterruptsAttack: 1
     HitVfx: {fileID: 11400000, guid: 5e968ca568c24b15ae9b5f984ad3d27f, type: 2}
     HitVfxOffset: {x: 0, y: 0, z: 0}
     HitSfx: {fileID: 11400000, guid: 9fba50e016f647349bb5ad82ddeea5fd, type: 2}
     HitSfxOffset: {x: 0, y: 0, z: 0}
+    element: 0
+    elementalPower: 1
+    elementalStatusDuration: 4
+    consumesElementOnReaction: 1
   flatBonusDamage: 0
   damageMultiplierPerPowerShotRank: 0.08
   piercingDamageMultiplierPerRank: 0.06
   trickArrowHitStunPerRank: 0.08
-  projectileVfx: {fileID: 11400000, guid: 683064399f39c51418c86940208aa884, type: 2}
-  projectileSpeed: 15
+  projectileVfx: {fileID: 11400000, guid: 2287e592ae2a4ad88e0ce1620467113c, type: 2}
+  projectileSpeed: 13
   projectileRotationOffset: 0
-  projectilePenetration: 4
+  projectilePenetration: 0
+  projectileCount: 1
+  spreadAngle: 0
+  sideSpacing: 0
+  arrowMemoryLifetime: 6
+  recallOutboundDuration: 1.2
+  recallDelay: 1
+  huntMarkDuration: 6
+  trapDuration: 6
+  trapTickInterval: 0.35
+  trapRadius: 2.2
+  shockbindStunDuration: 0.85
+  shockbindStunDurationPerRank: 0.25
+  shockbindChainRadiusPerRank: 0.35
+  shockbindChainTargets: 2
+  shockbindChainTargetsPerRank: 1
+  shockbindChainDamageMultiplier: 0
+  teleportWindow: 4
+  ultimateFinalRadius: 1.8
   logProjectileDebug: 1

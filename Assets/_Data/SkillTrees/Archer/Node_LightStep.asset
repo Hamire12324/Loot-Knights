@@ -12,24 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
   m_Name: Node_LightStep
   m_EditorClassIdentifier: 
-  nodeId: archer.light_step
-  displayName: Light Step
-  description: '+0.15 Move Speed. Keeps the archer mobile.'
-  icon: {fileID: 0}
-  kind: 0
-  branch: 9
-  treePosition: {x: 260, y: 20}
+  nodeId: archer.arrowstep.ambush_stance
+  displayName: Ambush Stance
+  description: "After dashing, the next projectile gains bonus damage and critical chance. The bonus is stronger from behind."
+  icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
+  kind: 2
+  branch: 8
+  treePosition: {x: 210, y: 50}
   maxRank: 1
   pointCost: 1
-  requiredPlayerLevel: 1
+  requiredPlayerLevel: 3
   prerequisites:
-  - node: {fileID: 11400000, guid: 0ab338d7277a4f75b8130743a1558371, type: 2}
+  - node: {fileID: 11400000, guid: 62166832d7fc45e58e16d6d373fbe057, type: 2}
     requiredRank: 1
   scaleStatModifiersByRank: 1
-  statModifiers:
-  - statType: 5
-    modifierType: 0
-    amount: 0.15
+  statModifiers: []
   activeSkill: {fileID: 0}
   preferredEquipSlot: -1
   element: 0

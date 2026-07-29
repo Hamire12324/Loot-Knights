@@ -18,6 +18,7 @@ MonoBehaviour:
   targetLayer:
     serializedVersion: 2
     m_Bits: 64
+  skillPattern: 1
   damageData:
     Multiplier: 1.55
     CanCrit: 1
@@ -33,8 +34,20 @@ MonoBehaviour:
   damageMultiplierPerPowerShotRank: 0.08
   piercingDamageMultiplierPerRank: 0.06
   trickArrowHitStunPerRank: 0.08
-  projectileVfx: {fileID: 11400000, guid: 683064399f39c51418c86940208aa884, type: 2}
+  projectileVfx: {fileID: 11400000, guid: 25bc15c7a87244d4bb9fd07523fab1ab, type: 2}
   projectileSpeed: 14
   projectileRotationOffset: 0
   projectilePenetration: 3
+  projectileCount: 1
+  spreadAngle: 0
+  sideSpacing: 0
+  arrowMemoryLifetime: 6
+  recallOutboundDuration: 1.2
+  recallDelay: 1
+  huntMarkDuration: 6
+  trapDuration: 6
+  trapTickInterval: 0.35
+  trapRadius: 2.4
+  teleportWindow: 4
+  ultimateFinalRadius: 1.8
   logProjectileDebug: 1

@@ -45,9 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeroLevel
   characterCtrl: {fileID: 8879337150097753119}
-  usePlayerProgression: 1
-  healByAddedMaxHealth: 1
   currentLevel: 1
+  usePlayerProgression: 1
 --- !u!1 &910000000000000011
 GameObject:
   m_ObjectHideFlags: 0
@@ -93,7 +92,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeroVFXController
   characterCtrl: {fileID: 8879337150097753119}
-  attackVfx: {fileID: 11400000, guid: 2b884347172948129733b740a52163a7, type: 2}
+    attackVfx: {fileID: 0}
   attackAnchor: {fileID: 8256115376057758440}
   attackSfx: {fileID: 11400000, guid: f15bc3fc0f5143c0a1429ff491e3d7a4, type: 2}
   defaultHitVfx: {fileID: 11400000, guid: 5e968ca568c24b15ae9b5f984ad3d27f, type: 2}
@@ -1080,5 +1079,4 @@ MonoBehaviour:
     baseValue: 0
     isDirty: 1
     cachedFinalValue: 0
-  previousMaxHealth: 0
   currentHealth: 0

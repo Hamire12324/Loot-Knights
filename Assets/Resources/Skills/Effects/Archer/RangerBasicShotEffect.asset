@@ -18,6 +18,7 @@ MonoBehaviour:
   targetLayer:
     serializedVersion: 2
     m_Bits: 64
+  skillPattern: 0
   damageData:
     Multiplier: 0.9
     CanCrit: 1
@@ -37,4 +38,7 @@ MonoBehaviour:
   projectileSpeed: 12
   projectileRotationOffset: 0
   projectilePenetration: 0
+  projectileCount: 1
+  spreadAngle: 0
+  sideSpacing: 0
   logProjectileDebug: 1

@@ -5,13 +5,13 @@ public static class PlayerExperienceStorage
 {
     public const string ExperienceKey = "LootKnights.Character.Experience";
 
-    private const int DefaultExperience = 0;
+    private static readonly int DebugMinimumExperience = PlayerLevel.GetTotalExperienceForLevel(PlayerLevel.MaxLevel);
 
     public static event Action<int> OnExperienceChanged;
     public static event Action<PlayerLevelSnapshot> OnLevelSnapshotChanged;
     public static event Action<int, int> OnLevelChanged;
 
-    public static int Experience => PlayerPrefs.GetInt(ExperienceKey, DefaultExperience);
+    public static int Experience => Mathf.Max(PlayerPrefs.GetInt(ExperienceKey, DebugMinimumExperience), DebugMinimumExperience);
     public static int Level => Snapshot.Level;
     public static int MaxLevel => PlayerLevel.MaxLevel;
     public static PlayerLevelSnapshot Snapshot => PlayerLevel.CreateSnapshot(Experience);

@@ -54,7 +54,6 @@ public abstract class CharacterVFXController : CharacterAbstract
 
     protected virtual void LoadDefinitions()
     {
-        attackVfx ??= Resources.Load<VFXDefinition>(DefaultAttackVfxPath);
         defaultHitVfx ??= Resources.Load<VFXDefinition>(DefaultHitVfxPath);
         attackSfx ??= Resources.Load<SFXDefinition>(DefaultAttackSfxPath);
         defaultHitSfx ??= Resources.Load<SFXDefinition>(DefaultHitSfxPath);

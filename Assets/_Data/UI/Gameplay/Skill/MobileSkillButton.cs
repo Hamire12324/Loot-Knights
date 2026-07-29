@@ -21,6 +21,7 @@ public class MobileSkillButton : MonoBehaviour, IPointerClickHandler
     [SerializeField] private UICircleGraphic cooldownFill;
     [SerializeField] private TMP_Text cooldownText;
     [SerializeField] private TMP_Text fallbackLabel;
+    [SerializeField] private TMP_Text ultimateChargeText;
 
     public void Setup(bool basicAttack, int index, Image iconImage, UICircleGraphic cooldown, TMP_Text text, TMP_Text label)
     {
@@ -120,12 +121,66 @@ public class MobileSkillButton : MonoBehaviour, IPointerClickHandler
         if (cooldownFill != null)
             cooldownFill.FillAmount = normalized;
 
-        if (cooldownText == null) return;
+        if (cooldownText == null)
+        {
+            RefreshUltimateCharge();
+            return;
+        }
 
         float remaining = mode == MobileSkillButtonMode.ElementAbsorb
             ? 0f
             : runtime != null ? runtime.Cooldown.Remaining : 0f;
         cooldownText.text = remaining > 0.05f ? Mathf.CeilToInt(remaining).ToString() : "";
+        RefreshUltimateCharge();
+    }
+
+    private void RefreshUltimateCharge()
+    {
+        bool shouldShow = mode == MobileSkillButtonMode.Skill && skillIndex == 3;
+        if (!shouldShow)
+        {
+            if (ultimateChargeText != null)
+                ultimateChargeText.gameObject.SetActive(false);
+            return;
+        }
+
+        LoadUltimateChargeText();
+        if (ultimateChargeText == null)
+            return;
+
+        HeroCtrl hero = HeroCtrl.GetLocal();
+        int charges = hero != null ? ArcherUltimateCharge.GetCharges(hero) : 0;
+        ultimateChargeText.text = charges.ToString();
+        ultimateChargeText.gameObject.SetActive(true);
+    }
+
+    private void LoadUltimateChargeText()
+    {
+        if (ultimateChargeText != null)
+            return;
+
+        Transform child = transform.Find("UltimateChargeText");
+        if (child != null)
+            ultimateChargeText = child.GetComponent<TMP_Text>();
+
+        if (ultimateChargeText != null)
+            return;
+
+        GameObject textObject = new("UltimateChargeText");
+        textObject.transform.SetParent(transform, false);
+        ultimateChargeText = textObject.AddComponent<TextMeshProUGUI>();
+        ultimateChargeText.alignment = TextAlignmentOptions.Center;
+        ultimateChargeText.fontSize = 24f;
+        ultimateChargeText.fontStyle = FontStyles.Bold;
+        ultimateChargeText.color = new Color(1f, 0.95f, 0.55f, 1f);
+        ultimateChargeText.raycastTarget = false;
+
+        RectTransform rect = ultimateChargeText.rectTransform;
+        rect.anchorMin = new Vector2(1f, 0.5f);
+        rect.anchorMax = new Vector2(1f, 0.5f);
+        rect.pivot = new Vector2(0f, 0.5f);
+        rect.anchoredPosition = new Vector2(8f, 0f);
+        rect.sizeDelta = new Vector2(42f, 30f);
     }
 
     private CharacterSkillRuntime GetRuntime()

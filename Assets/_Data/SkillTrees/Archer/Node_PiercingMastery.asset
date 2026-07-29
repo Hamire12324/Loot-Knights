@@ -12,18 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
   m_Name: Node_PiercingMastery
   m_EditorClassIdentifier: 
-  nodeId: archer.piercing_mastery
-  displayName: Piercing Mastery
-  description: Piercing Shot gains +1 penetration and +6% Attack damage per rank.
+  nodeId: archer.heartseeker.fated_arrow
+  displayName: Fated Arrow
+  description: "Heartseeker Barrage scales with consumed Ultimate Charges and Hunt Marks, then converges into a finishing strike."
   icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
   kind: 2
   branch: 10
-  treePosition: {x: 540, y: -170}
-  maxRank: 2
-  pointCost: 1
-  requiredPlayerLevel: 8
+  treePosition: {x: 470, y: -70}
+  maxRank: 1
+  pointCost: 2
+  requiredPlayerLevel: 6
   prerequisites:
-  - node: {fileID: 11400000, guid: 1d1bf997f4934c11be3722bae8c66671, type: 2}
+  - node: {fileID: 11400000, guid: 3221f5fc29b1456584e9050d7d96e4b0, type: 2}
     requiredRank: 1
   scaleStatModifiersByRank: 1
   statModifiers: []

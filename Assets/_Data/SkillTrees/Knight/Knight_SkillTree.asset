@@ -43,3 +43,21 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 01529ffee00c4db096a69ca7fdeb44f2, type: 2}
   - {fileID: 11400000, guid: 9a47cce4558e4610afb65c72738f5e3b, type: 2}
   - {fileID: 11400000, guid: 0e6a135be69b4e9198ca79e2559329ad, type: 2}
+  viewSettings:
+    overrideBuilderSettings: 1
+    contentSize: {x: 1100, y: 860}
+    contentOffset: {x: 0, y: 0}
+    contentScale: 1
+    contentScale2D: {x: 1, y: 1.5}
+    nodeSize: 200
+    iconSize: 100
+    nodeIconFramePadding: 24
+    useMajorMinorNodeSizes: 1
+    majorNodeSize: 180
+    majorIconSize: 100
+    minorNodeSize: 150
+    minorIconSize: 80
+    autoExpandScrollContent: 1
+    scrollContentPadding: {x: 160, y: 160}
+    horizontalScroll: 0
+    startTreeAtTop: 1
