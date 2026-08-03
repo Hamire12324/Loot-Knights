@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b5a26d7c89e4d5b8db4d2fe44c971a3, type: 3}
+  m_Name: ArmoredSkeletonShieldBashEffect
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterSkillShieldBashEffect
+  size: {x: 1.1, y: 0.8}
+  forwardOffset: 0.55
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  damageData:
+    Multiplier: 0.25
+    CanCrit: 0
+    CausesHitStun: 1
+    HitStunDuration: 0.12
+    HitStunImmunityDuration: 0.5
+    IgnoresHitStunImmunity: 0
+    InterruptsAttack: 1
+    HitVfx: {fileID: 0}
+    HitVfxOffset: {x: 0, y: 0, z: 0}
+    HitSfx: {fileID: 0}
+    HitSfxOffset: {x: 0, y: 0, z: 0}
+    element: 0
+    elementalPower: 1
+    elementalStatusDuration: 4
+    consumesElementOnReaction: 1
+  damageInterval: 0.2
+  knockbackForce: 2.4
+  animationStateName: Attack_Special
+  maximumDuration: 2
+  logHitResults: 1

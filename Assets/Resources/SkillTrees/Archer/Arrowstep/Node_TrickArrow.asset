@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
+  m_Name: Node_TrickArrow
+  m_EditorClassIdentifier: 
+  nodeId: archer.arrowstep
+  displayName: Shadow Volley Dash
+  description: Dash a short distance while firing a quick volley at nearby enemies.
+    Ends by banking 1 Ultimate Charge.
+  icon: {fileID: 21300000, guid: b82b9081529567545886eee7a293fe5e, type: 3}
+  kind: 1
+  branch: 1
+  treePosition: {x: 130, y: 170}
+  maxRank: 1
+  pointCost: 1
+  requiredPlayerLevel: 1
+  prerequisites:
+  - node: {fileID: 11400000, guid: d72f38ef732241c9a7d07b4208f24f91, type: 2}
+    requiredRank: 1
+  scaleStatModifiersByRank: 1
+  statModifiers: []
+  skillModifiers: []
+  activeSkill: {fileID: 11400000, guid: 69cd118d957a45adb21c972971f6a94f, type: 2}
+  preferredEquipSlot: 2
+  element: 0
+  reaction: 0

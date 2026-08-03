@@ -97,7 +97,7 @@ public class CharacterDamReceiver : CharacterAbstract
     private void TryApplyHitStun(DamageData damageData)
     {
         if (!canBeHitStunned || damageData == null) return;
-        if (!damageData.CausesHitStun || IsHitStunImmune) return;
+        if (!damageData.CausesHitStun || (IsHitStunImmune && !damageData.IgnoresHitStunImmunity)) return;
 
         float stunDuration = Mathf.Max(0f, damageData.HitStunDuration);
         float immunityDuration = Mathf.Max(0f, damageData.HitStunImmunityDuration);
@@ -108,7 +108,7 @@ public class CharacterDamReceiver : CharacterAbstract
         if (immunityDuration <= 0f)
             immunityDuration = fallbackHitStunImmunityDuration;
 
-        hitStunEndTime = Time.time + stunDuration;
+        hitStunEndTime = Mathf.Max(hitStunEndTime, Time.time + stunDuration);
         hitStunImmunityEndTime = Time.time + stunDuration + immunityDuration;
 
         if (damageData.InterruptsAttack)

@@ -25,6 +25,7 @@ public class CharacterSkillRuntime
 
         CharacterCtrl caster = controller.CharacterCtrl;
         if (caster == null) return false;
+        if (caster.CharacterStat != null && caster.CharacterStat.CurrentMana < definition.ManaCost) return false;
         if (caster.CharacterDamReceiver != null && caster.CharacterDamReceiver.IsDead) return false;
         if (caster.CharacterDamReceiver != null && caster.CharacterDamReceiver.IsHitStunned) return false;
 
@@ -35,6 +36,12 @@ public class CharacterSkillRuntime
     {
         cooldown.Start(cooldownDuration);
         NotifyChanged();
+    }
+
+    public void ReduceCooldown(float seconds)
+    {
+        if (cooldown.Reduce(seconds))
+            NotifyChanged();
     }
 
     public void SetUnlocked(bool value)

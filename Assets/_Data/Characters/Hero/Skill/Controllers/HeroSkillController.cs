@@ -39,7 +39,7 @@ public class HeroSkillController : CharacterSkillController
 
     public bool TryAbsorbElementConduit()
     {
-        HeroSkillElementalConduitEffect effect = GetElementalConduitEffect();
+        ElementalSkillConduitEffect effect = GetElementalConduitEffect();
         if (effect == null || characterCtrl == null)
             return false;
 
@@ -50,7 +50,7 @@ public class HeroSkillController : CharacterSkillController
 
     public bool TryCollectElementShard(ElementalShardPickup shard)
     {
-        HeroSkillElementalConduitEffect effect = GetElementalConduitEffect();
+        ElementalSkillConduitEffect effect = GetElementalConduitEffect();
         if (effect == null || characterCtrl == null || shard == null)
             return false;
 
@@ -59,7 +59,7 @@ public class HeroSkillController : CharacterSkillController
 
     public bool AddAllElementConduitForTesting()
     {
-        HeroSkillElementalConduitEffect effect = GetElementalConduitEffect();
+        ElementalSkillConduitEffect effect = GetElementalConduitEffect();
         return effect != null && effect.AddAllElementsForTesting(characterCtrl);
     }
 
@@ -68,7 +68,7 @@ public class HeroSkillController : CharacterSkillController
         if (!CanReleaseElementConduit(logReason: true))
             return false;
 
-        HeroSkillElementalConduitEffect effect = GetElementalConduitEffect();
+        ElementalSkillConduitEffect effect = GetElementalConduitEffect();
         if (!TryCastSpecialSkill())
             return false;
 
@@ -85,13 +85,13 @@ public class HeroSkillController : CharacterSkillController
     {
         preview = default;
 
-        HeroSkillElementalConduitEffect effect = GetElementalConduitEffect();
+        ElementalSkillConduitEffect effect = GetElementalConduitEffect();
         return effect != null && effect.TryGetReleasePreview(characterCtrl, out preview);
     }
 
     private bool CanReleaseElementConduit(bool logReason)
     {
-        HeroSkillElementalConduitEffect effect = GetElementalConduitEffect();
+        ElementalSkillConduitEffect effect = GetElementalConduitEffect();
         if (effect == null)
         {
             if (logReason)
@@ -111,12 +111,12 @@ public class HeroSkillController : CharacterSkillController
         return canRelease;
     }
 
-    private HeroSkillElementalConduitEffect GetElementalConduitEffect()
+    private ElementalSkillConduitEffect GetElementalConduitEffect()
     {
         return GetElementalConduitEffect(GetSpecialSkill());
     }
 
-    private HeroSkillElementalConduitEffect GetElementalConduitEffect(CharacterSkillRuntime runtime)
+    private ElementalSkillConduitEffect GetElementalConduitEffect(CharacterSkillRuntime runtime)
     {
         CharacterSkillDefinition definition = runtime != null ? runtime.Definition : null;
         if (definition == null || definition.Effects == null)
@@ -124,7 +124,7 @@ public class HeroSkillController : CharacterSkillController
 
         foreach (CharacterSkillEffectDefinition effect in definition.Effects)
         {
-            if (effect is HeroSkillElementalConduitEffect conduitEffect)
+            if (effect is ElementalSkillConduitEffect conduitEffect)
                 return conduitEffect;
         }
 

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CharacterAnimation : CharacterAbstract
 {
-    private const string AttackTrigger = "Attack";
+    private const string AttackTrigger = "Basic_Attack";
     private const string HurtTrigger = "Hurt";
     private const string DeathTrigger = "Death";
 

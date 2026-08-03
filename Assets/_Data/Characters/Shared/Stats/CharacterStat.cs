@@ -23,10 +23,13 @@ public class CharacterStat : CharacterAbstract
     public StatValue ManaRegen;
 
     [SerializeField] private float currentHealth;
+    [SerializeField] private float currentMana;
     public float CurrentHealth => currentHealth;
+    public float CurrentMana => currentMana;
 
     public event Action<StatType> OnStatChanged;
     public event Action<float> OnHealthChanged;
+    public event Action<float> OnManaChanged;
 
     protected override void Awake()
     {
@@ -34,6 +37,7 @@ public class CharacterStat : CharacterAbstract
         InitBaseStats();
 
         currentHealth = MaxHealth.FinalValue;
+        currentMana = MaxMana.FinalValue;
 
         RegisterStatValueListeners();
     }
@@ -42,6 +46,7 @@ public class CharacterStat : CharacterAbstract
     {
         base.Update();
         TickHealthRegen();
+        TickManaRegen();
     }
 
     public virtual void InitBaseStats() { }
@@ -85,10 +90,36 @@ public class CharacterStat : CharacterAbstract
         OnHealthChanged?.Invoke(currentHealth);
     }
 
+    public void SetCurrentMana(float value)
+    {
+        currentMana = Mathf.Clamp(value, 0f, MaxMana?.FinalValue ?? value);
+        OnManaChanged?.Invoke(currentMana);
+    }
+
+    public void RestoreMana(float amount)
+    {
+        if (amount > 0f)
+            SetCurrentMana(currentMana + amount);
+    }
+
+    public bool TrySpendMana(float amount)
+    {
+        if (amount <= 0f)
+            return true;
+
+        if (currentMana < amount)
+            return false;
+
+        SetCurrentMana(currentMana - amount);
+        return true;
+    }
+
     public virtual void RecalculateSkillTree(List<StatModifier> skillTreeModifiers)
     {
         float previousMaxHealth = GetMaxHealth();
         float previousCurrentHealth = currentHealth;
+        float previousMaxMana = GetMaxMana();
+        float previousCurrentMana = currentMana;
 
         ClearSkillTreeModifiers();
 
@@ -103,6 +134,7 @@ public class CharacterStat : CharacterAbstract
         }
 
         ApplyMaxHealthDelta(previousMaxHealth, previousCurrentHealth);
+        ApplyMaxManaDelta(previousMaxMana, previousCurrentMana);
         NotifyAllStatsChanged();
     }
 
@@ -115,6 +147,8 @@ public class CharacterStat : CharacterAbstract
     {
         float previousMaxHealth = GetMaxHealth();
         float previousCurrentHealth = currentHealth;
+        float previousMaxMana = GetMaxMana();
+        float previousCurrentMana = currentMana;
 
         ClearEquipmentModifiers();
 
@@ -129,6 +163,7 @@ public class CharacterStat : CharacterAbstract
         }
 
         ApplyMaxHealthDelta(previousMaxHealth, previousCurrentHealth);
+        ApplyMaxManaDelta(previousMaxMana, previousCurrentMana);
         NotifyAllStatsChanged();
     }
 
@@ -141,10 +176,13 @@ public class CharacterStat : CharacterAbstract
     {
         float previousMaxHealth = GetMaxHealth();
         float previousCurrentHealth = currentHealth;
+        float previousMaxMana = GetMaxMana();
+        float previousCurrentMana = currentMana;
 
         ForEachStat(stat => stat.ClearAllModifiers());
 
         ApplyMaxHealthDelta(previousMaxHealth, previousCurrentHealth);
+        ApplyMaxManaDelta(previousMaxMana, previousCurrentMana);
         NotifyAllStatsChanged();
     }
 
@@ -154,11 +192,16 @@ public class CharacterStat : CharacterAbstract
 
         float previousMaxHealth = GetMaxHealth();
         float previousCurrentHealth = currentHealth;
+        float previousMaxMana = GetMaxMana();
+        float previousCurrentMana = currentMana;
 
         ForEachStat(stat => stat.RemoveModifierFromSource(source));
 
         if (updateHealthByMaxHealthDelta)
+        {
             ApplyMaxHealthDelta(previousMaxHealth, previousCurrentHealth);
+            ApplyMaxManaDelta(previousMaxMana, previousCurrentMana);
+        }
 
         NotifyAllStatsChanged();
     }
@@ -195,14 +238,34 @@ public class CharacterStat : CharacterAbstract
         SetCurrentHealth(currentHealth + regenPerSecond * Time.deltaTime);
     }
 
+    private void TickManaRegen()
+    {
+        if (ManaRegen == null || MaxMana == null || currentMana >= MaxMana.FinalValue)
+            return;
+
+        float regenPerSecond = ManaRegen.FinalValue;
+        if (regenPerSecond > 0f)
+            SetCurrentMana(currentMana + regenPerSecond * Time.deltaTime);
+    }
+
     public void ApplyMaxHealthDelta(float previousMaxHealth, float previousCurrentHealth)
     {
         SetCurrentHealth(previousCurrentHealth + GetMaxHealth() - previousMaxHealth);
     }
 
+    public void ApplyMaxManaDelta(float previousMaxMana, float previousCurrentMana)
+    {
+        SetCurrentMana(previousCurrentMana + GetMaxMana() - previousMaxMana);
+    }
+
     private float GetMaxHealth()
     {
         return MaxHealth != null ? MaxHealth.FinalValue : 0f;
+    }
+
+    private float GetMaxMana()
+    {
+        return MaxMana != null ? MaxMana.FinalValue : 0f;
     }
 
     private void ForEachStat(Action<StatValue> action)

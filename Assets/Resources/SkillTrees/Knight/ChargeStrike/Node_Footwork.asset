@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
+  m_Name: Node_Footwork
+  m_EditorClassIdentifier: 
+  nodeId: knight.footwork
+  displayName: Footwork
+  description: '+8% Move Speed per rank. Max rank 3: +24% Move Speed.'
+  icon: {fileID: 21300000, guid: 8397e73ec82a68a41866c345e469bdb2, type: 3}
+  kind: 0
+  branch: 0
+  treePosition: {x: 360, y: 50}
+  maxRank: 3
+  pointCost: 1
+  requiredPlayerLevel: 2
+  prerequisites:
+  - node: {fileID: 11400000, guid: e1a1ec1cd16048b6acb07f6e06290f2c, type: 2}
+    requiredRank: 1
+  scaleStatModifiersByRank: 1
+  statModifiers:
+  - statType: 5
+    modifierType: 0
+    amount: 0.08
+  skillModifiers: []
+  activeSkill: {fileID: 0}
+  preferredEquipSlot: -1
+  element: 0
+  reaction: 0

@@ -110,8 +110,8 @@ public static class ElementalReactionVfxDefinitionInstaller
 
     private static void AssignDefinitionsToEffect(VFXDefinition[] definitions)
     {
-        HeroSkillElementalConduitEffect effect =
-            AssetDatabase.LoadAssetAtPath<HeroSkillElementalConduitEffect>(EffectPath);
+        ElementalSkillConduitEffect effect =
+            AssetDatabase.LoadAssetAtPath<ElementalSkillConduitEffect>(EffectPath);
         if (effect == null)
         {
             Debug.LogWarning($"Cannot find {EffectPath}. VFX definitions were created but not assigned.");

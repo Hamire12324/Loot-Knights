@@ -122,7 +122,7 @@ public sealed class HeroSkillLoadoutPhotonSync : MonoBehaviourPunCallbacks
             : string.Empty;
     }
 
-    private IReadOnlyList<SkillTreeDefinition> GetSkillTrees()
+    public IReadOnlyList<SkillTreeDefinition> GetSkillTrees()
     {
         List<SkillTreeDefinition> trees = new();
         if (skillTree != null)

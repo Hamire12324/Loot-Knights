@@ -61,6 +61,16 @@ public class CharacterMenuPanel : BaseMonoBehaviour
         SetActive(false);
     }
 
+    public IReadOnlyList<SkillTreeDefinition> GetSkillTreesForCurrentProfile()
+    {
+        CreatedCharacterData savedCharacter = CharacterProfileStorage.Load();
+        SkillTreeDefinition classSkillTree = savedCharacter != null
+            ? FindClassSkillTree(savedCharacter.CharacterClass)
+            : null;
+
+        return GetSkillTrees(classSkillTree);
+    }
+
     private void ShowSection(CharacterMenuSection section, bool activatePanel)
     {
         if (activatePanel)
@@ -193,6 +203,18 @@ public class CharacterMenuPanel : BaseMonoBehaviour
         }
 
         return null;
+    }
+
+    private IReadOnlyList<SkillTreeDefinition> GetSkillTrees(SkillTreeDefinition classSkillTree)
+    {
+        List<SkillTreeDefinition> trees = new();
+        if (classSkillTree != null)
+            trees.Add(classSkillTree);
+
+        if (elementalSkillTree != null && !trees.Contains(elementalSkillTree))
+            trees.Add(elementalSkillTree);
+
+        return trees;
     }
 
     private void LoadCloseButton()

@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
+  m_Name: Node_DecoyBomb
+  m_EditorClassIdentifier: 
+  nodeId: archer.arrowstep.decoy_bomb
+  displayName: Decoy Bomb
+  description: Shadow Volley Dash fires 1 additional arrow and gains 5% damage.
+  icon: {fileID: 21300000, guid: 236911592d104a1489f2657e4acddc6a, type: 3}
+  kind: 2
+  branch: 1
+  treePosition: {x: 200, y: -190}
+  maxRank: 1
+  pointCost: 3
+  requiredPlayerLevel: 10
+  prerequisites:
+  - node: {fileID: 11400000, guid: 4b0517c9a0e54268a2d63d4fb6afec58, type: 2}
+    requiredRank: 1
+  scaleStatModifiersByRank: 1
+  statModifiers: []
+  skillModifiers:
+  - skillId: ranger.shadow_volley_dash
+    modifierType: 8
+    amount: 1
+    scaleByRank: 1
+  - skillId: ranger.shadow_volley_dash
+    modifierType: 0
+    amount: 0.05
+    scaleByRank: 1
+  activeSkill: {fileID: 0}
+  preferredEquipSlot: -1
+  element: 0
+  reaction: 0

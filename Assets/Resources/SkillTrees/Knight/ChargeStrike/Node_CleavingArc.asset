@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
+  m_Name: Node_CleavingArc
+  m_EditorClassIdentifier: 
+  nodeId: knight.cleaving_arc
+  displayName: Cleaving Arc
+  description: '+8% Crit Damage per rank. Also upgrades Charge Strike per rank: +0.25
+    dash range, +0.12 hit radius, +12 degree slash angle, +10% Attack damage multiplier.
+    Max rank 2.'
+  icon: {fileID: 21300000, guid: 814e39445a5ec9c4a8e7ddf14aa6cd9d, type: 3}
+  kind: 2
+  branch: 0
+  treePosition: {x: 410, y: -310}
+  maxRank: 2
+  pointCost: 1
+  requiredPlayerLevel: 6
+  prerequisites:
+  - node: {fileID: 11400000, guid: 01529ffee00c4db096a69ca7fdeb44f2, type: 2}
+    requiredRank: 1
+  scaleStatModifiersByRank: 1
+  statModifiers:
+  - statType: 8
+    modifierType: 0
+    amount: 0.08
+  skillModifiers:
+  - skillId: hero.charge_strike
+    modifierType: 11
+    amount: 0.25
+    scaleByRank: 1
+  - skillId: hero.charge_strike
+    modifierType: 2
+    amount: 0.12
+    scaleByRank: 1
+  - skillId: hero.charge_strike
+    modifierType: 13
+    amount: 12
+    scaleByRank: 1
+  - skillId: hero.charge_strike
+    modifierType: 0
+    amount: 0.1
+    scaleByRank: 1
+  activeSkill: {fileID: 0}
+  preferredEquipSlot: -1
+  element: 0
+  reaction: 0

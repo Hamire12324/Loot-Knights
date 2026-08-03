@@ -27,3 +27,4 @@ MonoBehaviour:
   castSfx: {fileID: 0}
   effects:
   - {fileID: 11400000, guid: 0d4942105f664c679eb4c53ebf9d5d41, type: 2}
+  - {fileID: 11400000, guid: 33e6436f43894ebca4911453a178ed21, type: 2}

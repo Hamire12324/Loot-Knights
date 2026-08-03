@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0028e54ec6904aa469aa3161a6588063, type: 3}
+  m_Name: PoisonSlimeBasicAttack
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySkillDefinition
+  skillId: poison_slime_basic
+  displayName: Poison Slime Attack
+  icon: {fileID: 0}
+  castType: 1
+  castTime: 0.5
+  duration: 0
+  lockMovementWhileCasting: 1
+  canBeInterrupted: 1
+  cooldown: 0
+  manaCost: 0
+  triggerName: Attack
+  animationIndex: 0
+  castVfx: {fileID: 0}
+  castSfx: {fileID: 0}
+  effects:
+  - {fileID: 11400000, guid: a6088929bf1a7924f95869636601af33, type: 2}
+  - {fileID: 11400000, guid: 245bb43535e82c84fbd71f35543821a5, type: 2}

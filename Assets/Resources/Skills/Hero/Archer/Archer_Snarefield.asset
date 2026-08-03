@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Archer_Snarefield
   m_EditorClassIdentifier: 
   skillId: ranger.shockbind_arrow
-  displayName: Shockbind Arrow
-  icon: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
+  displayName: Snarefield
+  icon: {fileID: 21300000, guid: e991832d42e24de28703d96a230b4836, type: 3}
   castType: 0
   castTime: 0.12
   duration: 0

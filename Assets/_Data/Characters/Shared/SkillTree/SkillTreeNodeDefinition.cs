@@ -24,6 +24,9 @@ public sealed class SkillTreeNodeDefinition : ScriptableObject
     [SerializeField] private bool scaleStatModifiersByRank = true;
     [SerializeField] private List<StatModifierData> statModifiers = new();
 
+    [Header("Skill Modifiers")]
+    [SerializeField] private List<SkillModifierData> skillModifiers = new();
+
     [Header("Skill Unlock")]
     [SerializeField] private HeroSkillDefinition activeSkill;
     [SerializeField] private int preferredEquipSlot = -1;
@@ -43,6 +46,7 @@ public sealed class SkillTreeNodeDefinition : ScriptableObject
     public int PointCost => Mathf.Max(1, pointCost);
     public int RequiredPlayerLevel => Mathf.Max(1, requiredPlayerLevel);
     public IReadOnlyList<SkillTreePrerequisite> Prerequisites => prerequisites;
+    public IReadOnlyList<SkillModifierData> SkillModifiers => skillModifiers ??= new List<SkillModifierData>();
     public HeroSkillDefinition ActiveSkill => activeSkill;
     public int PreferredEquipSlot => preferredEquipSlot;
     public ElementType Element => element;
@@ -75,5 +79,6 @@ public sealed class SkillTreeNodeDefinition : ScriptableObject
         maxRank = Mathf.Max(1, maxRank);
         pointCost = Mathf.Max(1, pointCost);
         requiredPlayerLevel = Mathf.Max(1, requiredPlayerLevel);
+        skillModifiers ??= new List<SkillModifierData>();
     }
 }

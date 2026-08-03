@@ -33,11 +33,31 @@ public static class CharacterSkillDamageUtility
         float multiplierBonus = 0f,
         float critChanceBonus = 0f)
     {
+        return DealDamage(
+            caster,
+            target,
+            damageData,
+            out _,
+            flatBonusDamage,
+            multiplierBonus,
+            critChanceBonus);
+    }
+
+    public static bool DealDamage(
+        CharacterCtrl caster,
+        CharacterCtrl target,
+        DamageData damageData,
+        out float dealtDamage,
+        float flatBonusDamage = 0f,
+        float multiplierBonus = 0f,
+        float critChanceBonus = 0f)
+    {
+        dealtDamage = 0f;
         if (target == null || target.CharacterDamReceiver == null || target.CharacterDamReceiver.IsDead)
             return false;
 
-        float damage = CalculateDamage(caster, damageData, flatBonusDamage, multiplierBonus, critChanceBonus);
-        target.CharacterDamReceiver.ReceiveDamage(damage, caster != null ? caster.transform : null, damageData);
+        dealtDamage = CalculateDamage(caster, damageData, flatBonusDamage, multiplierBonus, critChanceBonus);
+        target.CharacterDamReceiver.ReceiveDamage(dealtDamage, caster != null ? caster.transform : null, damageData);
         return true;
     }
 

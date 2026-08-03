@@ -86,6 +86,36 @@ public static class CharacterSkillTargetUtility
         return Vector2.Angle(direction.normalized, toTarget.normalized) <= angle * 0.5f;
     }
 
+    public static CharacterCtrl FindClosestTarget(
+        CharacterCtrl caster,
+        Vector2 center,
+        float radius,
+        LayerMask targetLayer)
+    {
+        ContactFilter2D filter = CreateTargetFilter(caster, targetLayer);
+        int count = Physics2D.OverlapCircle(center, Mathf.Max(0.05f, radius), filter, Hits);
+        CharacterCtrl closest = null;
+        float closestDistanceSqr = float.MaxValue;
+
+        for (int i = 0; i < count; i++)
+        {
+            Collider2D hit = Hits[i];
+            Hits[i] = null;
+            CharacterCtrl target = hit != null ? hit.GetComponentInParent<CharacterCtrl>() : null;
+            if (!IsValidTarget(caster, hit, target))
+                continue;
+
+            float distanceSqr = ((Vector2)target.transform.position - center).sqrMagnitude;
+            if (distanceSqr >= closestDistanceSqr)
+                continue;
+
+            closest = target;
+            closestDistanceSqr = distanceSqr;
+        }
+
+        return closest;
+    }
+
     private static void AddValidTargets(
         CharacterCtrl caster,
         int count,

@@ -18,9 +18,13 @@ public abstract class CharacterSkillDefinition : ScriptableObject
     [Header("Cooldown")]
     [SerializeField, Min(0f)] private float cooldown = 1f;
 
+    [Header("Resource")]
+    [SerializeField, Min(0f)] private float manaCost;
+
     [Header("Animation")]
     [SerializeField] private string triggerName;
     [SerializeField] private int animationIndex;
+    [SerializeField] private bool executeEffectsOnAnimationHit = true;
 
     [Header("Cast Feedback")]
     [SerializeField] private VFXDefinition castVfx;
@@ -38,8 +42,10 @@ public abstract class CharacterSkillDefinition : ScriptableObject
     public bool LockMovementWhileCasting => lockMovementWhileCasting;
     public bool CanBeInterrupted => canBeInterrupted;
     public float Cooldown => cooldown;
+    public float ManaCost => manaCost;
     public string TriggerName => triggerName;
     public int AnimationIndex => animationIndex;
+    public bool ExecuteEffectsOnAnimationHit => executeEffectsOnAnimationHit;
     public VFXDefinition CastVfx => castVfx;
     public SFXDefinition CastSfx => castSfx;
     public IReadOnlyList<CharacterSkillEffectDefinition> Effects => effects;

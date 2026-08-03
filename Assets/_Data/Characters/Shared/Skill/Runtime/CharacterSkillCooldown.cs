@@ -20,4 +20,13 @@ public class CharacterSkillCooldown
         lastCastTime = -999f;
         duration = 0f;
     }
+
+    public bool Reduce(float seconds)
+    {
+        if (seconds <= 0f || IsReady)
+            return false;
+
+        lastCastTime -= seconds;
+        return true;
+    }
 }

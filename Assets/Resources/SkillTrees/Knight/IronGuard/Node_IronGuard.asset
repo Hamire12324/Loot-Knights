@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
+  m_Name: Node_IronGuard
+  m_EditorClassIdentifier: 
+  nodeId: knight.iron_guard
+  displayName: Iron Guard
+  description: Unlock Iron Guard. Cast a defensive buff skill for surviving burst damage.
+  icon: {fileID: 21300000, guid: f6b8b85cbdc82ce439a41ae3d56d57ee, type: 3}
+  kind: 1
+  branch: 0
+  treePosition: {x: -110, y: 170}
+  maxRank: 1
+  pointCost: 1
+  requiredPlayerLevel: 2
+  prerequisites:
+  - node: {fileID: 11400000, guid: 8610693fbd47469b88d0a07b9082e74b, type: 2}
+    requiredRank: 1
+  scaleStatModifiersByRank: 1
+  statModifiers: []
+  activeSkill: {fileID: 11400000, guid: 013a375609a8418e8ad14c4685676459, type: 2}
+  preferredEquipSlot: 1
+  element: 0
+  reaction: 0

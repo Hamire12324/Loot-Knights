@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 70486753260b49368ad212bf632e1f64, type: 3}
-  m_Name: ShockbindArrow_Projectile
+  m_Name: Snarefield_Projectile
   m_EditorClassIdentifier: Assembly-CSharp::VFXDefinition
   Prefab: {fileID: 5387943697733402799, guid: 83fae0272a45e7c4098042dcf1c1cf8d, type: 3}
   Offset: {x: 0, y: 0, z: 0}

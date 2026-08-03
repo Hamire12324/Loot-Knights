@@ -31,8 +31,8 @@ MonoBehaviour:
     minAmount: 1
     maxAmount: 1
   enemyEntries:
-  - prefab: {fileID: 6626155559249779585, guid: 37393141bdaf2f9418f005b34f4ea263, type: 3}
-    cost: 3
+  - prefab: {fileID: 6626155559249779585, guid: 44f87fd3866645ae9518e4ab296f7e97, type: 3}
+    cost: 10
     weight: 10
     minDifficultyLevel: 1
     maxDifficultyLevel: 0

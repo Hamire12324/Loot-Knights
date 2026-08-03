@@ -136,7 +136,8 @@ public class MobileSkillButton : MonoBehaviour, IPointerClickHandler
 
     private void RefreshUltimateCharge()
     {
-        bool shouldShow = mode == MobileSkillButtonMode.Skill && skillIndex == 3;
+        string resourceId = GetConsumedResourceId(GetRuntime());
+        bool shouldShow = mode == MobileSkillButtonMode.Skill && !string.IsNullOrWhiteSpace(resourceId);
         if (!shouldShow)
         {
             if (ultimateChargeText != null)
@@ -149,9 +150,23 @@ public class MobileSkillButton : MonoBehaviour, IPointerClickHandler
             return;
 
         HeroCtrl hero = HeroCtrl.GetLocal();
-        int charges = hero != null ? ArcherUltimateCharge.GetCharges(hero) : 0;
+        int charges = hero != null ? CharacterSkillResource.GetValue(hero, resourceId) : 0;
         ultimateChargeText.text = charges.ToString();
         ultimateChargeText.gameObject.SetActive(true);
+    }
+
+    private static string GetConsumedResourceId(CharacterSkillRuntime runtime)
+    {
+        if (runtime?.Definition?.Effects == null)
+            return null;
+
+        foreach (CharacterSkillEffectDefinition effect in runtime.Definition.Effects)
+        {
+            if (effect is ICharacterSkillResourceConsumer consumer && !string.IsNullOrWhiteSpace(consumer.ResourceId))
+                return consumer.ResourceId;
+        }
+
+        return null;
     }
 
     private void LoadUltimateChargeText()

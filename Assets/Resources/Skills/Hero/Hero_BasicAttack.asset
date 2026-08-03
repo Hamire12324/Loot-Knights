@@ -21,8 +21,10 @@ MonoBehaviour:
   lockMovementWhileCasting: 0
   canBeInterrupted: 1
   cooldown: 0.15
+  manaCost: 0
   triggerName: 
   animationIndex: 0
+  executeEffectsOnAnimationHit: 1
   castVfx: {fileID: 0}
   castSfx: {fileID: 0}
   effects:

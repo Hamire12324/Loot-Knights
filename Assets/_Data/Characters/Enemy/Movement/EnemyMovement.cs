@@ -24,6 +24,7 @@ public class EnemyMovement : CharacterMovement
     [SerializeField] private bool hasTarget;
     public bool HasTarget => hasTarget;
     [SerializeField] private Vector2 desiredVelocity;
+    [SerializeField] private float speedMultiplier = 1f;
     public bool HasArrived => 
         hasTarget && Vector2.Distance(characterCtrl.Rb.position, targetPosition) <= stoppingDistance;
     protected override void FixedUpdate()
@@ -61,6 +62,12 @@ public class EnemyMovement : CharacterMovement
         hasTarget = false;
         moveInput = Vector2.zero;
         desiredVelocity = Vector2.zero;
+        speedMultiplier = 1f;
+    }
+
+    public void SetSpeedMultiplier(float multiplier)
+    {
+        speedMultiplier = Mathf.Max(0f, multiplier);
     }
 
     public void ConfigureObstacleLayer(LayerMask layerMask)
@@ -105,7 +112,7 @@ public class EnemyMovement : CharacterMovement
 
     private void ApplyMovement()
     {
-        desiredVelocity = moveInput * moveSpeed;
+        desiredVelocity = moveInput * moveSpeed * speedMultiplier;
         float rate = desiredVelocity.sqrMagnitude > 0.01f ? acceleration : deceleration;
 
         characterCtrl.Rb.linearVelocity = Vector2.MoveTowards(

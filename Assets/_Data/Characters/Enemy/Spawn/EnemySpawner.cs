@@ -193,7 +193,24 @@ public class EnemySpawner : BaseMonoBehaviour
         aliveEnemies.Add(enemy);
         BindDeathEvent(enemy);
 
+        ApplyLevelToEnemy(enemy, difficultyLevel);
+
         return enemy;
+    }
+
+    private void ApplyLevelToEnemy(PoolObj enemy, int level)
+    {
+        if (enemy == null) return;
+
+        EnemyLevel enemyLevel = enemy.GetComponentInChildren<EnemyLevel>(true);
+        if (enemyLevel != null)
+        {
+            enemyLevel.ApplyLevel(level);
+            return;
+        }
+
+        CharacterLevel characterLevel = enemy.GetComponentInChildren<CharacterLevel>(true);
+        characterLevel?.ApplyLevel(level);
     }
 
     public void ReturnAllAliveEnemies()

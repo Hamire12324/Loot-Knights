@@ -10,6 +10,7 @@ public class DamageData
     public bool CausesHitStun;
     public float HitStunDuration = 0.2f;
     public float HitStunImmunityDuration = 0.75f;
+    public bool IgnoresHitStunImmunity;
     public bool InterruptsAttack = true;
 
     [Header("VFX")]

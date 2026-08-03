@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a8b82fda04db574191efa9825e360e7, type: 3}
+  m_Script: {fileID: 11500000, guid: 4ec8bd2efb7a4f03a2f42d3446a695c1, type: 3}
   m_Name: SlashAreaDamageEffect
   m_EditorClassIdentifier: 
   radius: 1.35

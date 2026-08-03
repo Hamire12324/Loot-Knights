@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class AttributeView : BaseMonoBehaviour
@@ -19,6 +20,7 @@ public class AttributeView : BaseMonoBehaviour
         base.OnEnable();
         SubscribeStatEvents();
         SubscribeEquipmentEvents();
+        SubscribeSkillTreeEvents();
         Refresh();
     }
 
@@ -26,6 +28,7 @@ public class AttributeView : BaseMonoBehaviour
     {
         UnsubscribeStatEvents();
         UnsubscribeEquipmentEvents();
+        UnsubscribeSkillTreeEvents();
         base.OnDisable();
     }
     protected override void LoadComponents()
@@ -176,6 +179,7 @@ public class AttributeView : BaseMonoBehaviour
         ApplyAttributePointBonus(StatType.MaxHealth, ref maxHealth);
         ApplyAttributePointBonus(StatType.CritChance, ref critChance);
         ApplyAttributePointBonus(StatType.CritDamage, ref critDamage);
+        ApplySkillTreeModifiers();
 
         float finalMaxHealth = maxHealth.FinalValue;
         float healthRatio = baseSnapshot.MaxHealth > 0f
@@ -226,6 +230,30 @@ public class AttributeView : BaseMonoBehaviour
 
             accumulator.Add(new StatModifier(statType, ModifierType.Flat, bonus));
         }
+
+        void ApplySkillTreeModifiers()
+        {
+            IReadOnlyList<SkillTreeDefinition> skillTrees = ResolveSkillTrees();
+            foreach (SkillTreeDefinition tree in skillTrees)
+            {
+                if (tree == null)
+                    continue;
+
+                ApplyModifiers(new SkillTreeRuntime(tree).CreateStatModifiers());
+            }
+        }
+    }
+
+    private IReadOnlyList<SkillTreeDefinition> ResolveSkillTrees()
+    {
+        CharacterMenuPanel menuPanel = GetComponentInParent<CharacterMenuPanel>();
+        if (menuPanel != null)
+            return menuPanel.GetSkillTreesForCurrentProfile();
+
+        SkillTreeView skillTreeView = GetComponentInParent<SkillTreeView>();
+        return skillTreeView != null
+            ? skillTreeView.GetSkillTrees()
+            : System.Array.Empty<SkillTreeDefinition>();
     }
 
     private void SubscribeStatEvents()
@@ -267,6 +295,17 @@ public class AttributeView : BaseMonoBehaviour
         equipmentManager.OnEquipmentChanged -= HandleEquipmentChanged;
     }
 
+    private void SubscribeSkillTreeEvents()
+    {
+        PlayerSkillTreeManager.Service.OnChanged -= HandleSkillTreeChanged;
+        PlayerSkillTreeManager.Service.OnChanged += HandleSkillTreeChanged;
+    }
+
+    private void UnsubscribeSkillTreeEvents()
+    {
+        PlayerSkillTreeManager.Service.OnChanged -= HandleSkillTreeChanged;
+    }
+
     private void HandleHealthChanged(float currentHealth)
     {
         Refresh();
@@ -278,6 +317,11 @@ public class AttributeView : BaseMonoBehaviour
     }
 
     private void HandleEquipmentChanged()
+    {
+        Refresh();
+    }
+
+    private void HandleSkillTreeChanged()
     {
         Refresh();
     }

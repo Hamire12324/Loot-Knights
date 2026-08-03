@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
+  m_Name: Node_Skirmisher
+  m_EditorClassIdentifier: 
+  nodeId: archer.shockbind_arrow.conductive_arrow
+  displayName: Conductive Arrow
+  description: Shockbind Arrow gains 12% damage.
+  icon: {fileID: 21300000, guid: cae45e62595d41e4b441de443f2d974c, type: 3}
+  kind: 2
+  branch: 1
+  treePosition: {x: -50, y: -70}
+  maxRank: 1
+  pointCost: 2
+  requiredPlayerLevel: 6
+  prerequisites:
+  - node: {fileID: 11400000, guid: ae886e89c2b043cfbede92f04da2e3f6, type: 2}
+    requiredRank: 1
+  scaleStatModifiersByRank: 1
+  statModifiers: []
+  skillModifiers:
+  - skillId: ranger.shockbind_arrow
+    modifierType: 0
+    amount: 0.12
+    scaleByRank: 1
+  activeSkill: {fileID: 0}
+  preferredEquipSlot: -1
+  element: 0
+  reaction: 0

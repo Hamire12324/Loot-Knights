@@ -30,6 +30,7 @@ public class CharacterSkillController : CharacterAbstract
     public CharacterSkillRuntime BasicAttackRuntime => loadout.BasicAttackRuntime;
     public CharacterSkillRuntime SpecialSkillRuntime => loadout.SpecialSkillRuntime;
     public bool IsCasting => castingRoutine != null;
+    public bool IsAttackVisualActive => animationDriver != null && animationDriver.IsAttackVisualActive();
     public IReadOnlyList<CharacterSkillRuntime> RuntimeSkills => loadout.RuntimeSkills;
 
     protected override void Awake()
@@ -82,7 +83,7 @@ public class CharacterSkillController : CharacterAbstract
         return true;
     }
 
-    public bool TryCastBasicAttack()
+    public virtual bool TryCastBasicAttack()
     {
         if (BasicAttackRuntime == null)
         {
@@ -176,12 +177,15 @@ public class CharacterSkillController : CharacterAbstract
     protected virtual IEnumerator CastRoutine(CharacterSkillRuntime runtime)
     {
         CharacterSkillDefinition definition = runtime.Definition;
+        if (definition == null || characterCtrl == null ||
+            (characterCtrl.CharacterStat != null && !characterCtrl.CharacterStat.TrySpendMana(definition.ManaCost)))
+        {
+            castingRoutine = null;
+            yield break;
+        }
+
         currentCastingRuntime = runtime;
         runtime.StartCooldown(GetCooldownDuration(runtime, definition));
-
-        Debug.Log(
-            $"{nameof(CharacterSkillController)} started cast '{definition?.name ?? "null"}' on {(characterCtrl != null ? characterCtrl.name : "null")}. trigger={definition?.TriggerName ?? "null"}, castTime={(definition != null ? definition.CastTime : 0f):0.00}.",
-            gameObject);
 
         if (cancelBasicAttackOnCast && runtime != BasicAttackRuntime)
             characterCtrl.CharacterCombatController?.CancelAttack(force: true);
@@ -258,9 +262,7 @@ public class CharacterSkillController : CharacterAbstract
         foreach (CharacterSkillEffectDefinition effect in definition.Effects)
         {
             if (effect == null) continue;
-            Debug.Log(
-                $"{nameof(CharacterSkillController)} executing effect '{effect.name}' ({effect.GetType().Name}) for skill '{definition.name}', aim={aimDirection}.",
-                gameObject);
+
             effect.Execute(context);
         }
     }
@@ -277,7 +279,9 @@ public class CharacterSkillController : CharacterAbstract
 
     private static bool ShouldExecuteOnAnimationHit(CharacterSkillDefinition definition)
     {
-        return definition != null && !string.IsNullOrWhiteSpace(definition.TriggerName);
+        return definition != null &&
+               definition.ExecuteEffectsOnAnimationHit &&
+               !string.IsNullOrWhiteSpace(definition.TriggerName);
     }
 
     private void ClearPendingCast()

@@ -1318,13 +1318,9 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     {
         return branch switch
         {
-            SkillTreeBranch.KnightTechnique => techniqueLineColor,
-            SkillTreeBranch.KnightDefense => defenseLineColor,
-            SkillTreeBranch.KnightControl => controlLineColor,
-            SkillTreeBranch.GauntletFire => fireLineColor,
-            SkillTreeBranch.GauntletFrost => frostLineColor,
-            SkillTreeBranch.GauntletLightning => lightningLineColor,
-            SkillTreeBranch.GauntletPoison => poisonLineColor,
+            SkillTreeBranch.Knight => techniqueLineColor,
+            SkillTreeBranch.Archer => controlLineColor,
+            SkillTreeBranch.Element => defaultLineColor,
             _ => defaultLineColor
         };
     }
@@ -1334,7 +1330,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         if (toNode != null && toNode.Kind == SkillTreeNodeKind.ElementReaction && fromNode != null)
             return GetNodeAccentColor(fromNode);
 
-        return GetLineColor(toNode != null ? toNode.Branch : SkillTreeBranch.GauntletReaction);
+        return GetLineColor(toNode != null ? toNode.Branch : SkillTreeBranch.Element);
     }
 
     private Color GetNodeAccentColor(SkillTreeNodeDefinition definition)

@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d1b40b385564f70ba2cd129ab6741a3, type: 3}
+  m_Name: Node_SpinningGuard
+  m_EditorClassIdentifier: 
+  nodeId: knight.spinning_guard
+  displayName: Spinning Guard
+  description: '+1 Armor and +3 Attack per rank. Also upgrades Whirlwind per rank:
+    +0.2s duration, +0.12 radius, and +1.5 Armor while spinning. Max rank 2.'
+  icon: {fileID: 21300000, guid: 1c672a70bec329d42851f0a24864418b, type: 3}
+  kind: 2
+  branch: 0
+  treePosition: {x: 120, y: -70}
+  maxRank: 2
+  pointCost: 1
+  requiredPlayerLevel: 7
+  prerequisites:
+  - node: {fileID: 11400000, guid: 59065ede6566496f92b748cf5e34cfab, type: 2}
+    requiredRank: 1
+  scaleStatModifiersByRank: 1
+  statModifiers:
+  - statType: 2
+    modifierType: 0
+    amount: 1
+  - statType: 1
+    modifierType: 0
+    amount: 3
+  skillModifiers:
+  - skillId: hero.whirlwind
+    modifierType: 3
+    amount: 0.2
+    scaleByRank: 1
+  - skillId: hero.whirlwind
+    modifierType: 2
+    amount: 0.12
+    scaleByRank: 1
+  activeSkill: {fileID: 0}
+  preferredEquipSlot: -1
+  element: 0
+  reaction: 0

@@ -4,6 +4,8 @@ public class EnemyCtrl : CharacterCtrl
 {
     [SerializeField] private EnemyAIController enemyAIController;
     public EnemyAIController EnemyAIController => enemyAIController;
+    [SerializeField] private EnemyLevel enemyLevel;
+    public EnemyLevel EnemyLevel => enemyLevel;
 
     protected override void ResetValue()
     {
@@ -18,9 +20,22 @@ public class EnemyCtrl : CharacterCtrl
         this.LoadEnemyAIController();
     }
 
+    protected override void LoadCharacterLevel()
+    {
+        LoadEnemyLevel();
+    }
+
     protected virtual void LoadEnemyAIController()
     {
         if (enemyAIController != null) return;
         enemyAIController = GetComponentInChildren<EnemyAIController>();
+    }
+
+    private void LoadEnemyLevel()
+    {
+        if (enemyLevel == null)
+            enemyLevel = GetComponentInChildren<EnemyLevel>(true);
+
+        characterLevel = enemyLevel;
     }
 }

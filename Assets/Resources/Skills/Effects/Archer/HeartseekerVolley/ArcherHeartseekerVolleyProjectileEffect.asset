@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3995c67d9ef44340b307dbcaa41e2007, type: 3}
+  m_Name: ArcherHeartseekerVolleyProjectileEffect
+  m_EditorClassIdentifier: 
+  projectileVfx: {fileID: 11400000, guid: 7eb62ed57a72401c86273743f919685f, type: 2}
+  length: 8.5
+  startOffset: 0.55
+  speed: 16
+  rotationOffset: 0
+  penetration: 2
+  targetingLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  projectileCount: 7
+  spreadAngle: 34
+  sideSpacing: 0.12
+  shotInterval: 0.1
+  spawnOriginRadius: 1.25
+  spawnOriginAngleStep: 51.43
+  damageData:
+    Multiplier: 0.7
+    CanCrit: 1
+    CausesHitStun: 1
+    HitStunDuration: 0.18
+    HitStunImmunityDuration: 0.65
+    InterruptsAttack: 1
+    HitVfx: {fileID: 11400000, guid: 5e968ca568c24b15ae9b5f984ad3d27f, type: 2}
+    HitVfxOffset: {x: 0, y: 0, z: 0}
+    HitSfx: {fileID: 11400000, guid: 9fba50e016f647349bb5ad82ddeea5fd, type: 2}
+    HitSfxOffset: {x: 0, y: 0, z: 0}
+  flatBonusDamage: 0
+  multiplierBonus: 0
+  rankScalings: []
+  maximumCharges: 5
+  extraProjectilesPerCharge: 1
+  resourceId: archer.heartseeker_charge
+  targetSearchRadius: 8.5
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 64
