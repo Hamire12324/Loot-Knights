@@ -25,6 +25,9 @@ public class BatAIController : EnemyAIController
     [SerializeField] private float diveSpeedMultiplier = 2.2f;
     [SerializeField] private float diveTimeout = 0.7f;
 
+    [Header("Blood Drain")]
+    [SerializeField, Range(0f, 1f)] private float bloodDrainHealthThreshold = 0.75f;
+
     [Header("Retreat")]
     [SerializeField] private float retreatDistance = 2.4f;
     [SerializeField] private float retreatSpeedMultiplier = 1.4f;
@@ -114,7 +117,9 @@ public class BatAIController : EnemyAIController
 
         if (GetTargetDistance() <= biteDistance)
         {
-            TryAttack();
+            if (!TryCastBloodDrain())
+                TryAttack();
+
             ChangeBatState(BatState.Bite);
             return;
         }
@@ -159,6 +164,28 @@ public class BatAIController : EnemyAIController
         retreatPosition = (Vector2)target.position + away * retreatDistance;
         nextAttackTime = Time.time + attackCooldown;
         ChangeBatState(BatState.Retreat);
+    }
+
+    private bool TryCastBloodDrain()
+    {
+        if (!ShouldUseBloodDrain())
+            return false;
+
+        CharacterSkillController skillController = characterCtrl.CharacterSkillController;
+        if (skillController != null && skillController.GetSkill(0) != null)
+            return skillController.TryCast(0);
+
+        return false;
+    }
+
+    private bool ShouldUseBloodDrain()
+    {
+        CharacterStat stats = characterCtrl != null ? characterCtrl.CharacterStat : null;
+        float maxHealth = stats?.MaxHealth?.FinalValue ?? 0f;
+        if (maxHealth <= 0f)
+            return false;
+
+        return stats.CurrentHealth / maxHealth <= bloodDrainHealthThreshold;
     }
 
     private bool EnsureTarget()

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0028e54ec6904aa469aa3161a6588063, type: 3}
+  m_Name: ArmoredOrc_Thrust
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySkillDefinition
+  skillId: armored_orc_thrust
+  displayName: Ironbreaker Thrust
+  icon: {fileID: 0}
+  castType: 1
+  castTime: 0.36
+  duration: 0
+  lockMovementWhileCasting: 1
+  canBeInterrupted: 1
+  cooldown: 0
+  manaCost: 0
+  triggerName: ArmoredOrc_Thrust
+  animationIndex: 0
+  executeEffectsOnAnimationHit: 0
+  castVfx: {fileID: 0}
+  castSfx: {fileID: 0}
+  effects:
+  - {fileID: 11400000, guid: 6de8c7d2c2864b208e842f7b65adf01a, type: 2}

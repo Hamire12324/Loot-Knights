@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0028e54ec6904aa469aa3161a6588063, type: 3}
+  m_Name: OrcRider_MaelstromMace
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySkillDefinition
+  skillId: orc_rider_maelstrom_mace
+  displayName: Maelstrom Mace
+  icon: {fileID: 0}
+  castType: 2
+  castTime: 0.08
+  duration: 0.82
+  lockMovementWhileCasting: 1
+  canBeInterrupted: 1
+  cooldown: 6.5
+  manaCost: 0
+  triggerName: OrcRider_Maelstrom
+  animationIndex: 0
+  executeEffectsOnAnimationHit: 0
+  castVfx: {fileID: 0}
+  castSfx: {fileID: 0}
+  effects:
+  - {fileID: 11400000, guid: 1d0d81f8f8e04754c9b4ae4d7d5f70fe, type: 2}

@@ -63,6 +63,7 @@ MonoBehaviour:
   targetPosition: {x: 0, y: 0}
   hasTarget: 0
   desiredVelocity: {x: 0, y: 0}
+  speedMultiplier: 1
 --- !u!1 &414880977286340877
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,6 +150,7 @@ MonoBehaviour:
     isDirty: 1
     cachedFinalValue: 0
   currentHealth: 620
+  currentMana: 0
 --- !u!1 &910000000000000101
 GameObject:
   m_ObjectHideFlags: 0
@@ -205,6 +207,114 @@ MonoBehaviour:
   defaultDeathVfx: {fileID: 0}
   deathAnchor: {fileID: 3072885155169383438}
   defaultDeathSfx: {fileID: 0}
+--- !u!1 &920000000000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 920000000000000002}
+  - component: {fileID: 920000000000000003}
+  m_Layer: 6
+  m_Name: EnemySkillController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &920000000000000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920000000000000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3072885155169383438}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &920000000000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920000000000000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01b2c3d4e5f6478899aabbccddeeff01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WerebearSkillController
+  characterCtrl: {fileID: 5807337789327651017}
+  basicAttack: {fileID: 11400000, guid: 31c3d4e5f6a74899aabbccddeeff0031, type: 2}
+  equippedSkills:
+  - {fileID: 11400000, guid: 32c3d4e5f6a74899aabbccddeeff0032, type: 2}
+  - {fileID: 11400000, guid: 33c3d4e5f6a74899aabbccddeeff0033, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
+  specialSkill: {fileID: 0}
+  cancelBasicAttackOnCast: 1
+  basicAttacksBeforeSpecial: 2
+  specialChance: 0.4
+--- !u!1 &920000000000000004
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 920000000000000005}
+  - component: {fileID: 920000000000000006}
+  m_Layer: 6
+  m_Name: EnemyLevel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &920000000000000005
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920000000000000004}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3072885155169383438}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &920000000000000006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920000000000000004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d44ac9975092546438ab8c98be659981, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyLevel
+  characterCtrl: {fileID: 5807337789327651017}
+  currentLevel: 1
+  statGrowths:
+  - statType: 3
+    bonusPerLevel: 10
+  - statType: 1
+    bonusPerLevel: 2
+  - statType: 2
+    bonusPerLevel: 0.5
 --- !u!1 &1686787518447534156
 GameObject:
   m_ObjectHideFlags: 0
@@ -282,7 +392,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.55, y: 2.55, z: 2.55}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3072885155169383438}
@@ -336,8 +446,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 5770554414319492624, guid: 18d6b1b6a1d410041b0e521e35ed978d, type: 3}
-  m_Color: {r: 0.72, g: 0.55, b: 0.42, a: 1}
+  m_Sprite: {fileID: 902542760473553384, guid: e96ed7074a118944fba65589c65865c3, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -356,7 +466,7 @@ Animator:
   m_GameObject: {fileID: 2386543685311483332}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 4385df8c0d9c5e745bf1f4d3d857f4c7, type: 2}
+  m_Controller: {fileID: 9100000, guid: 1431326373de41c4bb8fba77da8165af, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -481,7 +591,7 @@ MonoBehaviour:
   targetLayer:
     serializedVersion: 2
     m_Bits: 128
-  detectRadius: 5.0
+  detectRadius: 5
   currentTarget: {fileID: 0}
 --- !u!1 &4325988491008515566
 GameObject:
@@ -513,7 +623,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2797357453435563648}
@@ -528,6 +638,8 @@ Transform:
   - {fileID: 6486831783893825970}
   - {fileID: 8806267082225723563}
   - {fileID: 910000000000000102}
+  - {fileID: 920000000000000002}
+  - {fileID: 920000000000000005}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &8574517393882886143
@@ -591,8 +703,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.0013145208, y: 0}
-  m_Size: {x: 0.62, y: 0.62}
+  m_Offset: {x: 0.016, y: 0}
+  m_Size: {x: 0.2, y: 0.22}
   m_Direction: 0
 --- !u!114 &5807337789327651017
 MonoBehaviour:
@@ -617,11 +729,12 @@ MonoBehaviour:
   characterDamSender: {fileID: 9134152244285718677}
   characterDamReceiver: {fileID: 7992388985059515559}
   characterCombatController: {fileID: 2566884767154531975}
-  characterSkillController: {fileID: 0}
+  characterSkillController: {fileID: 920000000000000003}
   characterTargetFinder: {fileID: 8243017945076777029}
   characterVFXController: {fileID: 910000000000000103}
-  characterLevel: {fileID: 0}
+  characterLevel: {fileID: 920000000000000006}
   enemyAIController: {fileID: 2949383566835647808}
+  enemyLevel: {fileID: 920000000000000006}
 --- !u!114 &6626155559249779585
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -704,7 +817,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.74, y: 0}
+  m_Offset: {x: 0.1, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -714,7 +827,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.2, y: 0.62}
+  m_Size: {x: 0.2, y: 0.2}
   m_EdgeRadius: 0
 --- !u!114 &9134152244285718677
 MonoBehaviour:
@@ -735,6 +848,7 @@ MonoBehaviour:
     CausesHitStun: 0
     HitStunDuration: 0.2
     HitStunImmunityDuration: 0.75
+    IgnoresHitStunImmunity: 0
     InterruptsAttack: 1
     HitVfx: {fileID: 0}
     HitVfxOffset: {x: 0, y: 0, z: 0}
@@ -789,21 +903,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 5677991643459005651}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Name: 
   m_Script: {fileID: 11500000, guid: 1d42736d1ae049bdb2a4f55f3cf6a521, type: 3}
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeleeEnemyAIController
   characterCtrl: {fileID: 5807337789327651017}
   movement: {fileID: 6935674513474067312}
+  loseRange: 8
+  targetRefreshInterval: 0.25
+  attackCooldown: 2.1
+  target: {fileID: 0}
   desiredAttackDistance: 0.65
   attackHorizontalRange: 1.25
   attackVerticalRange: 0.65
-  loseRange: 8
-  targetRefreshInterval: 0.25
-  attackCooldown: 2.10
   minStateTime: 0.15
   maxAttackersPerTarget: 2
+  equippedAttackSkillIndex: -1
+  basicAttacksBeforeEquippedSkill: 2
+  equippedAttackSkillChance: 0.35
   state: 0
-  target: {fileID: 0}
 --- !u!1 &6592089983394598127
 GameObject:
   m_ObjectHideFlags: 0
@@ -948,7 +1065,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyItemDrop
   damageReceiver: {fileID: 7992388985059515559}
-  dropChance: 0.50
+  dropChance: 0.5
   scatterRadius: 0.35
   dropOffset: {x: 0, y: 0}
   stageManager: {fileID: 0}

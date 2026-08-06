@@ -146,11 +146,9 @@ public abstract class EnemyAIController : CharacterAbstract
         nextAttackTime = Time.time + attackCooldown;
 
         CharacterSkillController skillController = characterCtrl.CharacterSkillController;
-        if (skillController != null)
+        if (skillController != null && skillController.BasicAttackRuntime != null)
         {
-            if (skillController.BasicAttackRuntime != null)
-                skillController.TryCastBasicAttack();
-
+            skillController.TryCastBasicAttack();
             return;
         }
 

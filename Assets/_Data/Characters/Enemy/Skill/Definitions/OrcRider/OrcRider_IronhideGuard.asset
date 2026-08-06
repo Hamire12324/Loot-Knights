@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a88ad12a66c846dda173c0cbe5fd1a88, type: 3}
+  m_Name: OrcRider_IronhideGuard
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyBlockSkillDefinition
+  skillId: orc_rider_ironhide_guard
+  displayName: Ironhide Guard
+  icon: {fileID: 0}
+  castType: 2
+  castTime: 0
+  duration: 0.7
+  lockMovementWhileCasting: 1
+  canBeInterrupted: 1
+  cooldown: 3.5
+  manaCost: 0
+  triggerName: Block
+  animationIndex: 0
+  executeEffectsOnAnimationHit: 0
+  castVfx: {fileID: 0}
+  castSfx: {fileID: 0}
+  effects: []
+  damageMultiplier: 0.35

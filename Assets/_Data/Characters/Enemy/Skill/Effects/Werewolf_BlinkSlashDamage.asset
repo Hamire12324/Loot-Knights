@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ec8bd2efb7a4f03a2f42d3446a695c1, type: 3}
+  m_Name: Werewolf_BlinkSlashDamage
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterSkillAreaDamageEffect
+  radius: 1.05
+  angle: 100
+  forwardOffset: 0.45
+  sideOffset: 0
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  delay: 0
+  damageData:
+    Multiplier: 1.65
+    CanCrit: 0
+    CausesHitStun: 1
+    HitStunDuration: 0.28
+    HitStunImmunityDuration: 0.8
+    IgnoresHitStunImmunity: 0
+    InterruptsAttack: 1
+    HitVfx: {fileID: 0}
+    HitVfxOffset: {x: 0, y: 0, z: 0}
+    HitSfx: {fileID: 0}
+    HitSfxOffset: {x: 0, y: 0, z: 0}
+  flatBonusDamage: 0
+  multiplierBonus: 0
+  hitAreaVfx: {fileID: 0}

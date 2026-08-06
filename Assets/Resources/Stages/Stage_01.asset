@@ -16,7 +16,7 @@ MonoBehaviour:
   stageNumber: 1
   difficultyLevel: 1
   middleRoomCount: 4
-  totalEnemyBudget: 100
+  totalEnemyBudget: 200
   bossRoomBudget: 12
   coinReward: 100
   diamondReward: 0
@@ -31,8 +31,8 @@ MonoBehaviour:
     minAmount: 1
     maxAmount: 1
   enemyEntries:
-  - prefab: {fileID: 6626155559249779585, guid: 44f87fd3866645ae9518e4ab296f7e97, type: 3}
-    cost: 10
+  - prefab: {fileID: 6626155559249779585, guid: 37393141bdaf2f9418f005b34f4ea263, type: 3}
+    cost: 5
     weight: 10
     minDifficultyLevel: 1
     maxDifficultyLevel: 0

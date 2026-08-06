@@ -22,8 +22,9 @@ MonoBehaviour:
   canBeInterrupted: 1
   cooldown: 0
   manaCost: 0
-  triggerName: Attack
+  triggerName: Basic_Attack
   animationIndex: 0
+  executeEffectsOnAnimationHit: 1
   castVfx: {fileID: 0}
   castSfx: {fileID: 0}
   effects:

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f627713a14074ef4c84ca136d66cb7a8, type: 3}
+  m_Name: NecromancerSummonSkeletonsEffect
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterSkillSummonEnemiesEffect
+  summonEntries:
+  - Prefab: {fileID: 6626155559249779585, guid: 7da205d84dbf4bd699e93ef93e504e53, type: 3}
+    Weight: 5
+  - Prefab: {fileID: 6626155559249779585, guid: 88bf6a0fbcf14ef898ec8a7ce60be873, type: 3}
+    Weight: 3
+  - Prefab: {fileID: 6626155559249779585, guid: 44f87fd3866645ae9518e4ab296f7e97, type: 3}
+    Weight: 1
+  - Prefab: {fileID: 6626155559249779585, guid: 429e497c17b943f6bc18e2534a0d8c26, type: 3}
+    Weight: 2
+  summonCount: 2
+  spawnRadius: 1.15
+  delayBetweenSummons: 0.12
+  summonTrigger: Summoned
+  summonAnimationDuration: 0.8

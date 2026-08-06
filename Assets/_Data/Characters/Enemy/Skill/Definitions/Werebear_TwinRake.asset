@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0028e54ec6904aa469aa3161a6588063, type: 3}
+  m_Name: Werebear_TwinRake
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySkillDefinition
+  skillId: werebear_twin_rake
+  displayName: Twin Rake
+  icon: {fileID: 0}
+  castType: 1
+  castTime: 0.48
+  duration: 0
+  lockMovementWhileCasting: 1
+  canBeInterrupted: 1
+  cooldown: 2.4
+  manaCost: 0
+  triggerName: CycloneReap
+  animationIndex: 0
+  executeEffectsOnAnimationHit: 0
+  castVfx: {fileID: 0}
+  castSfx: {fileID: 0}
+  effects:
+  - {fileID: 11400000, guid: 892787a977174e019e3f8b537a2b5cf0, type: 2}
+  - {fileID: 11400000, guid: b64b4c6ec8844cb9afc1116cdd5b65f5, type: 2}

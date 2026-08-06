@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0028e54ec6904aa469aa3161a6588063, type: 3}
+  m_Name: OrcRider_BeastbreakerCharge
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySkillDefinition
+  skillId: orc_rider_beastbreaker_charge
+  displayName: Beastbreaker Charge
+  icon: {fileID: 0}
+  castType: 1
+  castTime: 0.28
+  duration: 0
+  lockMovementWhileCasting: 1
+  canBeInterrupted: 1
+  cooldown: 5.5
+  manaCost: 0
+  triggerName: OrcRider_Charge
+  animationIndex: 0
+  executeEffectsOnAnimationHit: 0
+  castVfx: {fileID: 0}
+  castSfx: {fileID: 0}
+  effects:
+  - {fileID: 11400000, guid: bad4130287cf8b740b6a239528b1398b, type: 2}
+  - {fileID: 11400000, guid: df332cfc98c0cd948bc29f75375fec29, type: 2}

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0028e54ec6904aa469aa3161a6588063, type: 3}
+  m_Name: Werewolf_SwordSlash
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySkillDefinition
+  skillId: werewolf_sword_slash
+  displayName: Sword Slash
+  icon: {fileID: 0}
+  castType: 1
+  castTime: 0.32
+  duration: 0
+  lockMovementWhileCasting: 1
+  canBeInterrupted: 1
+  cooldown: 0
+  manaCost: 0
+  triggerName: Basic_Attack
+  animationIndex: 0
+  executeEffectsOnAnimationHit: 0
+  castVfx: {fileID: 0}
+  castSfx: {fileID: 0}
+  effects:
+  - {fileID: 11400000, guid: 24c3d4e5f6a74899aabbccddeeff0024, type: 2}

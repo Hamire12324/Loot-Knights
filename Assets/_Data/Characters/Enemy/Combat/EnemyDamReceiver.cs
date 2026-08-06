@@ -7,7 +7,19 @@ public class EnemyDamReceiver : CharacterDamReceiver
     [SerializeField] private float fallbackReturnToPoolDelay = 1.2f;
 
     private PoolObj poolObj;
+    private EnemyBlockBehaviour blockBehaviour;
     private Coroutine fallbackReturnCoroutine;
+
+    public override void ReceiveDamage(float damage, Transform attacker = null, DamageData damageData = null)
+    {
+        if (blockBehaviour == null)
+            blockBehaviour = GetComponentInParent<EnemyBlockBehaviour>();
+
+        if (blockBehaviour != null && blockBehaviour.IsBlocking)
+            damage *= blockBehaviour.DamageMultiplier;
+
+        base.ReceiveDamage(damage, attacker, damageData);
+    }
 
     protected override void LoadComponents()
     {

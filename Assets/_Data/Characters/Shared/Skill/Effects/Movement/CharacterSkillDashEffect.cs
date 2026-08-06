@@ -24,6 +24,7 @@ public sealed class CharacterSkillDashEffect : CharacterSkillEffectDefinition
 
     [SerializeField, Min(0f)] private float distance = 3f;
     [SerializeField, Min(0.01f)] private float duration = 0.2f;
+    [SerializeField] private bool instantTeleport;
     [SerializeField] private bool invincibleDuringDash;
     [SerializeField] private string onArriveTrigger;
     [SerializeField] private RankScaling[] rankScalings;
@@ -33,10 +34,40 @@ public sealed class CharacterSkillDashEffect : CharacterSkillEffectDefinition
         if (context.Caster == null || context.Controller == null)
             return;
 
+        if (instantTeleport)
+        {
+            TeleportImmediately(
+                context.Caster,
+                context.AimDirection,
+                context.Definition != null ? context.Definition.SkillId : null);
+            return;
+        }
+
         context.Controller.StartCoroutine(DashRoutine(
             context.Caster,
             context.AimDirection,
             context.Definition != null ? context.Definition.SkillId : null));
+    }
+
+    private void TeleportImmediately(CharacterCtrl caster, Vector2 direction, string skillId)
+    {
+        if (caster.Rb == null)
+            return;
+
+        Vector2 normalizedDirection = direction == Vector2.zero ? Vector2.down : direction.normalized;
+        float effectiveDistance = distance;
+        float unusedDuration = duration;
+        foreach (RankScaling scaling in rankScalings ?? System.Array.Empty<RankScaling>())
+            scaling.Apply(caster, ref effectiveDistance, ref unusedDuration);
+
+        effectiveDistance += SkillTreeSkillModifierResolver.GetValue(
+            caster,
+            skillId,
+            SkillModifierType.DashDistance);
+
+        caster.Rb.linearVelocity = Vector2.zero;
+        caster.Rb.position += normalizedDirection * Mathf.Max(0f, effectiveDistance);
+        PlayArrivalTrigger(caster);
     }
 
     private IEnumerator DashRoutine(CharacterCtrl caster, Vector2 direction, string skillId)

@@ -22,10 +22,10 @@ MonoBehaviour:
   canBeInterrupted: 1
   cooldown: 3
   manaCost: 0
-  triggerName: Attack_Special
+  triggerName: ShieldBash
   animationIndex: 0
   executeEffectsOnAnimationHit: 0
   castVfx: {fileID: 0}
   castSfx: {fileID: 0}
   effects:
-  - {fileID: 11400000, guid: 8904e6c515c84b57a3b16a2d00d1fe92, type: 2}
+  - {fileID: 11400000, guid: 6e4afd4f1bef4a96b46374aa19d48dbe, type: 2}

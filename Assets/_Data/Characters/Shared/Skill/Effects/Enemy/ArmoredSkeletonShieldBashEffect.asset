@@ -35,6 +35,6 @@ MonoBehaviour:
     consumesElementOnReaction: 1
   damageInterval: 0.2
   knockbackForce: 2.4
-  animationStateName: Attack_Special
+  animationStateName: Basic_Special_Attack
   maximumDuration: 2
   logHitResults: 1

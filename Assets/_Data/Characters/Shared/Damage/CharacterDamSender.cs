@@ -33,10 +33,12 @@ public class CharacterDamSender : CharacterAbstract
         Debug.Log($"{transform.name}: LoadCollider2D", gameObject);
     }
 
-    public virtual void DealHitboxDamage()
+    public virtual float DealHitboxDamage()
     {
         if (hitboxCollider == null || characterCtrl == null)
-            return;
+            return 0f;
+
+        float totalDamageDealt = 0f;
 
         ContactFilter2D filter = new();
         filter.SetLayerMask(targetLayer);
@@ -60,8 +62,17 @@ public class CharacterDamSender : CharacterAbstract
             if (!damagedTargets.Add(receiver))
                 continue;
 
+            float healthBefore = receiver.CharacterCtrl.CharacterStat != null
+                ? receiver.CharacterCtrl.CharacterStat.CurrentHealth
+                : 0f;
+
             DealDamage(receiver);
+
+            if (receiver.CharacterCtrl.CharacterStat != null)
+                totalDamageDealt += Mathf.Max(0f, healthBefore - receiver.CharacterCtrl.CharacterStat.CurrentHealth);
         }
+
+        return totalDamageDealt;
     }
 
     protected virtual bool IsValidTarget(

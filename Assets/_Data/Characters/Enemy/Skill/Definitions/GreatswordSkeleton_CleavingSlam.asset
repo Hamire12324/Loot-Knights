@@ -22,7 +22,7 @@ MonoBehaviour:
   canBeInterrupted: 1
   cooldown: 4.2
   manaCost: 0
-  triggerName: Attack_2
+  triggerName: CleavingSlam
   animationIndex: 0
   executeEffectsOnAnimationHit: 0
   castVfx: {fileID: 0}

@@ -14,15 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillId: ranger.shadow_volley_dash
   displayName: Shadow Volley Dash
-  icon: {fileID: 21300000, guid: 74ea2553b04b4cb4b99b1b40c2a1878b, type: 3}
+  icon: {fileID: 21300000, guid: b82b9081529567545886eee7a293fe5e, type: 3}
   castType: 0
   castTime: 0.05
   duration: 0
   lockMovementWhileCasting: 0
   canBeInterrupted: 1
   cooldown: 4
+  manaCost: 0
   triggerName: Attack
   animationIndex: 0
+  executeEffectsOnAnimationHit: 1
   castVfx: {fileID: 0}
   castSfx: {fileID: 0}
   effects:
