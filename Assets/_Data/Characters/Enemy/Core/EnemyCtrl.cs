@@ -7,6 +7,11 @@ public class EnemyCtrl : CharacterCtrl
     [SerializeField] private EnemyLevel enemyLevel;
     public EnemyLevel EnemyLevel => enemyLevel;
 
+    public void SetFaction(Faction value)
+    {
+        faction = value;
+    }
+
     protected override void ResetValue()
     {
         base.ResetValue();

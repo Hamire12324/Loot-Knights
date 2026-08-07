@@ -135,6 +135,88 @@ public class EnemySpawner : BaseMonoBehaviour
         return spawnedEnemies;
     }
 
+    /// <summary>
+    /// Spawns the requested number of enemies when spawn limits allow it. Each enemy
+    /// is randomly chosen by Weight from the supplied stage roster.
+    /// </summary>
+    public List<PoolObj> SpawnCount(
+        IReadOnlyList<Vector3> positions,
+        int enemyCount,
+        int level,
+        IReadOnlyList<StageEnemyEntry> stageEnemyEntries,
+        bool isBossWave = false)
+    {
+        List<PoolObj> spawnedEnemies = new();
+
+        if (positions == null || positions.Count == 0 || enemyCount <= 0)
+            return spawnedEnemies;
+
+        SetDifficultyLevel(level);
+        RemoveMissingEnemies();
+
+        int[] anchorUseCounts = new int[positions.Count];
+        while (spawnedEnemies.Count < enemyCount && aliveEnemies.Count < maxAlive)
+        {
+            StageEnemyEntry entry = PickStageEnemy(stageEnemyEntries, difficultyLevel);
+            if (entry == null || !TryPickAnchorIndex(anchorUseCounts, out int positionIndex))
+                break;
+
+            PoolObj enemy = SpawnAt(entry.Prefab, GetSpawnPositionNearAnchor(positions[positionIndex]));
+            if (enemy == null)
+                break;
+
+            BossEnemy bossEnemy = enemy.GetComponent<BossEnemy>();
+            if (bossEnemy == null && isBossWave)
+                bossEnemy = enemy.gameObject.AddComponent<BossEnemy>();
+
+            bossEnemy?.Configure(isBossWave);
+
+            anchorUseCounts[positionIndex]++;
+            spawnedEnemies.Add(enemy);
+        }
+
+        if (spawnedEnemies.Count < enemyCount)
+        {
+            Debug.LogWarning(
+                $"{name}: Spawned {spawnedEnemies.Count}/{enemyCount} stage enemies. " +
+                "Check Stage Enemies, Max Alive, and spawn-point limits.",
+                gameObject);
+        }
+
+        return spawnedEnemies;
+    }
+
+    private static StageEnemyEntry PickStageEnemy(IReadOnlyList<StageEnemyEntry> entries, int level)
+    {
+        if (entries == null || entries.Count == 0)
+            return null;
+
+        List<StageEnemyEntry> candidates = new();
+        int totalWeight = 0;
+
+        foreach (StageEnemyEntry entry in entries)
+        {
+            if (entry == null || entry.Prefab == null || !entry.IsAllowedAtDifficulty(level))
+                continue;
+
+            candidates.Add(entry);
+            totalWeight += entry.Weight;
+        }
+
+        if (candidates.Count == 0)
+            return null;
+
+        int roll = Random.Range(0, totalWeight);
+        foreach (StageEnemyEntry entry in candidates)
+        {
+            roll -= entry.Weight;
+            if (roll < 0)
+                return entry;
+        }
+
+        return candidates[0];
+    }
+
     private bool TryPickAnchorIndex(int[] anchorUseCounts, out int index)
     {
         index = -1;

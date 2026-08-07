@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ButtonTestStageComplete : ButtonAbstract
 {
-    [SerializeField] private DungeonStageManager stageManager;
+    [SerializeField] private StageManager stageManager;
     [SerializeField] private bool editorOnly = true;
 
     protected override void Awake()
@@ -29,7 +29,7 @@ public class ButtonTestStageComplete : ButtonAbstract
 
         if (stageManager == null)
         {
-            Debug.LogError(transform.name + ": Missing DungeonStageManager reference.", gameObject);
+            Debug.LogError(transform.name + ": Missing StageManager reference.", gameObject);
             return;
         }
 
@@ -40,7 +40,7 @@ public class ButtonTestStageComplete : ButtonAbstract
     {
         if (stageManager != null) return;
 
-        stageManager = FindAnyObjectByType<DungeonStageManager>(FindObjectsInactive.Include);
+        stageManager = FindAnyObjectByType<StageManager>(FindObjectsInactive.Include);
     }
 
     private bool IsEditorOnlyBlocked()

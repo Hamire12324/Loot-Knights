@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f14ec9d8a7b45d4ab1d236d14dc0d51, type: 3}
+  m_Name: Stage_17
+  m_EditorClassIdentifier: Assembly-CSharp::StageConfig
+  stageName: Stage 17
+  stageNumber: 17
+  difficultyLevel: 17
+  enemyRoster:
+  - prefab: {fileID: 6626155559249779585, guid: 0364b1541c824085a5d28fd6a1b0c61d, type: 3}
+    weight: 40
+    minDifficultyLevel: 1
+    maxDifficultyLevel: 0
+  - prefab: {fileID: 6626155559249779585, guid: 2dd0c920664442b6ab31967827919ff0, type: 3}
+    weight: 35
+    minDifficultyLevel: 1
+    maxDifficultyLevel: 0
+  - prefab: {fileID: 6626155559249779585, guid: eb493a37539c4786a287a03d84bd937b, type: 3}
+    weight: 25
+    minDifficultyLevel: 1
+    maxDifficultyLevel: 0
+  openingEnemies:
+    enemyCount: 6
+    delayBeforeWave: 0
+    isBossWave: 0
+    enemyOverrides: []
+  waves:
+  - enemyCount: 8
+    delayBeforeWave: 1.5
+    isBossWave: 0
+    enemyOverrides: []
+  - enemyCount: 9
+    delayBeforeWave: 1.75
+    isBossWave: 0
+    enemyOverrides: []
+  - enemyCount: 10
+    delayBeforeWave: 2
+    isBossWave: 0
+    enemyOverrides: []
+  - enemyCount: 10
+    delayBeforeWave: 2.25
+    isBossWave: 0
+    enemyOverrides: []
+  - enemyCount: 10
+    delayBeforeWave: 2.5
+    isBossWave: 0
+    enemyOverrides: []
+  coinReward: 525
+  diamondReward: 0
+  experienceReward: 610
+  itemDrops: []

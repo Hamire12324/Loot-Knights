@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class EnemyItemDrop : CharacterDrop
 {
-    [SerializeField] private DungeonStageManager stageManager;
+    [SerializeField] private StageManager stageManager;
     [SerializeField] private ItemPickup itemPickupPrefab;
     [SerializeField] private int minItemDrops = 0;
     [SerializeField] private int maxItemDrops = 1;
@@ -18,7 +18,7 @@ public class EnemyItemDrop : CharacterDrop
     {
         if (stageManager != null) return;
 
-        stageManager = FindAnyObjectByType<DungeonStageManager>(FindObjectsInactive.Include);
+        stageManager = FindAnyObjectByType<StageManager>(FindObjectsInactive.Include);
     }
 
     protected override void Drop(CharacterDamReceiver receiver)

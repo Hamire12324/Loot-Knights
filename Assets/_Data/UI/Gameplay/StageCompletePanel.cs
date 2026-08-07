@@ -41,7 +41,7 @@ public class StageCompletePanel : BaseMonoBehaviour
     }
 
     public void Show(
-        DungeonStageConfig completedStage,
+        StageConfig completedStage,
         int completedStageIndex,
         bool hasNextStage,
         PlayerLevelRewardResult? experienceResult = null)
@@ -253,7 +253,7 @@ public class StageCompletePanel : BaseMonoBehaviour
     }
 
     private void RefreshRewardTexts(
-        DungeonStageConfig completedStage,
+        StageConfig completedStage,
         PlayerLevelRewardResult? experienceResult)
     {
         int coins = completedStage != null ? completedStage.CoinReward : 0;

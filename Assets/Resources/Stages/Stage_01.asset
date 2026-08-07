@@ -11,13 +11,35 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3f14ec9d8a7b45d4ab1d236d14dc0d51, type: 3}
   m_Name: Stage_01
-  m_EditorClassIdentifier: Assembly-CSharp::DungeonStageConfig
+  m_EditorClassIdentifier: Assembly-CSharp::StageConfig
   stageName: Stage 1
   stageNumber: 1
   difficultyLevel: 1
-  middleRoomCount: 4
-  totalEnemyBudget: 200
-  bossRoomBudget: 12
+  enemyRoster:
+  - prefab: {fileID: 6626155559249779585, guid: 37393141bdaf2f9418f005b34f4ea263, type: 3}
+    weight: 100
+    minDifficultyLevel: 1
+    maxDifficultyLevel: 0
+  openingEnemies:
+    enemyCount: 3
+    delayBeforeWave: 0
+    enemyOverrides: []
+  waves:
+  - enemyCount: 5
+    delayBeforeWave: 1.5
+    enemyOverrides: []
+  - enemyCount: 6
+    delayBeforeWave: 1.5
+    enemyOverrides: []
+  - enemyCount: 7
+    delayBeforeWave: 2
+    enemyOverrides: []
+  - enemyCount: 8
+    delayBeforeWave: 2
+    enemyOverrides: []
+  - enemyCount: 9
+    delayBeforeWave: 2.5
+    enemyOverrides: []
   coinReward: 100
   diamondReward: 0
   experienceReward: 100
@@ -30,9 +52,3 @@ MonoBehaviour:
     weight: 1000
     minAmount: 1
     maxAmount: 1
-  enemyEntries:
-  - prefab: {fileID: 6626155559249779585, guid: 37393141bdaf2f9418f005b34f4ea263, type: 3}
-    cost: 5
-    weight: 10
-    minDifficultyLevel: 1
-    maxDifficultyLevel: 0
