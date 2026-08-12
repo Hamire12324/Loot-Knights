@@ -7,8 +7,10 @@ public sealed class CharacterSkillSummonEnemiesEffect : CharacterSkillEffectDefi
     [System.Serializable]
     private struct SummonEntry
     {
+#pragma warning disable CS0649 // Values are populated by Unity's serialized asset data.
         public PoolObj Prefab;
         [Min(1)] public int Weight;
+#pragma warning restore CS0649
     }
 
     [Header("Summons")]

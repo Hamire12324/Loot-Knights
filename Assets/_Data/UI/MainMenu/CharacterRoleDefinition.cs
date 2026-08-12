@@ -9,6 +9,8 @@ public class CharacterRoleDefinition
     public CharacterClass CharacterClass = CharacterClass.Knight;
     public Sprite Portrait;
     public Sprite FullBodySprite;
+    [Tooltip("Skills displayed on the character selection screen. Their assigned game icons are used automatically.")]
+    public CharacterSkillDefinition[] Skills;
     public Sprite[] SkillIcons;
 
     [Range(0f, 1f)] public float Attack = 0.8f;

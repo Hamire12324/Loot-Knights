@@ -29,32 +29,56 @@ MonoBehaviour:
     minDifficultyLevel: 1
     maxDifficultyLevel: 0
   openingEnemies:
-    enemyCount: 4
+    enemyCount: 24
     delayBeforeWave: 0
     isBossWave: 0
     enemyOverrides: []
   waves:
-  - enemyCount: 6
+  - enemyCount: 48
     delayBeforeWave: 1.5
     isBossWave: 0
     enemyOverrides: []
-  - enemyCount: 7
+  - enemyCount: 72
     delayBeforeWave: 1.75
     isBossWave: 0
     enemyOverrides: []
-  - enemyCount: 8
+  - enemyCount: 96
     delayBeforeWave: 2
     isBossWave: 0
     enemyOverrides: []
-  - enemyCount: 9
+  - enemyCount: 120
     delayBeforeWave: 2.25
     isBossWave: 0
     enemyOverrides: []
-  - enemyCount: 10
+  - enemyCount: 144
     delayBeforeWave: 2.5
     isBossWave: 0
     enemyOverrides: []
   coinReward: 325
   diamondReward: 0
   experienceReward: 370
-  itemDrops: []
+  itemDrops:
+  - item: {fileID: 11400000, guid: c8ac93f20800164419c0efec5f51f48a, type: 2}
+    weight: 22
+    minAmount: 1
+    maxAmount: 1
+  - item: {fileID: 11400000, guid: 7920cc5c374b80449b347f7d89ba5b1d, type: 2}
+    weight: 22
+    minAmount: 1
+    maxAmount: 1
+  - item: {fileID: 11400000, guid: 6393cc2bf5d5dd84bbae62442c479a0c, type: 2}
+    weight: 22
+    minAmount: 1
+    maxAmount: 1
+  - item: {fileID: 11400000, guid: 8f26acb05095615489c4b74ed69c2f29, type: 2}
+    weight: 22
+    minAmount: 1
+    maxAmount: 1
+  - item: {fileID: 11400000, guid: f07a4503d44c2e342842a071783b1f12, type: 2}
+    weight: 6
+    minAmount: 1
+    maxAmount: 1
+  - item: {fileID: 11400000, guid: f82e2a75a0c438f4ebb68249a9011e99, type: 2}
+    weight: 6
+    minAmount: 1
+    maxAmount: 1

@@ -102,7 +102,7 @@ public class InventoryView : BaseMonoBehaviour
             return;
         }
 
-        inventoryManager.SetCapacity(inventoryCapacity);
+        inventoryManager.SetCapacity(PlayerInventoryCapacityStorage.GetCapacity(inventoryCapacity));
         InventoryContainer inventory = inventoryManager.Inventory;
         BuildDisplayedInventoryIndexes(inventory);
 
@@ -180,8 +180,16 @@ public class InventoryView : BaseMonoBehaviour
 
         int displayIndex = slots.IndexOf(slot);
         int inventoryIndex = GetInventoryIndex(displayIndex);
-        if (inventoryIndex >= 0)
-            inventoryManager?.RemoveSlot(inventoryIndex);
+        if (inventoryIndex >= 0 && inventoryManager != null)
+        {
+            InventorySlotData inventorySlot = inventoryManager.Inventory.GetSlot(inventoryIndex);
+            ItemDefinition item = inventorySlot != null ? inventorySlot.Item : null;
+            int amount = inventorySlot != null ? inventorySlot.Amount : 0;
+
+            InventoryOperationResult result = inventoryManager.RemoveSlot(inventoryIndex);
+            if (result != null && result.Success)
+                PlayerCurrencyStorage.Add(CurrencyType.Coins, EconomyPricing.GetSellValue(item, amount));
+        }
 
         selectedSlot = null;
         RefreshActionButtonStates();

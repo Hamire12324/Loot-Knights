@@ -11,6 +11,8 @@ public class ItemDefinition : ScriptableObject
     [SerializeField] private ItemRarity rarity = ItemRarity.Common;
     [SerializeField] private ItemCategory category = ItemCategory.Auto;
     [SerializeField] private EquipmentSlotType equipmentSlotType = EquipmentSlotType.None;
+    [Tooltip("Optional set this equipment belongs to. Set bonuses are applied by PlayerEquipmentManager.")]
+    [SerializeField] private EquipmentSetDefinition equipmentSet;
     [SerializeField] private int maxStack = 99;
     [SerializeField] private int maxUpgradeLevel = 10;
     [SerializeField] private List<StatModifierData> equipmentModifiers = new();
@@ -30,6 +32,7 @@ public class ItemDefinition : ScriptableObject
     public int MaxStack => Mathf.Max(1, maxStack);
     public bool IsValid => !string.IsNullOrWhiteSpace(itemId);
     public EquipmentSlotType EquipmentSlotType => equipmentSlotType;
+    public EquipmentSetDefinition EquipmentSet => equipmentSet;
     public int MaxUpgradeLevel => Mathf.Max(0, maxUpgradeLevel);
     public IReadOnlyList<StatModifierData> EquipmentModifiers => equipmentModifiers;
     public IReadOnlyList<StatModifierData> UpgradeModifiersPerLevel => upgradeModifiersPerLevel;

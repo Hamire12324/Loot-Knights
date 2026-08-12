@@ -75,6 +75,19 @@ public class PlayerEquipmentManager : BaseSingleton<PlayerEquipmentManager>
         return equipmentInventory.GetInstance(slotType);
     }
 
+    public int GetUpgradeCost(EquipmentSlotType slotType)
+    {
+        ItemDefinition item = GetItem(slotType);
+        return item == null ? 0 : EconomyPricing.GetEquipmentUpgradeCost(item, GetUpgradeLevel(slotType));
+    }
+
+    /// <summary>Returns every equipped set and its current piece count.</summary>
+    public IReadOnlyList<EquipmentSetProgress> GetSetProgresses()
+    {
+        EnsureLoaded();
+        return BuildSetProgresses();
+    }
+
     public bool CanEquip(ItemDefinition item, EquipmentSlotType slotType)
     {
         return item != null
@@ -132,6 +145,9 @@ public class PlayerEquipmentManager : BaseSingleton<PlayerEquipmentManager>
         }
 
         int previousLevel = instance.UpgradeLevel;
+        if (!TrySpendUpgradeCost(item, previousLevel, levels))
+            return false;
+
         instance.AddUpgradeLevels(levels, item.MaxUpgradeLevel);
         int nextLevel = instance.UpgradeLevel;
 
@@ -289,6 +305,9 @@ public class PlayerEquipmentManager : BaseSingleton<PlayerEquipmentManager>
             }
 
             int previousLevel = instance.UpgradeLevel;
+            if (!TrySpendUpgradeCost(item, previousLevel, levels))
+                return false;
+
             instance.AddUpgradeLevels(levels, item.MaxUpgradeLevel);
 
             if (instance.UpgradeLevel == previousLevel)
@@ -370,7 +389,43 @@ public class PlayerEquipmentManager : BaseSingleton<PlayerEquipmentManager>
                 equipmentModifiers.AddRange(item.BuildEquipmentModifiers(EquipmentUpgradeStorage.GetLevel(item)));
         }
 
+        foreach (EquipmentSetProgress progress in BuildSetProgresses())
+            progress.Set.AddActiveBonuses(progress.EquippedPieceCount, equipmentModifiers);
+
         hero.CharacterStat.RecalculateEquipment(equipmentModifiers);
+    }
+
+    private static bool TrySpendUpgradeCost(ItemDefinition item, int currentLevel, int requestedLevels)
+    {
+        if (item == null || requestedLevels <= 0 || currentLevel >= item.MaxUpgradeLevel)
+            return false;
+
+        int levelsToBuy = Mathf.Min(requestedLevels, item.MaxUpgradeLevel - currentLevel);
+        int totalCost = 0;
+        for (int levelOffset = 0; levelOffset < levelsToBuy; levelOffset++)
+            totalCost += EconomyPricing.GetEquipmentUpgradeCost(item, currentLevel + levelOffset);
+
+        return PlayerCurrencyStorage.TrySpend(CurrencyType.Coins, totalCost);
+    }
+
+    private List<EquipmentSetProgress> BuildSetProgresses()
+    {
+        Dictionary<EquipmentSetDefinition, int> pieceCounts = new();
+
+        foreach (EquipmentSlotData slot in equipmentInventory.Slots)
+        {
+            EquipmentSetDefinition set = slot?.Item != null ? slot.Item.EquipmentSet : null;
+            if (set == null || !set.IsValid) continue;
+
+            pieceCounts.TryGetValue(set, out int count);
+            pieceCounts[set] = count + 1;
+        }
+
+        List<EquipmentSetProgress> progresses = new(pieceCounts.Count);
+        foreach (KeyValuePair<EquipmentSetDefinition, int> pair in pieceCounts)
+            progresses.Add(new EquipmentSetProgress(pair.Key, pair.Value));
+
+        return progresses;
     }
 
     [ContextMenu("Apply Equipment To Local Hero")]

@@ -20,8 +20,10 @@ MonoBehaviour:
   duration: 0
   lockMovementWhileCasting: 0
   canBeInterrupted: 1
+  supportsManualAim: 1
+  manualAimRange: 8
   cooldown: 14
-  manaCost: 0
+  manaCost: 50
   triggerName: Attack
   animationIndex: 0
   castVfx: {fileID: 0}

@@ -79,7 +79,7 @@ public abstract class EnemyAIController : CharacterAbstract
 
     protected bool HasUsableTarget()
     {
-        if (IsTargetValid() && GetTargetDistance() <= loseRange)
+        if (IsTargetValid())
             return true;
 
         ClearTarget();
@@ -99,10 +99,10 @@ public abstract class EnemyAIController : CharacterAbstract
             return;
         }
 
-        if (IsTargetValid() && GetTargetDistance() <= loseRange) return;
+        if (IsTargetValid()) return;
 
         SetTarget(characterCtrl.CharacterTargetFinder != null
-            ? characterCtrl.CharacterTargetFinder.FindClosestTarget()
+            ? characterCtrl.CharacterTargetFinder.FindClosestTargetAnywhere()
             : null);
     }
 

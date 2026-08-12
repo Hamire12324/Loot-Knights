@@ -75,6 +75,15 @@ public class CharacterDamSender : CharacterAbstract
         return totalDamageDealt;
     }
 
+    protected override void OnDisable()
+    {
+        DisableHitbox();
+        StopAllCoroutines();
+        dotCoroutines.Clear();
+        damagedTargets.Clear();
+        base.OnDisable();
+    }
+
     protected virtual bool IsValidTarget(
         Collider2D hitCollider,
         CharacterCtrl targetCtrl)
@@ -208,6 +217,8 @@ public class CharacterDamSender : CharacterAbstract
     {
         if (hitboxCollider != null)
             hitboxCollider.enabled = false;
+
+        damagedTargets.Clear();
     }
 
     public virtual void SetDamageData(DamageData data)

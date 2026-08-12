@@ -22,6 +22,8 @@ public class CharacterSkillController : CharacterAbstract
     private CharacterSkillRuntime currentCastingRuntime;
     private Vector2 pendingAimDirection;
     private Transform pendingTarget;
+    private Vector2 pendingManualTargetPosition;
+    private bool hasPendingManualTargetPosition;
     private bool waitingForAnimationHit;
     private bool currentCastEffectsExecuted;
     private CharacterSkillAnimationDriver animationDriver;
@@ -62,9 +64,30 @@ public class CharacterSkillController : CharacterAbstract
     public bool TryCast(int index)
     {
         CharacterSkillRuntime runtime = GetSkill(index);
+        return TryCastRuntime(runtime);
+    }
+
+    public bool TryCastAtPosition(int index, Vector2 targetPosition)
+    {
+        CharacterSkillRuntime runtime = GetSkill(index);
+        return TryCastRuntime(runtime, targetPosition);
+    }
+
+    private bool TryCastRuntime(CharacterSkillRuntime runtime)
+    {
         if (runtime == null || !runtime.CanCast(this)) return false;
 
         castingRoutine = StartCoroutine(CastRoutine(runtime));
+        return true;
+    }
+
+    private bool TryCastRuntime(CharacterSkillRuntime runtime, Vector2 targetPosition)
+    {
+        CharacterSkillDefinition definition = runtime != null ? runtime.Definition : null;
+        if (definition == null || !definition.SupportsManualAim || !runtime.CanCast(this))
+            return false;
+
+        castingRoutine = StartCoroutine(CastRoutine(runtime, targetPosition));
         return true;
     }
 
@@ -75,6 +98,18 @@ public class CharacterSkillController : CharacterAbstract
         if (!CanCastSpecialSkillRuntime(runtime)) return false;
 
         castingRoutine = StartCoroutine(CastRoutine(runtime));
+        return true;
+    }
+
+    public bool TryCastSpecialSkillAtPosition(Vector2 targetPosition)
+    {
+        CharacterSkillRuntime runtime = GetSpecialSkill();
+        CharacterSkillDefinition definition = runtime != null ? runtime.Definition : null;
+        if (definition == null || !definition.SupportsManualAim || !runtime.CanCast(this))
+            return false;
+        if (!CanCastSpecialSkillRuntime(runtime)) return false;
+
+        castingRoutine = StartCoroutine(CastRoutine(runtime, targetPosition));
         return true;
     }
 
@@ -176,6 +211,19 @@ public class CharacterSkillController : CharacterAbstract
 
     protected virtual IEnumerator CastRoutine(CharacterSkillRuntime runtime)
     {
+        return CastRoutine(runtime, default, false);
+    }
+
+    private IEnumerator CastRoutine(CharacterSkillRuntime runtime, Vector2 manualTargetPosition)
+    {
+        return CastRoutine(runtime, manualTargetPosition, true);
+    }
+
+    private IEnumerator CastRoutine(
+        CharacterSkillRuntime runtime,
+        Vector2 manualTargetPosition,
+        bool hasManualTargetPosition)
+    {
         CharacterSkillDefinition definition = runtime.Definition;
         if (definition == null || characterCtrl == null ||
             (characterCtrl.CharacterStat != null && !characterCtrl.CharacterStat.TrySpendMana(definition.ManaCost)))
@@ -190,10 +238,25 @@ public class CharacterSkillController : CharacterAbstract
         if (cancelBasicAttackOnCast && runtime != BasicAttackRuntime)
             characterCtrl.CharacterCombatController?.CancelAttack(force: true);
 
-        Transform target = CharacterSkillTargeting.FindTarget(characterCtrl);
-        Vector2 aimDirection = CharacterSkillTargeting.GetAimDirection(characterCtrl, target);
+        Transform target = null;
+        Vector2 aimDirection;
+        if (hasManualTargetPosition)
+        {
+            Vector2 toTargetPosition = manualTargetPosition - (Vector2)characterCtrl.transform.position;
+            aimDirection = toTargetPosition.sqrMagnitude > 0.001f
+                ? toTargetPosition.normalized
+                : CharacterSkillTargeting.GetAimDirection(characterCtrl, null);
+        }
+        else
+        {
+            target = CharacterSkillTargeting.FindTarget(characterCtrl);
+            aimDirection = CharacterSkillTargeting.GetAimDirection(characterCtrl, target);
+        }
+
         pendingAimDirection = aimDirection;
         pendingTarget = target;
+        pendingManualTargetPosition = manualTargetPosition;
+        hasPendingManualTargetPosition = hasManualTargetPosition;
         currentCastEffectsExecuted = false;
 
         facing?.FaceCastDirection(aimDirection);
@@ -257,7 +320,13 @@ public class CharacterSkillController : CharacterAbstract
     protected virtual void ExecuteEffects(CharacterSkillRuntime runtime, Vector2 aimDirection, Transform target)
     {
         CharacterSkillDefinition definition = runtime.Definition;
-        CharacterSkillExecutionContext context = new(this, runtime, aimDirection, target);
+        CharacterSkillExecutionContext context = new(
+            this,
+            runtime,
+            aimDirection,
+            target,
+            pendingManualTargetPosition,
+            hasPendingManualTargetPosition);
 
         foreach (CharacterSkillEffectDefinition effect in definition.Effects)
         {
@@ -288,6 +357,8 @@ public class CharacterSkillController : CharacterAbstract
     {
         pendingAimDirection = Vector2.zero;
         pendingTarget = null;
+        pendingManualTargetPosition = Vector2.zero;
+        hasPendingManualTargetPosition = false;
         waitingForAnimationHit = false;
         currentCastEffectsExecuted = false;
     }

@@ -110,27 +110,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyStat
   characterCtrl: {fileID: 5807337789327651017}
   Attack:
-    baseValue: 22
+    baseValue: 24
     isDirty: 1
     cachedFinalValue: 0
   CritChance:
-    baseValue: 0
+    baseValue: 0.04
     isDirty: 1
     cachedFinalValue: 0
   CritDamage:
-    baseValue: 0
+    baseValue: 1.5
     isDirty: 1
     cachedFinalValue: 0
   Armor:
-    baseValue: 2
+    baseValue: 3
     isDirty: 1
     cachedFinalValue: 0
   MaxHealth:
-    baseValue: 170
+    baseValue: 220
     isDirty: 1
     cachedFinalValue: 0
   MaxMana:
-    baseValue: 0
+    baseValue: 0.05
     isDirty: 1
     cachedFinalValue: 0
   MoveSpeed:
@@ -260,13 +260,12 @@ MonoBehaviour:
   - {fileID: 0}
   specialSkill: {fileID: 0}
   cancelBasicAttackOnCast: 1
-  meleeRange: 1.25
   magicRange: 4
-  summonChance: 0.4
-  lastStandHealthThreshold: 0.5
-  lastStandArmorBonus: 12
-  lastStandAttackSpeedBonus: 0.9
-  lastStandMeleeRange: 0.9
+  lastStandHealthThreshold: 0.35
+  lastStandArmorBonus: 35
+  lastStandAttackBonus: 55
+  lastStandAttackSpeedBonus: 1.25
+  lastStandMeleeRange: 1.1
 --- !u!1 &920000000000000004
 GameObject:
   m_ObjectHideFlags: 0

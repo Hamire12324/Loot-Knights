@@ -28,12 +28,27 @@ public class StageMapController : BaseMonoBehaviour
     [Header("Enemies")]
     [SerializeField] private EnemySpawner enemySpawner;
 
+    [Header("Completion")]
+    [Tooltip("Seconds to keep the battlefield visible after the final enemy is defeated before showing victory.")]
+    [SerializeField, Min(0f)] private float victoryDelay = 2f;
+
     private readonly List<CharacterDamReceiver> livingWaveEnemies = new();
     private StageConfig activeStage;
     private int currentWaveIndex;
+    private int remainingEnemiesInWave;
+    private IReadOnlyList<StageEnemyEntry> currentWaveEnemyEntries;
+    private bool currentWaveIsBossWave;
     private bool openingEncounterPending;
     private bool stageRunning;
     private Coroutine nextWaveCoroutine;
+    private Coroutine completionCoroutine;
+
+    public int CurrentWaveNumber { get; private set; }
+    public int TotalWaveCount => activeStage == null
+        ? 0
+        : activeStage.Waves.Count + (activeStage.HasOpeningEnemies ? 1 : 0);
+
+    public event System.Action<int, int> OnWaveChanged;
 
     protected override void Awake()
     {
@@ -99,6 +114,8 @@ public class StageMapController : BaseMonoBehaviour
         enemySpawner.ReturnAllAliveEnemies();
         currentWaveIndex = 0;
         openingEncounterPending = stage != null && stage.HasOpeningEnemies;
+        CurrentWaveNumber = 0;
+        NotifyWaveChanged();
 
         SpawnNextWave();
     }
@@ -211,9 +228,9 @@ public class StageMapController : BaseMonoBehaviour
             return;
         }
 
-        int waveEnemyCount = GetCurrentWaveEnemyCount();
-        IReadOnlyList<StageEnemyEntry> waveEnemyEntries = GetCurrentWaveEnemyEntries();
-        bool isBossWave = IsCurrentWaveBossWave();
+        remainingEnemiesInWave = GetCurrentWaveEnemyCount();
+        currentWaveEnemyEntries = GetCurrentWaveEnemyEntries();
+        currentWaveIsBossWave = IsCurrentWaveBossWave();
         if (activeStage != null)
         {
             if (openingEncounterPending)
@@ -224,12 +241,41 @@ public class StageMapController : BaseMonoBehaviour
         else
             currentWaveIndex++;
 
+        CurrentWaveNumber = activeStage != null && activeStage.HasOpeningEnemies
+            ? currentWaveIndex + 1
+            : currentWaveIndex;
+        NotifyWaveChanged();
+
+        SpawnCurrentWaveBatch(points);
+    }
+
+    private void SpawnCurrentWaveBatch(IReadOnlyList<Vector3> points)
+    {
+        if (!stageRunning || remainingEnemiesInWave <= 0)
+        {
+            QueueNextWaveOrComplete();
+            return;
+        }
+
         List<PoolObj> spawned = enemySpawner.SpawnCount(
             points,
-            waveEnemyCount,
+            remainingEnemiesInWave,
             activeStage != null ? activeStage.DifficultyLevel : 1,
-            waveEnemyEntries,
-            isBossWave);
+            currentWaveEnemyEntries,
+            currentWaveIsBossWave);
+
+        remainingEnemiesInWave -= spawned.Count;
+
+        if (spawned.Count == 0)
+        {
+            Debug.LogWarning(
+                name + ": Unable to spawn the remaining enemies for this wave. " +
+                "Check the stage roster and EnemySpawner limits.",
+                gameObject);
+            remainingEnemiesInWave = 0;
+            QueueNextWaveOrComplete();
+            return;
+        }
 
         foreach (PoolObj enemy in spawned)
         {
@@ -244,7 +290,7 @@ public class StageMapController : BaseMonoBehaviour
         }
 
         if (livingWaveEnemies.Count == 0)
-            QueueNextWaveOrComplete();
+            HandleCurrentWaveBatchCleared();
     }
 
     private List<Vector3> GetSpawnPositions()
@@ -271,7 +317,28 @@ public class StageMapController : BaseMonoBehaviour
         livingWaveEnemies.Remove(receiver);
 
         if (stageRunning && livingWaveEnemies.Count == 0)
-            QueueNextWaveOrComplete();
+            HandleCurrentWaveBatchCleared();
+    }
+
+    private void HandleCurrentWaveBatchCleared()
+    {
+        if (!stageRunning) return;
+
+        if (remainingEnemiesInWave > 0)
+        {
+            List<Vector3> points = GetSpawnPositions();
+            if (points.Count == 0)
+            {
+                Debug.LogWarning(name + ": Add at least one EnemySpawnPoint before spawning reinforcements.", gameObject);
+                CompleteStage();
+                return;
+            }
+
+            SpawnCurrentWaveBatch(points);
+            return;
+        }
+
+        QueueNextWaveOrComplete();
     }
 
     private void QueueNextWaveOrComplete()
@@ -300,6 +367,16 @@ public class StageMapController : BaseMonoBehaviour
         if (!stageRunning) return;
 
         stageRunning = false;
+        completionCoroutine = StartCoroutine(CompleteStageAfterDelay());
+    }
+
+    private IEnumerator CompleteStageAfterDelay()
+    {
+        float delay = Mathf.Max(0f, victoryDelay);
+        if (delay > 0f)
+            yield return new WaitForSeconds(delay);
+
+        completionCoroutine = null;
         StageManager manager = FindAnyObjectByType<StageManager>(FindObjectsInactive.Include);
         manager?.CompleteStage();
     }
@@ -308,12 +385,23 @@ public class StageMapController : BaseMonoBehaviour
     {
         stageRunning = false;
         currentWaveIndex = 0;
+        remainingEnemiesInWave = 0;
+        currentWaveEnemyEntries = null;
+        currentWaveIsBossWave = false;
         openingEncounterPending = false;
+        CurrentWaveNumber = 0;
+        NotifyWaveChanged();
 
         if (nextWaveCoroutine != null)
         {
             StopCoroutine(nextWaveCoroutine);
             nextWaveCoroutine = null;
+        }
+
+        if (completionCoroutine != null)
+        {
+            StopCoroutine(completionCoroutine);
+            completionCoroutine = null;
         }
 
         UnsubscribeWaveEnemies();
@@ -377,5 +465,10 @@ public class StageMapController : BaseMonoBehaviour
             ? activeStage.OpeningEnemies
             : activeStage.Waves[currentWaveIndex];
         return wave != null && wave.IsBossWave;
+    }
+
+    private void NotifyWaveChanged()
+    {
+        OnWaveChanged?.Invoke(CurrentWaveNumber, TotalWaveCount);
     }
 }

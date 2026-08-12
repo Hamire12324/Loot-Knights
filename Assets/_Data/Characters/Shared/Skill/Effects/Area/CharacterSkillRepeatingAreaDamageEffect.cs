@@ -84,8 +84,10 @@ public sealed class CharacterSkillRepeatingAreaDamageEffect : CharacterSkillEffe
         settings.Radius = Mathf.Max(0.05f, settings.Radius);
         settings.Duration = Mathf.Max(0.05f, settings.Duration);
         settings.TickInterval = Mathf.Max(0.05f, settings.TickInterval);
-        Vector3 fixedCenter = context.Caster.transform.position + (Vector3)(direction * forwardOffset);
-        if (placeOnClosestTarget)
+        Vector3 fixedCenter = context.HasManualTargetPosition
+            ? context.ManualTargetPosition
+            : context.Caster.transform.position + (Vector3)(direction * forwardOffset);
+        if (placeOnClosestTarget && !context.HasManualTargetPosition)
         {
             CharacterCtrl target = CharacterSkillTargetUtility.FindClosestTarget(
                 context.Caster,

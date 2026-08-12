@@ -45,16 +45,13 @@ public class CharacterCombatController : CharacterAbstract
 
     public virtual void EndAttack()
     {
-        if (!isAttacking) return;
-
         isAttacking = false;
         characterCtrl.CharacterDamSender?.DisableHitbox();
     }
 
     public virtual void CancelAttack(bool force = false)
     {
-        if (!isAttacking) return;
-        if (!force && !canAttackBeInterrupted) return;
+        if (isAttacking && !force && !canAttackBeInterrupted) return;
 
         EndAttack();
     }

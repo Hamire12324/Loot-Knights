@@ -76,6 +76,7 @@ public class StageManager : BaseMonoBehaviour
 
         Array.Sort(loadedStages, (left, right) => left.StageNumber.CompareTo(right.StageNumber));
         stages = new List<StageConfig>(loadedStages);
+        StageEncounterBalance.Apply(stages);
     }
 
     public void StartCurrentStage()
@@ -459,6 +460,7 @@ public class StageManager : BaseMonoBehaviour
     {
         ReturnActivePickupsToPool(FindObjectsByType<ItemPickup>(FindObjectsInactive.Exclude));
         ReturnActivePickupsToPool(FindObjectsByType<CurrencyPickup>(FindObjectsInactive.Exclude));
+        ReturnActivePickupsToPool(FindObjectsByType<ElementalShardPickup>(FindObjectsInactive.Exclude));
     }
 
     private static void ReturnActivePickupsToPool<T>(T[] pickups) where T : PoolObj

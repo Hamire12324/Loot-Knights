@@ -8,9 +8,14 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class BossEnemy : MonoBehaviour
 {
+    [Header("Presentation")]
+    [SerializeField] private string displayName = "Dread Werebear";
+
     private EnemyCtrl enemy;
     private CharacterDamReceiver damageReceiver;
     public bool IsBoss { get; private set; }
+    public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? gameObject.name : displayName;
+    public CharacterDamReceiver DamageReceiver => damageReceiver;
 
     public static event Action<BossEnemy> OnBossSpawned;
     public static event Action<BossEnemy> OnBossDefeated;

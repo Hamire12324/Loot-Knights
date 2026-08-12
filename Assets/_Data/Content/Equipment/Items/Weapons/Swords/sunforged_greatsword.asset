@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c39543ccfe2d574caaf1d15eab6aaad, type: 3}
+  m_Name: sunforged_greatsword
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: sunforged_greatsword
+  displayName: Sunforged Greatsword
+  description: A radiant heavy blade forged for dungeon champions.
+  icon: {fileID: 270138247091584535, guid: 15d3ca01303f09b498772fc7da67c047, type: 3}
+  rarity: 3
+  category: 1
+  equipmentSlotType: 1
+  equipmentSet: {fileID: 0}
+  maxStack: 1
+  maxUpgradeLevel: 10
+  equipmentModifiers:
+  - statType: 1
+    modifierType: 0
+    amount: 30
+  - statType: 8
+    modifierType: 1
+    amount: 15
+  upgradeModifiersPerLevel:
+  - statType: 1
+    modifierType: 0
+    amount: 6
+  - statType: 8
+    modifierType: 1
+    amount: 3
+  minRolledModifierCount: 1
+  maxRolledModifierCount: 2
+  rolledModifierPool:
+  - statType: 1
+    modifierType: 0
+    amount: 6
+  - statType: 8
+    modifierType: 1
+    amount: 12

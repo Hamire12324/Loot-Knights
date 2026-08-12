@@ -5,7 +5,8 @@ public static class FactionManager
         if (attacker == Faction.Hero && (target == Faction.Enemy || target == Faction.Boss))
             return true;
 
-        if (attacker == Faction.Enemy && (target == Faction.Hero || target == Faction.Ally))
+        if ((attacker == Faction.Enemy || attacker == Faction.Boss) &&
+            (target == Faction.Hero || target == Faction.Ally))
             return true;
 
         if (attacker == Faction.Ally && target == Faction.Enemy)

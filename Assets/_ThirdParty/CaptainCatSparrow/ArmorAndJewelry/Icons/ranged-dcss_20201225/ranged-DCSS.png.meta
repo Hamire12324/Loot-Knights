@@ -1,0 +1,1729 @@
+fileFormatVersion: 2
+guid: 1536125f043c28447ac5ab79db19c65a
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4650162331098039043
+    second: ranged-DCSS_0
+  - first:
+      213: 3635756516347388472
+    second: ranged-DCSS_1
+  - first:
+      213: -96757092507875170
+    second: ranged-DCSS_2
+  - first:
+      213: 2606178850682518901
+    second: ranged-DCSS_3
+  - first:
+      213: -3357403027094616040
+    second: ranged-DCSS_4
+  - first:
+      213: -6558076005498860495
+    second: ranged-DCSS_5
+  - first:
+      213: 8636781614482283615
+    second: ranged-DCSS_6
+  - first:
+      213: -8043986376740676625
+    second: ranged-DCSS_7
+  - first:
+      213: -2362575470493167438
+    second: ranged-DCSS_8
+  - first:
+      213: 8654068227070455533
+    second: ranged-DCSS_9
+  - first:
+      213: 2516318860257051367
+    second: ranged-DCSS_10
+  - first:
+      213: 3834974102448013173
+    second: ranged-DCSS_11
+  - first:
+      213: 8121457865107855521
+    second: ranged-DCSS_12
+  - first:
+      213: 237012953492048723
+    second: ranged-DCSS_13
+  - first:
+      213: -3323559606351227997
+    second: ranged-DCSS_14
+  - first:
+      213: 6444913279412647045
+    second: ranged-DCSS_15
+  - first:
+      213: -5764230948866980754
+    second: ranged-DCSS_16
+  - first:
+      213: 1627014038806721087
+    second: ranged-DCSS_17
+  - first:
+      213: -6090478409666749026
+    second: ranged-DCSS_18
+  - first:
+      213: -6838649741930448589
+    second: ranged-DCSS_19
+  - first:
+      213: 4362894893789699904
+    second: ranged-DCSS_20
+  - first:
+      213: 6376131357958400421
+    second: ranged-DCSS_21
+  - first:
+      213: 5318842160011664322
+    second: ranged-DCSS_22
+  - first:
+      213: -2972192658383950450
+    second: ranged-DCSS_23
+  - first:
+      213: -5041086713010638559
+    second: ranged-DCSS_24
+  - first:
+      213: -5374037881797295347
+    second: ranged-DCSS_25
+  - first:
+      213: -3016885259549772171
+    second: ranged-DCSS_26
+  - first:
+      213: -1714758734612096533
+    second: ranged-DCSS_27
+  - first:
+      213: -623074750125572227
+    second: ranged-DCSS_28
+  - first:
+      213: 1908427437446617842
+    second: ranged-DCSS_29
+  - first:
+      213: -1043232679099941174
+    second: ranged-DCSS_30
+  - first:
+      213: 8451908741194874931
+    second: ranged-DCSS_31
+  - first:
+      213: 4341683585898167228
+    second: ranged-DCSS_32
+  - first:
+      213: -5738162072846724444
+    second: ranged-DCSS_33
+  - first:
+      213: 1636081700480195635
+    second: ranged-DCSS_34
+  - first:
+      213: -337061385669447579
+    second: ranged-DCSS_35
+  - first:
+      213: -8693085284159557591
+    second: ranged-DCSS_36
+  - first:
+      213: 7873590681709436370
+    second: ranged-DCSS_37
+  - first:
+      213: -6519079961998820727
+    second: ranged-DCSS_38
+  - first:
+      213: 5201713082090452069
+    second: ranged-DCSS_39
+  - first:
+      213: -5046356249929454070
+    second: ranged-DCSS_40
+  - first:
+      213: -8735907977836296661
+    second: ranged-DCSS_41
+  - first:
+      213: -2872443659664841244
+    second: ranged-DCSS_42
+  - first:
+      213: 424312949628881541
+    second: ranged-DCSS_43
+  - first:
+      213: 5164107629583463664
+    second: ranged-DCSS_44
+  - first:
+      213: -9152961983954212587
+    second: ranged-DCSS_45
+  - first:
+      213: -4025804738940246787
+    second: ranged-DCSS_46
+  - first:
+      213: 4844870368919507244
+    second: ranged-DCSS_47
+  - first:
+      213: 6618678658336397326
+    second: ranged-DCSS_48
+  - first:
+      213: -2830093179121425409
+    second: ranged-DCSS_49
+  - first:
+      213: -4679011657064104755
+    second: ranged-DCSS_50
+  - first:
+      213: 248390074436741373
+    second: ranged-DCSS_51
+  - first:
+      213: -5172575972249761540
+    second: ranged-DCSS_52
+  - first:
+      213: 1024149307395368576
+    second: ranged-DCSS_53
+  - first:
+      213: 1707186254949087597
+    second: ranged-DCSS_54
+  - first:
+      213: 5071943392728426666
+    second: ranged-DCSS_55
+  - first:
+      213: 5188582639319809283
+    second: ranged-DCSS_56
+  - first:
+      213: -2170568359113654437
+    second: ranged-DCSS_57
+  - first:
+      213: 1720871288485999066
+    second: ranged-DCSS_58
+  - first:
+      213: -4002404612139126302
+    second: ranged-DCSS_59
+  - first:
+      213: 6572418875815674013
+    second: ranged-DCSS_60
+  - first:
+      213: -460099519960497957
+    second: ranged-DCSS_61
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ranged-DCSS_0
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 191
+        width: 23
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3034005a002b88040800000000000000
+      internalID: 4650162331098039043
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_1
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 223
+        width: 14
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 832a2bed94dc47230800000000000000
+      internalID: 3635756516347388472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_2
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 191
+        width: 27
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e98819fdfef38aef0800000000000000
+      internalID: -96757092507875170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_3
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 191
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57d31184bd10b2420800000000000000
+      internalID: 2606178850682518901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_4
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 223
+        width: 12
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81844323cbb1861d0800000000000000
+      internalID: -3357403027094616040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_5
+      rect:
+        serializedVersion: 2
+        x: 105
+        y: 191
+        width: 14
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13c4a328e980df4a0800000000000000
+      internalID: -6558076005498860495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_6
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 191
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5c57d56e130cd770800000000000000
+      internalID: 8636781614482283615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_7
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 223
+        width: 14
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: feb5a4c52050e5090800000000000000
+      internalID: -8043986376740676625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_8
+      rect:
+        serializedVersion: 2
+        x: 159
+        y: 223
+        width: 34
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b014368022763fd0800000000000000
+      internalID: -2362575470493167438
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_9
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 191
+        width: 11
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dee6788833d691870800000000000000
+      internalID: 8654068227070455533
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_10
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 223
+        width: 34
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e2cc3fdba2cbe220800000000000000
+      internalID: 2516318860257051367
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_11
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 192
+        width: 29
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57f7c3ba0a0983530800000000000000
+      internalID: 3834974102448013173
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_12
+      rect:
+        serializedVersion: 2
+        x: 223
+        y: 223
+        width: 33
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a85e0426e635b070800000000000000
+      internalID: 8121457865107855521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_13
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 192
+        width: 29
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35b4f04860a0a4300800000000000000
+      internalID: 237012953492048723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_14
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 163
+        width: 23
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a31991a52850e1d0800000000000000
+      internalID: -3323559606351227997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_15
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 163
+        width: 24
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 584b6932b7ee07950800000000000000
+      internalID: 6444913279412647045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_16
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 163
+        width: 24
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6488710e765100b0800000000000000
+      internalID: -5764230948866980754
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_17
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 160
+        width: 32
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f32f5a3e5a0549610800000000000000
+      internalID: 1627014038806721087
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_18
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 160
+        width: 32
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9d90a7b7264a7ba0800000000000000
+      internalID: -6090478409666749026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_19
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 161
+        width: 31
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3393becda4c3811a0800000000000000
+      internalID: -6838649741930448589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_20
+      rect:
+        serializedVersion: 2
+        x: 193
+        y: 161
+        width: 31
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04f53b05acd1c8c30800000000000000
+      internalID: 4362894893789699904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_21
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 161
+        width: 31
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a9e65810b19c7850800000000000000
+      internalID: 6376131357958400421
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_22
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 127
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2cbdddb93c250d940800000000000000
+      internalID: 5318842160011664322
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_23
+      rect:
+        serializedVersion: 2
+        x: 31
+        y: 128
+        width: 33
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8d20094686a0c6d0800000000000000
+      internalID: -2972192658383950450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_24
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 134
+        width: 32
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1213f05e7567a0ab0800000000000000
+      internalID: -5041086713010638559
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_25
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 134
+        width: 32
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d03caf5f4059b65b0800000000000000
+      internalID: -5374037881797295347
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_26
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 134
+        width: 32
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5767c6037ded126d0800000000000000
+      internalID: -3016885259549772171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_27
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 127
+        width: 32
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be992fb1404f338e0800000000000000
+      internalID: -1714758734612096533
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_28
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 127
+        width: 32
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7fff32e0d46a57f0800000000000000
+      internalID: -623074750125572227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_29
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 129
+        width: 31
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fa5d90a4a81c7a10800000000000000
+      internalID: 1908427437446617842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 97
+        width: 31
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ace3b28d761b581f0800000000000000
+      internalID: -1043232679099941174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_31
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 96
+        width: 28
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33080f058363b4570800000000000000
+      internalID: 8451908741194874931
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_32
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 99
+        width: 28
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbbba98d732c04c30800000000000000
+      internalID: 4341683585898167228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_33
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 98
+        width: 29
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a21a503ff3fd50b0800000000000000
+      internalID: -5738162072846724444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_34
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 98
+        width: 29
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33c93a463a784b610800000000000000
+      internalID: 1636081700480195635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_35
+      rect:
+        serializedVersion: 2
+        x: 163
+        y: 99
+        width: 26
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 560fbaf9474825bf0800000000000000
+      internalID: -337061385669447579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_36
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 99
+        width: 26
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9207e73fdf4fb5780800000000000000
+      internalID: -8693085284159557591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_37
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 119
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2dddd1a420d944d60800000000000000
+      internalID: 7873590681709436370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_38
+      rect:
+        serializedVersion: 2
+        x: 227
+        y: 99
+        width: 26
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98a71ba60539785a0800000000000000
+      internalID: -6519079961998820727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_39
+      rect:
+        serializedVersion: 2
+        x: 193
+        y: 109
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 564f0810d72303840800000000000000
+      internalID: 5201713082090452069
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_40
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 65
+        width: 28
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0ee1e83abdb7f9b0800000000000000
+      internalID: -5046356249929454070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_41
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 66
+        width: 27
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b26019e9af1d3c680800000000000000
+      internalID: -8735907977836296661
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_42
+      rect:
+        serializedVersion: 2
+        x: 69
+        y: 69
+        width: 22
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e5aa5cd5b70328d0800000000000000
+      internalID: -2872443659664841244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_43
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 69
+        width: 21
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58a4a3c216673e500800000000000000
+      internalID: 424312949628881541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_44
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 65
+        width: 27
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f4f43b47889aa740800000000000000
+      internalID: 5164107629583463664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_45
+      rect:
+        serializedVersion: 2
+        x: 166
+        y: 69
+        width: 21
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51921cfe1952af080800000000000000
+      internalID: -9152961983954212587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_46
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 68
+        width: 21
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df4e1686be77128c0800000000000000
+      internalID: -4025804738940246787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_47
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 65
+        width: 30
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c21534a6eef6c3340800000000000000
+      internalID: 4844870368919507244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_48
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 41
+        width: 24
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0899982c254adb50800000000000000
+      internalID: 6618678658336397326
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_49
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 38
+        width: 21
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff326318f3d79b8d0800000000000000
+      internalID: -2830093179121425409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_50
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 41
+        width: 19
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcc38c830bfc01fb0800000000000000
+      internalID: -4679011657064104755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_51
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 42
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df8e888e475727300800000000000000
+      internalID: 248390074436741373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_52
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 42
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf805580f815738b0800000000000000
+      internalID: -5172575972249761540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_53
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 42
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08663407e52863e00800000000000000
+      internalID: 1024149307395368576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_54
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 42
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d697ba39ad421b710800000000000000
+      internalID: 1707186254949087597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_55
+      rect:
+        serializedVersion: 2
+        x: 234
+        y: 42
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa8a774b4a9236640800000000000000
+      internalID: 5071943392728426666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_56
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 10
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30d7a609b6c810840800000000000000
+      internalID: 5188582639319809283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_57
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 16
+        width: 51
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5ff35ad39790e1e0800000000000000
+      internalID: -2170568359113654437
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_58
+      rect:
+        serializedVersion: 2
+        x: 185
+        y: 18
+        width: 37
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad1706eb153c1e710800000000000000
+      internalID: 1720871288485999066
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_59
+      rect:
+        serializedVersion: 2
+        x: 139
+        y: 5
+        width: 15
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e1ff0ef53a9478c0800000000000000
+      internalID: -4002404612139126302
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_60
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 5
+        width: 23
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d90c018352ce53b50800000000000000
+      internalID: 6572418875815674013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranged-DCSS_61
+      rect:
+        serializedVersion: 2
+        x: 181
+        y: 3
+        width: 30
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd04d6f9ce56d99f0800000000000000
+      internalID: -460099519960497957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ranged-DCSS_0: 4650162331098039043
+      ranged-DCSS_1: 3635756516347388472
+      ranged-DCSS_10: 2516318860257051367
+      ranged-DCSS_11: 3834974102448013173
+      ranged-DCSS_12: 8121457865107855521
+      ranged-DCSS_13: 237012953492048723
+      ranged-DCSS_14: -3323559606351227997
+      ranged-DCSS_15: 6444913279412647045
+      ranged-DCSS_16: -5764230948866980754
+      ranged-DCSS_17: 1627014038806721087
+      ranged-DCSS_18: -6090478409666749026
+      ranged-DCSS_19: -6838649741930448589
+      ranged-DCSS_2: -96757092507875170
+      ranged-DCSS_20: 4362894893789699904
+      ranged-DCSS_21: 6376131357958400421
+      ranged-DCSS_22: 5318842160011664322
+      ranged-DCSS_23: -2972192658383950450
+      ranged-DCSS_24: -5041086713010638559
+      ranged-DCSS_25: -5374037881797295347
+      ranged-DCSS_26: -3016885259549772171
+      ranged-DCSS_27: -1714758734612096533
+      ranged-DCSS_28: -623074750125572227
+      ranged-DCSS_29: 1908427437446617842
+      ranged-DCSS_3: 2606178850682518901
+      ranged-DCSS_30: -1043232679099941174
+      ranged-DCSS_31: 8451908741194874931
+      ranged-DCSS_32: 4341683585898167228
+      ranged-DCSS_33: -5738162072846724444
+      ranged-DCSS_34: 1636081700480195635
+      ranged-DCSS_35: -337061385669447579
+      ranged-DCSS_36: -8693085284159557591
+      ranged-DCSS_37: 7873590681709436370
+      ranged-DCSS_38: -6519079961998820727
+      ranged-DCSS_39: 5201713082090452069
+      ranged-DCSS_4: -3357403027094616040
+      ranged-DCSS_40: -5046356249929454070
+      ranged-DCSS_41: -8735907977836296661
+      ranged-DCSS_42: -2872443659664841244
+      ranged-DCSS_43: 424312949628881541
+      ranged-DCSS_44: 5164107629583463664
+      ranged-DCSS_45: -9152961983954212587
+      ranged-DCSS_46: -4025804738940246787
+      ranged-DCSS_47: 4844870368919507244
+      ranged-DCSS_48: 6618678658336397326
+      ranged-DCSS_49: -2830093179121425409
+      ranged-DCSS_5: -6558076005498860495
+      ranged-DCSS_50: -4679011657064104755
+      ranged-DCSS_51: 248390074436741373
+      ranged-DCSS_52: -5172575972249761540
+      ranged-DCSS_53: 1024149307395368576
+      ranged-DCSS_54: 1707186254949087597
+      ranged-DCSS_55: 5071943392728426666
+      ranged-DCSS_56: 5188582639319809283
+      ranged-DCSS_57: -2170568359113654437
+      ranged-DCSS_58: 1720871288485999066
+      ranged-DCSS_59: -4002404612139126302
+      ranged-DCSS_6: 8636781614482283615
+      ranged-DCSS_60: 6572418875815674013
+      ranged-DCSS_61: -460099519960497957
+      ranged-DCSS_7: -8043986376740676625
+      ranged-DCSS_8: -2362575470493167438
+      ranged-DCSS_9: 8654068227070455533
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

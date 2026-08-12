@@ -56,7 +56,9 @@ public static class ElementalConduitPulse
         CharacterCtrl focusedTarget = castTarget != null
             ? castTarget.GetComponentInParent<CharacterCtrl>()
             : null;
-        Vector2 origin = castTarget != null
+        Vector2 origin = request.Context.HasManualTargetPosition
+            ? request.Context.ManualTargetPosition
+            : castTarget != null
             ? (Vector2)castTarget.position
             : ElementalConduitTargeting.GetReleaseOrigin(
                 casterPosition,

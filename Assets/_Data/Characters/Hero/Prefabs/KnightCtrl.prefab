@@ -92,7 +92,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeroVFXController
   characterCtrl: {fileID: 8879337150097753119}
-    attackVfx: {fileID: 0}
+  attackVfx: {fileID: 0}
   attackAnchor: {fileID: 8256115376057758440}
   attackSfx: {fileID: 11400000, guid: f15bc3fc0f5143c0a1429ff491e3d7a4, type: 2}
   defaultHitVfx: {fileID: 11400000, guid: 5e968ca568c24b15ae9b5f984ad3d27f, type: 2}
@@ -183,7 +183,7 @@ Transform:
   m_GameObject: {fileID: 2336071543560550323}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.2, y: -0.01, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -223,7 +223,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.21640396, y: 0.008800805}
+  m_Offset: {x: 0.1, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -233,7 +233,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.63280797, y: 0.53161573}
+  m_Size: {x: 0.2, y: 0.2}
   m_EdgeRadius: 0
 --- !u!114 &2962451539958678809
 MonoBehaviour:
@@ -254,6 +254,7 @@ MonoBehaviour:
     CausesHitStun: 0
     HitStunDuration: 0.2
     HitStunImmunityDuration: 0.75
+    IgnoresHitStunImmunity: 0
     InterruptsAttack: 1
     HitVfx: {fileID: 0}
     HitVfxOffset: {x: 0, y: 0, z: 0}
@@ -1040,11 +1041,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HeroStat
   characterCtrl: {fileID: 8879337150097753119}
   Attack:
-    baseValue: 100
+    baseValue: 55
     isDirty: 1
     cachedFinalValue: 0
   CritChance:
-    baseValue: 0.05
+    baseValue: 0.08
     isDirty: 1
     cachedFinalValue: 0
   CritDamage:
@@ -1052,23 +1053,23 @@ MonoBehaviour:
     isDirty: 1
     cachedFinalValue: 0
   Armor:
-    baseValue: 0
+    baseValue: 4
     isDirty: 1
     cachedFinalValue: 0
   MaxHealth:
-    baseValue: 1
+    baseValue: 520
     isDirty: 1
     cachedFinalValue: 0
   MaxMana:
-    baseValue: 0
+    baseValue: 100
     isDirty: 1
     cachedFinalValue: 0
   MoveSpeed:
-    baseValue: 0
+    baseValue: 0.05
     isDirty: 1
     cachedFinalValue: 0
   AttackSpeed:
-    baseValue: 0
+    baseValue: 0.1
     isDirty: 1
     cachedFinalValue: 0
   HealthRegen:
@@ -1076,7 +1077,8 @@ MonoBehaviour:
     isDirty: 1
     cachedFinalValue: 0
   ManaRegen:
-    baseValue: 0
+    baseValue: 6
     isDirty: 1
     cachedFinalValue: 0
   currentHealth: 0
+  currentMana: 0

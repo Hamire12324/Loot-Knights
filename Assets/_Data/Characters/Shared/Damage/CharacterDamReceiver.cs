@@ -70,9 +70,14 @@ public class CharacterDamReceiver : CharacterAbstract
         if (isDead || isInvincible || characterCtrl.CharacterStat == null)
             return;
 
-        float armor = characterCtrl.CharacterStat.Armor?.FinalValue ?? 0f;
+        float armor = Mathf.Max(0f, characterCtrl.CharacterStat.Armor?.FinalValue ?? 0f);
 
-        float finalDamage = Mathf.Max(damage - armor, 0f);
+        // Armor follows diminishing returns so every hit remains meaningful.
+        // At 20 armor this absorbs 50% damage; each additional point provides
+        // less mitigation and can never reduce an incoming hit to zero.
+        const float armorScale = 5f;
+        float finalDamage = Mathf.Max(0f, damage) * 100f /
+                            (100f + armor * armorScale);
 
         characterCtrl.CharacterStat.SetCurrentHealth(characterCtrl.CharacterStat.CurrentHealth - finalDamage);
 
@@ -129,6 +134,8 @@ public class CharacterDamReceiver : CharacterAbstract
         if (isDead) return;
 
         characterCtrl.CharacterCombatController?.CancelAttack(force: true);
+        characterCtrl.CharacterSkillController?.CancelCast(force: true);
+        characterCtrl.CharacterDamSender?.DisableHitbox();
 
         isDead = true;
 

@@ -22,6 +22,7 @@ public class CharacterCreationPanel : BaseMonoBehaviour
     [SerializeField] private CharacterRoleButton[] roleButtons;
     [SerializeField] private RectTransform selectedRoleMarker;
     [SerializeField] private CharacterSkillIcon[] skillIcons;
+    [SerializeField] private Image[] skillIconImages;
 
     [Header("Attributes")]
     [SerializeField] private UIStatBar attackBar;
@@ -50,6 +51,7 @@ public class CharacterCreationPanel : BaseMonoBehaviour
         LoadRoleButtons();
         LoadSelectedRoleMarker();
         LoadSkillIcons();
+        LoadSkillIconImages();
         LoadStatBars();
         LoadActionButtons();
     }
@@ -173,6 +175,17 @@ public class CharacterCreationPanel : BaseMonoBehaviour
         if (skillIcons != null && skillIcons.Length > 0) return;
 
         skillIcons = GetComponentsInChildren<CharacterSkillIcon>(true);
+    }
+
+    private void LoadSkillIconImages()
+    {
+        if (skillIconImages != null && skillIconImages.Length > 0) return;
+
+        // The original menu uses plain Image components for its three skill slots.
+        // Keep this fallback so a scene does not need an extra component per slot.
+        Image[] images = GetComponentsInChildren<Image>(true);
+        skillIconImages = Array.FindAll(images, image =>
+            image != null && image.sprite != null && image.sprite.name.StartsWith("Skill", StringComparison.OrdinalIgnoreCase));
     }
 
     private void LoadStatBars()
@@ -329,13 +342,34 @@ public class CharacterCreationPanel : BaseMonoBehaviour
 
     private void UpdateSkillIcons(CharacterRoleDefinition role)
     {
-        if (skillIcons == null) return;
+        int iconCount = skillIcons != null ? skillIcons.Length : 0;
+        int imageCount = skillIconImages != null ? skillIconImages.Length : 0;
 
-        for (int i = 0; i < skillIcons.Length; i++)
+        for (int i = 0; i < Mathf.Max(iconCount, imageCount); i++)
         {
-            Sprite icon = role.SkillIcons != null && i < role.SkillIcons.Length ? role.SkillIcons[i] : null;
-            skillIcons[i].SetIcon(icon);
+            Sprite icon = GetSkillIcon(role, i);
+
+            if (i < iconCount && skillIcons[i] != null)
+            {
+                skillIcons[i].SetIcon(icon);
+            }
+
+            if (i < imageCount && skillIconImages[i] != null)
+            {
+                skillIconImages[i].sprite = icon;
+                skillIconImages[i].enabled = icon != null;
+            }
         }
+    }
+
+    private static Sprite GetSkillIcon(CharacterRoleDefinition role, int index)
+    {
+        if (role.Skills != null && index < role.Skills.Length && role.Skills[index] != null)
+        {
+            return role.Skills[index].Icon;
+        }
+
+        return role.SkillIcons != null && index < role.SkillIcons.Length ? role.SkillIcons[index] : null;
     }
 
     private CharacterRoleDefinition GetSelectedRole()

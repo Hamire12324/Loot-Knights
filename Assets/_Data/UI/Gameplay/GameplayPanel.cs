@@ -27,20 +27,16 @@ public class GameplayPanel : BaseMonoBehaviour
     private void LoadCharacterMenuPanel()
     {
         if (characterMenuPanel != null) return;
-
         characterMenuPanel = GetComponentInChildren<CharacterMenuPanel>(true);
-        if (characterMenuPanel != null) return;
-
-        characterMenuPanel = FindAnyObjectByType<CharacterMenuPanel>(FindObjectsInactive.Include);
+        characterMenuPanel ??= FindAnyObjectByType<CharacterMenuPanel>(FindObjectsInactive.Include);
     }
 
     private void LoadMobileSkillHud()
     {
         if (mobileSkillHud != null) return;
-
         mobileSkillHud = GetComponent<GameplayMobileSkillHud>();
-        if (mobileSkillHud != null) return;
-
-        mobileSkillHud = gameObject.AddComponent<GameplayMobileSkillHud>();
+        if (mobileSkillHud == null)
+            mobileSkillHud = gameObject.AddComponent<GameplayMobileSkillHud>();
     }
+
 }

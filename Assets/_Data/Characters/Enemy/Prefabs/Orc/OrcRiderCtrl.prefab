@@ -110,15 +110,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyStat
   characterCtrl: {fileID: 5807337789327651017}
   Attack:
-    baseValue: 28
+    baseValue: 30
     isDirty: 1
     cachedFinalValue: 0
   CritChance:
-    baseValue: 0
+    baseValue: 0.08
     isDirty: 1
     cachedFinalValue: 0
   CritDamage:
-    baseValue: 0
+    baseValue: 1.5
     isDirty: 1
     cachedFinalValue: 0
   Armor:
@@ -126,7 +126,7 @@ MonoBehaviour:
     isDirty: 1
     cachedFinalValue: 0
   MaxHealth:
-    baseValue: 230
+    baseValue: 280
     isDirty: 1
     cachedFinalValue: 0
   MaxMana:
@@ -134,11 +134,11 @@ MonoBehaviour:
     isDirty: 1
     cachedFinalValue: 0
   MoveSpeed:
-    baseValue: 1.55
+    baseValue: 1.5
     isDirty: 1
     cachedFinalValue: 0
   AttackSpeed:
-    baseValue: 0
+    baseValue: 0.15
     isDirty: 1
     cachedFinalValue: 0
   HealthRegen:

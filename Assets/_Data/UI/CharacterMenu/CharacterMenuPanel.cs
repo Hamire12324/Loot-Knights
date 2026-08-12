@@ -131,6 +131,12 @@ public class CharacterMenuPanel : BaseMonoBehaviour
         {
             CharacterStatUpgradePanel upgradePanel = viewRoot.GetComponentInChildren<CharacterStatUpgradePanel>(true);
             upgradePanel?.Refresh();
+
+            EconomyForgePanel forgePanel = viewRoot.GetComponent<EconomyForgePanel>();
+            if (forgePanel == null)
+                forgePanel = viewRoot.AddComponent<EconomyForgePanel>();
+
+            forgePanel.Refresh();
         }
 
         if (section == CharacterMenuSection.Skill)

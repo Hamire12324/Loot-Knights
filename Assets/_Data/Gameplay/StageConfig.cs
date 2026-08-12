@@ -13,9 +13,9 @@ public class StageConfig : ScriptableObject
     [SerializeField] private List<StageEnemyEntry> enemyRoster = new();
 
     [Header("Stage Flow")]
-    [Tooltip("Enemies spawned immediately when the stage starts.")]
+    [Tooltip("Total enemies in the opening encounter. Large encounters are delivered in safe batches.")]
     [SerializeField] private StageWaveConfig openingEnemies;
-    [Tooltip("Every wave uses the Stage Enemies pool unless it has an override list.")]
+    [Tooltip("Every wave uses the Stage Enemies pool unless it has an override list. Large waves are delivered in safe batches.")]
     [SerializeField] private List<StageWaveConfig> waves = new();
 
     [Header("Rewards")]
@@ -37,6 +37,22 @@ public class StageConfig : ScriptableObject
     public int DiamondReward => Mathf.Max(0, diamondReward);
     public int ExperienceReward => Mathf.Max(0, experienceReward);
     public IReadOnlyList<ItemDropEntry> ItemDrops => itemDrops;
+
+    /// <summary>
+    /// Applies the authored co-op encounter plan at runtime. Rewards and item drops
+    /// remain authored per stage; only the combat roster and wave flow are replaced.
+    /// </summary>
+    public void ApplyEncounterBalance(
+        string name,
+        IReadOnlyList<StageEnemyEntry> roster,
+        StageWaveConfig opening,
+        IReadOnlyList<StageWaveConfig> encounterWaves)
+    {
+        stageName = name;
+        enemyRoster = roster != null ? new List<StageEnemyEntry>(roster) : new List<StageEnemyEntry>();
+        openingEnemies = opening;
+        waves = encounterWaves != null ? new List<StageWaveConfig>(encounterWaves) : new List<StageWaveConfig>();
+    }
 
     private void OnValidate()
     {
@@ -66,6 +82,20 @@ public class StageWaveConfig
     public bool IsBossWave => isBossWave;
     public bool HasEnemyOverrides => enemyOverrides != null && enemyOverrides.Count > 0;
     public IReadOnlyList<StageEnemyEntry> EnemyOverrides => enemyOverrides;
+
+    public StageWaveConfig(
+        int enemyCount,
+        float delayBeforeWave,
+        bool isBossWave = false,
+        IReadOnlyList<StageEnemyEntry> enemyOverrides = null)
+    {
+        this.enemyCount = Mathf.Max(1, enemyCount);
+        this.delayBeforeWave = Mathf.Max(0f, delayBeforeWave);
+        this.isBossWave = isBossWave;
+        this.enemyOverrides = enemyOverrides != null
+            ? new List<StageEnemyEntry>(enemyOverrides)
+            : new List<StageEnemyEntry>();
+    }
 }
 
 [System.Serializable]
@@ -78,6 +108,12 @@ public class StageEnemyEntry
 
     public PoolObj Prefab => prefab;
     public int Weight => Mathf.Max(1, weight);
+
+    public StageEnemyEntry(PoolObj prefab, int weight)
+    {
+        this.prefab = prefab;
+        this.weight = Mathf.Max(1, weight);
+    }
 
     public bool IsAllowedAtDifficulty(int level)
     {

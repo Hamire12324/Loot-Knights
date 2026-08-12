@@ -5,20 +5,24 @@ using UnityEngine.UI;
 
 public class StageSelectPanel : BaseMonoBehaviour
 {
+    private const string StagesResourcesPath = "Stages";
+
     public event Action<int> OnStageSelected;
     public event Action OnBackRequested;
 
-    [SerializeField] private int totalStageCount = 3;
+    [SerializeField] private List<StageConfig> stages = new();
     [SerializeField] private int stagesPerPage = 14;
     [SerializeField] private bool useSerializedUnlockProgress;
     [SerializeField] private int serializedHighestUnlockedStageIndex;
     [SerializeField] private int currentPageIndex;
     [SerializeField] private Transform stageButtonRoot;
+    [SerializeField] private StageSelectButton stageButtonPrefab;
     [SerializeField] private StageSelectButton[] stageButtons;
     [SerializeField] private ButtonStagePageArrow[] pageArrows;
     [SerializeField] private Button backButton;
 
     public int CurrentPageIndex => currentPageIndex;
+    public int StageCount => stages == null ? 0 : stages.Count;
     public int PageSize
     {
         get
@@ -30,7 +34,7 @@ public class StageSelectPanel : BaseMonoBehaviour
             return Mathf.Clamp(stagesPerPage, 1, buttonCount);
         }
     }
-    public int PageCount => PageSize <= 0 ? 1 : Mathf.Max(1, Mathf.CeilToInt((float)Mathf.Max(1, totalStageCount) / PageSize));
+    public int PageCount => PageSize <= 0 ? 1 : Mathf.Max(1, Mathf.CeilToInt((float)Mathf.Max(1, StageCount) / PageSize));
     public bool CanGoPrevious => currentPageIndex > 0;
     public bool CanGoNext => currentPageIndex < PageCount - 1;
 
@@ -50,7 +54,7 @@ public class StageSelectPanel : BaseMonoBehaviour
     public void SelectStage(int stageIndex)
     {
         int safeStageIndex = Mathf.Max(0, stageIndex);
-        if (safeStageIndex >= totalStageCount) return;
+        if (safeStageIndex >= StageCount) return;
 
         OnStageSelected?.Invoke(safeStageIndex);
     }
@@ -80,6 +84,7 @@ public class StageSelectPanel : BaseMonoBehaviour
     {
         base.LoadComponents();
 
+        LoadStagesFromResources();
         LoadStageButtonRoot();
         LoadStageButtons();
         LoadPageArrows();
@@ -92,21 +97,36 @@ public class StageSelectPanel : BaseMonoBehaviour
     private void LoadStageButtons()
     {
         Transform searchRoot = LoadStageButtonRoot();
-        Button[] buttons = searchRoot.GetComponentsInChildren<Button>(true);
-        List<StageSelectButton> foundStageButtons = new();
+        stageButtons = searchRoot.GetComponentsInChildren<StageSelectButton>(true);
 
-        foreach (Button foundButton in buttons)
+        if (stageButtonPrefab == null && stageButtons.Length > 0)
+            stageButtonPrefab = stageButtons[0];
+
+        int requiredButtonCount = stagesPerPage <= 0
+            ? StageCount
+            : Mathf.Min(StageCount, stagesPerPage);
+
+        if (stageButtonPrefab == null || requiredButtonCount <= stageButtons.Length)
+            return;
+
+        List<StageSelectButton> buttons = new(stageButtons);
+
+        while (buttons.Count < requiredButtonCount)
         {
-            if (!IsStageButton(foundButton)) continue;
-
-            StageSelectButton stageButton = foundButton.GetComponent<StageSelectButton>();
-            if (stageButton == null)
-                stageButton = foundButton.gameObject.AddComponent<StageSelectButton>();
-
-            foundStageButtons.Add(stageButton);
+            StageSelectButton stageButton = Instantiate(stageButtonPrefab, stageButtonRoot);
+            stageButton.name = $"StageButton_{buttons.Count + 1:D2}";
+            buttons.Add(stageButton);
         }
 
-        stageButtons = foundStageButtons.ToArray();
+        stageButtons = buttons.ToArray();
+    }
+
+    protected virtual void LoadStagesFromResources()
+    {
+        StageConfig[] loadedStages = Resources.LoadAll<StageConfig>(StagesResourcesPath);
+        Array.Sort(loadedStages, (left, right) => left.StageNumber.CompareTo(right.StageNumber));
+        stages = new List<StageConfig>(loadedStages);
+
     }
 
     private void LoadPageArrows()
@@ -147,12 +167,7 @@ public class StageSelectPanel : BaseMonoBehaviour
         {
             if (child == null || child == transform) continue;
 
-            string childName = child.name.ToLowerInvariant();
-            if (childName.Contains("stagegrid") ||
-                childName.Contains("stage_grid") ||
-                childName.Contains("stagebuttons") ||
-                childName.Contains("stage_buttons") ||
-                childName.Contains("grid"))
+            if (child.name.Contains("StageGrid"))
             {
                 stageButtonRoot = child;
                 return stageButtonRoot;
@@ -161,24 +176,6 @@ public class StageSelectPanel : BaseMonoBehaviour
 
         stageButtonRoot = transform;
         return stageButtonRoot;
-    }
-
-    private bool IsStageButton(Button foundButton)
-    {
-        if (foundButton == null) return false;
-        if (foundButton == backButton) return false;
-        if (foundButton.GetComponent<ButtonStagePageArrow>() != null) return false;
-
-        string buttonName = foundButton.name.ToLowerInvariant();
-        if (buttonName.Contains("arrow") ||
-            buttonName.Contains("left") ||
-            buttonName.Contains("right") ||
-            buttonName.Contains("back"))
-        {
-            return false;
-        }
-
-        return true;
     }
 
     private void SetupStageButtons()
@@ -236,7 +233,7 @@ public class StageSelectPanel : BaseMonoBehaviour
             }
 
             int stageIndex = firstStageIndex + i;
-            bool exists = stageIndex < totalStageCount;
+            bool exists = stageIndex < StageCount;
 
             stageButton.SetAvailable(exists);
             if (!exists) continue;

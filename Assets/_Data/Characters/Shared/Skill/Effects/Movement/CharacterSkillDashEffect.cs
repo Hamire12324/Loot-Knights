@@ -39,22 +39,29 @@ public sealed class CharacterSkillDashEffect : CharacterSkillEffectDefinition
             TeleportImmediately(
                 context.Caster,
                 context.AimDirection,
-                context.Definition != null ? context.Definition.SkillId : null);
+                context.Definition != null ? context.Definition.SkillId : null,
+                context.HasManualTargetPosition ? context.ManualTargetPosition : (Vector2?)null);
             return;
         }
 
         context.Controller.StartCoroutine(DashRoutine(
             context.Caster,
             context.AimDirection,
-            context.Definition != null ? context.Definition.SkillId : null));
+            context.Definition != null ? context.Definition.SkillId : null,
+            context.HasManualTargetPosition ? context.ManualTargetPosition : (Vector2?)null));
     }
 
-    private void TeleportImmediately(CharacterCtrl caster, Vector2 direction, string skillId)
+    private void TeleportImmediately(
+        CharacterCtrl caster,
+        Vector2 direction,
+        string skillId,
+        Vector2? manualTargetPosition)
     {
         if (caster.Rb == null)
             return;
 
-        Vector2 normalizedDirection = direction == Vector2.zero ? Vector2.down : direction.normalized;
+        Vector2 start = caster.Rb.position;
+        Vector2 normalizedDirection = GetDashDirection(direction, start, manualTargetPosition);
         float effectiveDistance = distance;
         float unusedDuration = duration;
         foreach (RankScaling scaling in rankScalings ?? System.Array.Empty<RankScaling>())
@@ -64,19 +71,24 @@ public sealed class CharacterSkillDashEffect : CharacterSkillEffectDefinition
             caster,
             skillId,
             SkillModifierType.DashDistance);
+        effectiveDistance = ClampToManualTargetDistance(effectiveDistance, start, manualTargetPosition);
 
         caster.Rb.linearVelocity = Vector2.zero;
-        caster.Rb.position += normalizedDirection * Mathf.Max(0f, effectiveDistance);
+        caster.Rb.position = start + normalizedDirection * Mathf.Max(0f, effectiveDistance);
         PlayArrivalTrigger(caster);
     }
 
-    private IEnumerator DashRoutine(CharacterCtrl caster, Vector2 direction, string skillId)
+    private IEnumerator DashRoutine(
+        CharacterCtrl caster,
+        Vector2 direction,
+        string skillId,
+        Vector2? manualTargetPosition)
     {
         if (caster.Rb == null)
             yield break;
 
-        Vector2 normalizedDirection = direction == Vector2.zero ? Vector2.down : direction.normalized;
         Vector2 start = caster.Rb.position;
+        Vector2 normalizedDirection = GetDashDirection(direction, start, manualTargetPosition);
         float effectiveDistance = distance;
         float effectiveDuration = duration;
         foreach (RankScaling scaling in rankScalings ?? System.Array.Empty<RankScaling>())
@@ -92,7 +104,7 @@ public sealed class CharacterSkillDashEffect : CharacterSkillEffectDefinition
             SkillModifierType.DashDurationReduction);
         effectiveDuration *= Mathf.Max(0.05f, 1f - durationReduction);
 
-        effectiveDistance = Mathf.Max(0f, effectiveDistance);
+        effectiveDistance = ClampToManualTargetDistance(effectiveDistance, start, manualTargetPosition);
         effectiveDuration = Mathf.Max(0.01f, effectiveDuration);
         Vector2 end = start + normalizedDirection * effectiveDistance;
         CharacterDamReceiver receiver = caster.CharacterDamReceiver;
@@ -114,6 +126,31 @@ public sealed class CharacterSkillDashEffect : CharacterSkillEffectDefinition
 
         if (invincibleDuringDash && receiver != null)
             receiver.SetInvincible(wasInvincible);
+    }
+
+    private static Vector2 GetDashDirection(Vector2 fallbackDirection, Vector2 start, Vector2? manualTargetPosition)
+    {
+        if (manualTargetPosition.HasValue)
+        {
+            Vector2 manualDirection = manualTargetPosition.Value - start;
+            if (manualDirection.sqrMagnitude > 0.001f)
+                return manualDirection.normalized;
+        }
+
+        return fallbackDirection == Vector2.zero ? Vector2.down : fallbackDirection.normalized;
+    }
+
+    private static float ClampToManualTargetDistance(
+        float effectiveDistance,
+        Vector2 start,
+        Vector2? manualTargetPosition)
+    {
+        effectiveDistance = Mathf.Max(0f, effectiveDistance);
+        if (!manualTargetPosition.HasValue)
+            return effectiveDistance;
+
+        float desiredDistance = Vector2.Distance(start, manualTargetPosition.Value);
+        return Mathf.Min(effectiveDistance, desiredDistance);
     }
 
     private void PlayArrivalTrigger(CharacterCtrl caster)

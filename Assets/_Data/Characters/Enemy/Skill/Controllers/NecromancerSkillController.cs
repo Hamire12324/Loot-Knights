@@ -1,24 +1,20 @@
-using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Chooses the Necromancer's combat pattern: summon first when available,
-/// cast magic at range, and fall back to the staff melee attack up close.
+/// Runs a two-phase boss pattern: summon and magic at range, then an enraged
+/// melee last stand once the Necromancer reaches low health.
 /// </summary>
 public sealed class NecromancerSkillController : EnemySkillController
 {
     [Header("Decision Ranges")]
-    [SerializeField, Min(0f)] private float meleeRange = 1.25f;
     [SerializeField, Min(0f)] private float magicRange = 4f;
 
-    [Header("Skill Chances")]
-    [SerializeField, Range(0f, 1f)] private float summonChance = 0.4f;
-
     [Header("Last Stand")]
-    [SerializeField, Range(0f, 1f)] private float lastStandHealthThreshold = 0.5f;
-    [SerializeField, Min(0f)] private float lastStandArmorBonus = 12f;
-    [SerializeField, Min(0f)] private float lastStandAttackSpeedBonus = 0.9f;
-    [SerializeField, Min(0.1f)] private float lastStandMeleeRange = 0.9f;
+    [SerializeField, Range(0f, 1f)] private float lastStandHealthThreshold = 0.35f;
+    [SerializeField, Min(0f)] private float lastStandArmorBonus = 35f;
+    [SerializeField, Min(0f)] private float lastStandAttackBonus = 55f;
+    [SerializeField, Min(0f)] private float lastStandAttackSpeedBonus = 1.25f;
+    [SerializeField, Min(0.1f)] private float lastStandMeleeRange = 1.1f;
 
     private bool lastStandActive;
 
@@ -28,7 +24,6 @@ public sealed class NecromancerSkillController : EnemySkillController
         lastStandActive = false;
         Enemy?.CharacterStat?.RemoveModifiersFromSource(this);
         (Enemy?.EnemyAIController as MeleeEnemyAIController)?.RestoreDefaultCombatDistances();
-        StartCoroutine(SummonImmediately());
     }
 
     protected override void OnDisable()
@@ -55,34 +50,22 @@ public sealed class NecromancerSkillController : EnemySkillController
         if (lastStandActive)
             return distance <= lastStandMeleeRange ? base.TryCastBasicAttack() : false;
 
-        CharacterSkillRuntime summon = GetSkill(1);
-        if (summon != null && summon.CanCast(this) && Random.value <= summonChance)
-            return TryCast(1);
-
-        CharacterSkillRuntime magic = GetSkill(0);
-        // Never fall back to a melee hit while the target is outside melee range.
-        // At range the Necromancer either casts magic or waits for its cooldown.
-        if (distance > meleeRange)
-        {
-            if (magic != null && distance <= magicRange && magic.CanCast(this))
-                return TryCast(0);
-
+        // Phase 1: remain a caster. The boss must close in before it can cast,
+        // but it never switches to melee while above the last-stand threshold.
+        if (distance > magicRange)
             return false;
-        }
-
-        return base.TryCastBasicAttack();
-    }
-
-    private IEnumerator SummonImmediately()
-    {
-        yield return null;
-
-        if (Enemy == null || Enemy.CharacterDamReceiver == null || Enemy.CharacterDamReceiver.IsDead)
-            yield break;
 
         CharacterSkillRuntime summon = GetSkill(1);
         if (summon != null && summon.CanCast(this))
-            TryCast(1);
+            return TryCast(1);
+
+        // Phase 1 fallback: while Summon Skeletons is cooling down, pressure
+        // the hero with Falling Magic instead of using a staff attack.
+        CharacterSkillRuntime magic = GetSkill(0);
+        if (magic != null && magic.CanCast(this))
+            return TryCast(0);
+
+        return false;
     }
 
     private void ActivateLastStandIfNeeded()
@@ -98,6 +81,8 @@ public sealed class NecromancerSkillController : EnemySkillController
         lastStandActive = true;
         stats.Armor?.AddBuffModifier(new StatModifier(
             StatType.Armor, ModifierType.Flat, lastStandArmorBonus, this));
+        stats.Attack?.AddBuffModifier(new StatModifier(
+            StatType.Attack, ModifierType.Flat, lastStandAttackBonus, this));
         stats.AttackSpeed?.AddBuffModifier(new StatModifier(
             StatType.AttackSpeed, ModifierType.PercentAdd, lastStandAttackSpeedBonus, this));
         stats.NotifyAllStatsChanged();

@@ -76,6 +76,19 @@ public class HeroSkillController : CharacterSkillController
         return true;
     }
 
+    public bool TryReleaseElementConduitAtPosition(Vector2 targetPosition)
+    {
+        if (!CanReleaseElementConduit(logReason: true))
+            return false;
+
+        ElementalSkillConduitEffect effect = GetElementalConduitEffect();
+        if (!TryCastSpecialSkillAtPosition(targetPosition))
+            return false;
+
+        effect?.PrepareRelease(characterCtrl);
+        return true;
+    }
+
     public bool CanReleaseElementConduit()
     {
         return CanReleaseElementConduit(logReason: false);

@@ -121,7 +121,7 @@ public class LobbyProfileView : BaseMonoBehaviour
         }
 
         if (levelText != null)
-            levelText.text = "Lv. " + levelSnapshot.Level;
+            levelText.text = levelSnapshot.Level.ToString();
     }
 
     private void SetExperience(PlayerLevelSnapshot levelSnapshot)

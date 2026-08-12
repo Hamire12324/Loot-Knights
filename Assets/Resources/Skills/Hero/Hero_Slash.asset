@@ -21,6 +21,7 @@ MonoBehaviour:
   lockMovementWhileCasting: 1
   canBeInterrupted: 1
   cooldown: 2.5
+  manaCost: 15
   triggerName: Attack
   animationIndex: 0
   castVfx: {fileID: 11400000, guid: 2b884347172948129733b740a52163a7, type: 2}

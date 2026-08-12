@@ -22,6 +22,28 @@ public class ButtonHeroSkill : ButtonAbstract
     [SerializeField] private Color lockedColor = new(0.45f, 0.45f, 0.45f, 1f);
     [SerializeField] private Color readyColor = Color.white;
 
+    private float suppressClickUntil;
+
+    public bool SupportsManualAim
+    {
+        get
+        {
+            CharacterSkillDefinition definition = GetRuntime()?.Definition;
+            return mode != HeroSkillButtonMode.ElementAbsorb &&
+                   definition != null &&
+                   definition.SupportsManualAim;
+        }
+    }
+
+    public float ManualAimRange
+    {
+        get
+        {
+            CharacterSkillDefinition definition = GetRuntime()?.Definition;
+            return definition != null ? definition.ManualAimRange : 6f;
+        }
+    }
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -50,6 +72,9 @@ public class ButtonHeroSkill : ButtonAbstract
 
     protected override void OnClick()
     {
+        if (Time.unscaledTime <= suppressClickUntil)
+            return;
+
         HeroCtrl hero = HeroCtrl.GetLocal();
         if (hero == null || hero.HeroSkillController == null) return;
 
@@ -66,6 +91,22 @@ public class ButtonHeroSkill : ButtonAbstract
                 hero.HeroSkillController.TryCast(skillIndex);
                 break;
         }
+    }
+
+    public bool TryCastAtPosition(Vector2 targetPosition)
+    {
+        HeroCtrl hero = HeroCtrl.GetLocal();
+        if (hero == null || hero.HeroSkillController == null || !SupportsManualAim)
+            return false;
+
+        return mode == HeroSkillButtonMode.ElementRelease
+            ? hero.HeroSkillController.TryReleaseElementConduitAtPosition(targetPosition)
+            : hero.HeroSkillController.TryCastAtPosition(skillIndex, targetPosition);
+    }
+
+    public void SuppressClickForCurrentGesture()
+    {
+        suppressClickUntil = Time.unscaledTime + 0.15f;
     }
 
     public void SetSkillIndex(int index)

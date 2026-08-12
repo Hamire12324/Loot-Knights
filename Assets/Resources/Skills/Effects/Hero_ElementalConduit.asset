@@ -20,6 +20,8 @@ MonoBehaviour:
   duration: 0
   lockMovementWhileCasting: 1
   canBeInterrupted: 1
+  supportsManualAim: 1
+  manualAimRange: 6
   cooldown: 4.5
   triggerName: 
   animationIndex: 0

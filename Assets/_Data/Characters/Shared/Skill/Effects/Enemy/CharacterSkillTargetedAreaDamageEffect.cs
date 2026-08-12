@@ -16,7 +16,9 @@ public sealed class CharacterSkillTargetedAreaDamageEffect : CharacterSkillEffec
         if (context.Caster == null)
             return;
 
-        Vector2 center = context.Target != null
+        Vector2 center = context.HasManualTargetPosition
+            ? context.ManualTargetPosition
+            : context.Target != null
             ? context.Target.position
             : (Vector2)context.Caster.transform.position + context.AimDirection.normalized * 2f;
 

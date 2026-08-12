@@ -50,6 +50,29 @@ public abstract class CharacterTargetFinder : BaseMonoBehaviour
 
         return closest;
     }
+
+    public virtual Transform FindClosestTargetAnywhere()
+    {
+        CharacterCtrl selfCtrl = GetComponentInParent<CharacterCtrl>();
+        CharacterCtrl[] characters = FindObjectsByType<CharacterCtrl>(FindObjectsInactive.Exclude);
+        Transform closest = null;
+        float minDistanceSquared = Mathf.Infinity;
+
+        foreach (CharacterCtrl targetCtrl in characters)
+        {
+            if (targetCtrl == null || targetCtrl == selfCtrl) continue;
+            if (targetCtrl.CharacterDamReceiver == null || targetCtrl.CharacterDamReceiver.IsDead) continue;
+            if (selfCtrl != null && !FactionManager.CanAttack(selfCtrl.Faction, targetCtrl.Faction)) continue;
+
+            float distanceSquared = (targetCtrl.transform.position - transform.position).sqrMagnitude;
+            if (distanceSquared >= minDistanceSquared) continue;
+
+            minDistanceSquared = distanceSquared;
+            closest = targetCtrl.transform;
+        }
+
+        return closest;
+    }
     public void SetTarget(Transform t)
     {
         currentTarget = t;

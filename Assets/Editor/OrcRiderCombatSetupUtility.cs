@@ -11,46 +11,37 @@ public static class OrcRiderCombatSetupUtility
 {
     private const string PrefabPath = "Assets/_Data/Characters/Enemy/Prefabs/Orc/OrcRiderCtrl.prefab";
     private const string AnimatorPath = "Assets/_Data/Characters/Enemy/Animation/Orc/OrcRider/OrcRider.controller";
-    private const string EffectsPath = "Assets/_Data/Characters/Shared/Skill/Effects/Enemy";
+    private const string EffectsRootPath = "Assets/_Data/Characters/Shared/Skill/Effects/Enemy";
+    private const string CommonEffectsPath = EffectsRootPath + "/Common";
+    private const string OrcRiderEffectsPath = EffectsRootPath + "/OrcRider";
+    private const string BeastbreakerEffectsPath = OrcRiderEffectsPath + "/Beastbreaker";
+    private const string MaelstromEffectsPath = OrcRiderEffectsPath + "/Maelstrom";
     private const string DefinitionsPath = "Assets/_Data/Characters/Enemy/Skill/Definitions/OrcRider";
-
-    [InitializeOnLoadMethod]
-    private static void InstallAfterScriptReload()
-    {
-        const string sessionKey = "LootKnights.OrcRiderCombatConfigured.V2";
-        if (SessionState.GetBool(sessionKey, false))
-            return;
-
-        EditorApplication.delayCall += () =>
-        {
-            if (EditorApplication.isCompiling || SessionState.GetBool(sessionKey, false))
-                return;
-
-            Configure();
-            SessionState.SetBool(sessionKey, true);
-        };
-    }
 
     [MenuItem("Tools/Loot Knights/Configure Orc Rider Combat")]
     public static void Configure()
     {
         EnsureFolder("Assets/_Data/Characters/Enemy/Skill/Definitions", "OrcRider");
+        EnsureFolder(EffectsRootPath, "Common");
+        EnsureFolder(EffectsRootPath, "OrcRider");
+        EnsureFolder(OrcRiderEffectsPath, "Beastbreaker");
+        EnsureFolder(OrcRiderEffectsPath, "Maelstrom");
 
         CharacterSkillBasicAttackEffect hitbox = AssetDatabase.LoadAssetAtPath<CharacterSkillBasicAttackEffect>(
-            EffectsPath + "/EnemyHitboxAttackEffect.asset");
+            CommonEffectsPath + "/EnemyHitboxAttackEffect.asset");
         if (hitbox == null)
         {
             Debug.LogError("Orc Rider setup needs EnemyHitboxAttackEffect. Run 'Rebuild Enemy Skill Assets' first.");
             return;
         }
 
-        CharacterSkillDashEffect chargeDash = GetOrCreate<CharacterSkillDashEffect>(EffectsPath + "/OrcRider_BeastbreakerDash.asset");
+        CharacterSkillDashEffect chargeDash = GetOrCreate<CharacterSkillDashEffect>(BeastbreakerEffectsPath + "/OrcRider_BeastbreakerDash.asset");
         ConfigureDash(chargeDash);
 
-        CharacterSkillAreaDamageEffect chargeImpact = GetOrCreate<CharacterSkillAreaDamageEffect>(EffectsPath + "/OrcRider_BeastbreakerImpact.asset");
+        CharacterSkillAreaDamageEffect chargeImpact = GetOrCreate<CharacterSkillAreaDamageEffect>(BeastbreakerEffectsPath + "/OrcRider_BeastbreakerImpact.asset");
         ConfigureAreaDamage(chargeImpact, 0.95f, 110f, 0.55f, 0.4f, 1.35f, 0.18f);
 
-        CharacterSkillRepeatingAreaDamageEffect maelstrom = GetOrCreate<CharacterSkillRepeatingAreaDamageEffect>(EffectsPath + "/OrcRider_MaelstromTicks.asset");
+        CharacterSkillRepeatingAreaDamageEffect maelstrom = GetOrCreate<CharacterSkillRepeatingAreaDamageEffect>(MaelstromEffectsPath + "/OrcRider_MaelstromTicks.asset");
         ConfigureRepeatingAreaDamage(maelstrom);
 
         EnemyBlockSkillDefinition guard = GetOrCreate<EnemyBlockSkillDefinition>(DefinitionsPath + "/OrcRider_IronhideGuard.asset");

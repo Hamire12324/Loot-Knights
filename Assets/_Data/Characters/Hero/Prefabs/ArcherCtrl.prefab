@@ -1040,11 +1040,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HeroStat
   characterCtrl: {fileID: 8879337150097753119}
   Attack:
-    baseValue: 100
+    baseValue: 60
     isDirty: 1
     cachedFinalValue: 0
   CritChance:
-    baseValue: 0.05
+    baseValue: 0.12
     isDirty: 1
     cachedFinalValue: 0
   CritDamage:
@@ -1052,23 +1052,23 @@ MonoBehaviour:
     isDirty: 1
     cachedFinalValue: 0
   Armor:
-    baseValue: 0
+    baseValue: 2
     isDirty: 1
     cachedFinalValue: 0
   MaxHealth:
-    baseValue: 1
+    baseValue: 380
     isDirty: 1
     cachedFinalValue: 0
   MaxMana:
-    baseValue: 0
+    baseValue: 120
     isDirty: 1
     cachedFinalValue: 0
   MoveSpeed:
-    baseValue: 0
+    baseValue: 0.12
     isDirty: 1
     cachedFinalValue: 0
   AttackSpeed:
-    baseValue: 0
+    baseValue: 0.18
     isDirty: 1
     cachedFinalValue: 0
   HealthRegen:
@@ -1076,7 +1076,7 @@ MonoBehaviour:
     isDirty: 1
     cachedFinalValue: 0
   ManaRegen:
-    baseValue: 0
+    baseValue: 8
     isDirty: 1
     cachedFinalValue: 0
   currentHealth: 0

@@ -112,7 +112,7 @@ public class EnemyMovement : CharacterMovement
 
     private void ApplyMovement()
     {
-        desiredVelocity = moveInput * moveSpeed * speedMultiplier;
+        desiredVelocity = moveInput * GetMoveSpeed() * speedMultiplier;
         float rate = desiredVelocity.sqrMagnitude > 0.01f ? acceleration : deceleration;
 
         characterCtrl.Rb.linearVelocity = Vector2.MoveTowards(

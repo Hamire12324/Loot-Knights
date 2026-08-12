@@ -4,19 +4,23 @@ using UnityEngine;
 
 public static class EnemySkillAssetInstaller
 {
-    private const string EffectsPath = "Assets/_Data/Characters/Shared/Skill/Effects/Enemy";
+    private const string EffectsRootPath = "Assets/_Data/Characters/Shared/Skill/Effects/Enemy";
+    private const string CommonEffectsPath = EffectsRootPath + "/Common";
+    private const string PoisonSlimeEffectsPath = EffectsRootPath + "/PoisonSlime";
     private const string DefinitionsPath = "Assets/_Data/Characters/Enemy/Skill/Definitions/Base Attacks";
 
     [MenuItem("Tools/Loot Knights/Rebuild Enemy Skill Assets")]
     public static void Rebuild()
     {
         EnsureFolder("Assets/_Data/Characters/Shared/Skill/Effects", "Enemy");
+        EnsureFolder(EffectsRootPath, "Common");
+        EnsureFolder(EffectsRootPath, "PoisonSlime");
         EnsureFolder("Assets/_Data/Characters/Enemy/Skill/Definitions", "Base Attacks");
 
-        CharacterSkillBasicAttackEffect hitboxEffect = GetOrCreate<CharacterSkillBasicAttackEffect>(EffectsPath + "/EnemyHitboxAttackEffect.asset");
+        CharacterSkillBasicAttackEffect hitboxEffect = GetOrCreate<CharacterSkillBasicAttackEffect>(CommonEffectsPath + "/EnemyHitboxAttackEffect.asset");
         Set(hitboxEffect, "dealHitboxDamageAtCastTime", true);
 
-        CharacterSkillRepeatingAreaDamageEffect poisonArea = GetOrCreate<CharacterSkillRepeatingAreaDamageEffect>(EffectsPath + "/PoisonSlimeAreaEffect.asset");
+        CharacterSkillRepeatingAreaDamageEffect poisonArea = GetOrCreate<CharacterSkillRepeatingAreaDamageEffect>(PoisonSlimeEffectsPath + "/PoisonSlimeAreaEffect.asset");
         ConfigurePoisonArea(poisonArea);
 
         EnemySkillDefinition melee = GetOrCreate<EnemySkillDefinition>(DefinitionsPath + "/EnemyMeleeBasicAttack.asset");
@@ -33,7 +37,7 @@ public static class EnemySkillAssetInstaller
         arrowVfx.Scale = 1f;
         EditorUtility.SetDirty(arrowVfx);
 
-        CharacterSkillProjectileEffect arrowEffect = GetOrCreate<CharacterSkillProjectileEffect>(EffectsPath + "/EnemyArrowProjectileEffect.asset");
+        CharacterSkillProjectileEffect arrowEffect = GetOrCreate<CharacterSkillProjectileEffect>(CommonEffectsPath + "/EnemyArrowProjectileEffect.asset");
         ConfigureArrowProjectile(arrowEffect, arrowVfx);
 
         EnemySkillDefinition arrowShot = GetOrCreate<EnemySkillDefinition>(DefinitionsPath + "/EnemyArrowShot.asset");

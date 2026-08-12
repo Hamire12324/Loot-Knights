@@ -254,7 +254,8 @@ public class PlayerInventoryManager : BaseSingleton<PlayerInventoryManager>
             itemDatabase = global::ItemDatabase.LoadDefault();
 
         IReadOnlyList<InventoryItemStack> savedItems = InventorySaveService.LoadItems();
-        int safeCapacity = Mathf.Max(inventoryCapacity, savedItems != null ? savedItems.Count : 0);
+        int ownedCapacity = PlayerInventoryCapacityStorage.GetCapacity(inventoryCapacity);
+        int safeCapacity = Mathf.Max(ownedCapacity, savedItems != null ? savedItems.Count : 0);
 
         container = new InventoryContainer(safeCapacity);
         container.LoadFromStacks(savedItems, itemDatabase);

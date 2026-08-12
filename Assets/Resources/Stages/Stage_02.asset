@@ -12,45 +12,69 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f14ec9d8a7b45d4ab1d236d14dc0d51, type: 3}
   m_Name: Stage_02
   m_EditorClassIdentifier: Assembly-CSharp::StageConfig
-  stageName: Stage 2
+  stageName: Stage 2 - Crypt of the Necromancer
   stageNumber: 2
   difficultyLevel: 2
   enemyRoster:
-  - prefab: {fileID: 6626155559249779585, guid: 37393141bdaf2f9418f005b34f4ea263, type: 3}
-    weight: 60
+  - prefab: {fileID: 6626155559249779585, guid: d8e62a77bc564ff6a7e498312c9be41f, type: 3}
+    weight: 55
     minDifficultyLevel: 1
     maxDifficultyLevel: 0
-  - prefab: {fileID: 6626155559249779585, guid: a8d74d9e252a49b1b077447d1b695b6b, type: 3}
-    weight: 40
+  - prefab: {fileID: 6626155559249779585, guid: 660932081a0347c88200f7b248d084a7, type: 3}
+    weight: 30
+    minDifficultyLevel: 1
+    maxDifficultyLevel: 0
+  - prefab: {fileID: 6626155559249779585, guid: 44f87fd3866645ae9518e4ab296f7e97, type: 3}
+    weight: 15
     minDifficultyLevel: 1
     maxDifficultyLevel: 0
   openingEnemies:
-    enemyCount: 2
+    enemyCount: 10
     delayBeforeWave: 0
     isBossWave: 0
     enemyOverrides: []
   waves:
-  - enemyCount: 4
-    delayBeforeWave: 1.5
+  - enemyCount: 20
+    delayBeforeWave: 1.25
     isBossWave: 0
     enemyOverrides: []
-  - enemyCount: 5
+  - enemyCount: 30
     delayBeforeWave: 1.75
     isBossWave: 0
     enemyOverrides: []
-  - enemyCount: 6
-    delayBeforeWave: 2
-    isBossWave: 0
-    enemyOverrides: []
-  - enemyCount: 7
+  - enemyCount: 40
     delayBeforeWave: 2.25
     isBossWave: 0
     enemyOverrides: []
-  - enemyCount: 8
-    delayBeforeWave: 2.5
+  - enemyCount: 50
+    delayBeforeWave: 2.75
     isBossWave: 0
     enemyOverrides: []
-  coinReward: 150
+  coinReward: 250
   diamondReward: 0
-  experienceReward: 160
-  itemDrops: []
+  experienceReward: 275
+  itemDrops:
+  - item: {fileID: 11400000, guid: 312a2d719f7d2644ea6202489093c76d, type: 2}
+    weight: 22
+    minAmount: 1
+    maxAmount: 1
+  - item: {fileID: 11400000, guid: ea07f3ec1c1c24141ad960b7cbad818b, type: 2}
+    weight: 22
+    minAmount: 1
+    maxAmount: 1
+  - item: {fileID: 11400000, guid: 9fa37dcda4bbc284cafa3d822d55a6d8, type: 2}
+    weight: 22
+    minAmount: 1
+    maxAmount: 1
+  - item: {fileID: 11400000, guid: 0e3ce42f1c05e6944b3e6c5bdc3c95a7, type: 2}
+    weight: 22
+    minAmount: 1
+    maxAmount: 1
+  - item: {fileID: 11400000, guid: 4e49791eff526f845a4e74f53968db3c, type: 2}
+    weight: 6
+    minAmount: 1
+    maxAmount: 1
+  - item: {fileID: 11400000, guid: e408354b2536a5e488b16471eed6db2d, type: 2}
+    weight: 6
+    minAmount: 1
+    maxAmount: 1

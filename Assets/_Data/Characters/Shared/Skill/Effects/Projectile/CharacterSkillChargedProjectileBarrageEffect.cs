@@ -29,6 +29,14 @@ public sealed class CharacterSkillChargedProjectileBarrageEffect : CharacterSkil
         Vector3 origin,
         Vector2 fallbackDirection)
     {
+        if (context.HasManualTargetPosition)
+        {
+            Vector2 manualDirection = context.ManualTargetPosition - (Vector2)origin;
+            return manualDirection.sqrMagnitude > 0.001f
+                ? manualDirection.normalized
+                : fallbackDirection;
+        }
+
         string skillId = context.Definition != null ? context.Definition.SkillId : null;
         float effectiveSearchRadius = targetSearchRadius + SkillTreeSkillModifierResolver.GetValue(caster, skillId, SkillModifierType.TargetSearchRadius);
         CharacterCtrl target = CharacterSkillTargetUtility.FindClosestTarget(

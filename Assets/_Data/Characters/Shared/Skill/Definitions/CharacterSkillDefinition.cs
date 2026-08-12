@@ -15,6 +15,11 @@ public abstract class CharacterSkillDefinition : ScriptableObject
     [SerializeField] private bool lockMovementWhileCasting = true;
     [SerializeField] private bool canBeInterrupted = true;
 
+    [Header("Manual Aim")]
+    [Tooltip("Allow drag-to-aim input. A quick tap still uses automatic enemy targeting.")]
+    [SerializeField] private bool supportsManualAim = true;
+    [SerializeField, Min(0.1f)] private float manualAimRange = 6f;
+
     [Header("Cooldown")]
     [SerializeField, Min(0f)] private float cooldown = 1f;
 
@@ -41,6 +46,8 @@ public abstract class CharacterSkillDefinition : ScriptableObject
     public float Duration => duration;
     public bool LockMovementWhileCasting => lockMovementWhileCasting;
     public bool CanBeInterrupted => canBeInterrupted;
+    public bool SupportsManualAim => supportsManualAim;
+    public float ManualAimRange => Mathf.Max(0.1f, manualAimRange);
     public float Cooldown => cooldown;
     public float ManaCost => manaCost;
     public string TriggerName => triggerName;

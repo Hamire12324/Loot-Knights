@@ -72,6 +72,7 @@ public class GameplayMobileSkillHud : BaseMonoBehaviour
             buttonHeroSkill = rect.gameObject.AddComponent<ButtonHeroSkill>();
 
         buttonHeroSkill.SetSkillIndex(skillIndex);
+        ConfigureAimInput(buttonHeroSkill);
     }
 
     private static void BindElementButton(RectTransform rect, bool release)
@@ -90,6 +91,20 @@ public class GameplayMobileSkillHud : BaseMonoBehaviour
             buttonHeroSkill.SetElementRelease();
         else
             buttonHeroSkill.SetElementAbsorb();
+
+        ConfigureAimInput(buttonHeroSkill);
+    }
+
+    private static void ConfigureAimInput(ButtonHeroSkill skillButton)
+    {
+        if (skillButton == null)
+            return;
+
+        MobileSkillAimInput aimInput = skillButton.GetComponent<MobileSkillAimInput>();
+        if (aimInput == null)
+            aimInput = skillButton.gameObject.AddComponent<MobileSkillAimInput>();
+
+        aimInput.SetSkillButton(skillButton);
     }
 
     private static void BindAddAllElementsButton(RectTransform rect)
