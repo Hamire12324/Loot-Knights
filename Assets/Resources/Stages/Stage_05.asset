@@ -48,8 +48,18 @@ MonoBehaviour:
     enemyOverrides: []
   - enemyCount: 1
     delayBeforeWave: 3
-    isBossWave: 1
-    enemyOverrides: []
+    isBossWave: 0
+    enemyOverrides:
+    - prefab: {fileID: 6626155559249779585, guid: a8d74d9e252a49b1b077447d1b695b6b, type: 3}
+      weight: 1
+      minDifficultyLevel: 1
+      maxDifficultyLevel: 0
+    bossEncounter:
+      enabled: 1
+      displayName: Poison Slime
+      healthMultiplier: 5
+      attackMultiplier: 1.5
+      armorMultiplier: 1.25
   - enemyCount: 5
     delayBeforeWave: 1
     isBossWave: 0

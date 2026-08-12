@@ -16,16 +16,16 @@ MonoBehaviour:
   stageNumber: 16
   difficultyLevel: 16
   enemyRoster:
-  - prefab: {fileID: 6626155559249779585, guid: 6bffee01ae284cf5961295d9da31051e, type: 3}
-    weight: 40
+  - prefab: {fileID: 6626155559249779585, guid: 660932081a0347c88200f7b248d084a7, type: 3}
+    weight: 50
     minDifficultyLevel: 1
     maxDifficultyLevel: 0
-  - prefab: {fileID: 6626155559249779585, guid: 0364b1541c824085a5d28fd6a1b0c61d, type: 3}
-    weight: 30
+  - prefab: {fileID: 6626155559249779585, guid: 3871f3ff3c834e91845f18a4930e9fc2, type: 3}
+    weight: 15
     minDifficultyLevel: 1
     maxDifficultyLevel: 0
   - prefab: {fileID: 6626155559249779585, guid: d8e62a77bc564ff6a7e498312c9be41f, type: 3}
-    weight: 30
+    weight: 35
     minDifficultyLevel: 1
     maxDifficultyLevel: 0
   openingEnemies:

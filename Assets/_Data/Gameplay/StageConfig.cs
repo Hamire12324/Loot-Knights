@@ -13,6 +13,8 @@ public class StageConfig : ScriptableObject
     [SerializeField] private List<StageEnemyEntry> enemyRoster = new();
 
     [Header("Stage Flow")]
+    [Tooltip("When enabled, StageEncounterBalance replaces this asset's authored waves at runtime. Disable to use the waves configured in this asset.")]
+    [SerializeField] private bool useGeneratedEncounterBalance = true;
     [Tooltip("Total enemies in the opening encounter. Large encounters are delivered in safe batches.")]
     [SerializeField] private StageWaveConfig openingEnemies;
     [Tooltip("Every wave uses the Stage Enemies pool unless it has an override list. Large waves are delivered in safe batches.")]
@@ -30,6 +32,7 @@ public class StageConfig : ScriptableObject
     public int StageNumber => Mathf.Max(1, stageNumber);
     public int DifficultyLevel => Mathf.Max(1, difficultyLevel);
     public IReadOnlyList<StageEnemyEntry> EnemyRoster => enemyRoster;
+    public bool UseGeneratedEncounterBalance => useGeneratedEncounterBalance;
     public StageWaveConfig OpeningEnemies => openingEnemies;
     public IReadOnlyList<StageWaveConfig> Waves => waves;
     public bool HasOpeningEnemies => openingEnemies != null && openingEnemies.EnemyCount > 0;
@@ -54,6 +57,20 @@ public class StageConfig : ScriptableObject
         waves = encounterWaves != null ? new List<StageWaveConfig>(encounterWaves) : new List<StageWaveConfig>();
     }
 
+    public BossEncounterConfig FindBossEncounter()
+    {
+        if (openingEnemies != null && openingEnemies.IsBossWave)
+            return openingEnemies.BossEncounter;
+
+        foreach (StageWaveConfig wave in waves)
+        {
+            if (wave != null && wave.IsBossWave)
+                return wave.BossEncounter;
+        }
+
+        return null;
+    }
+
     private void OnValidate()
     {
         stageNumber = Mathf.Max(1, stageNumber);
@@ -64,6 +81,10 @@ public class StageConfig : ScriptableObject
         enemyRoster ??= new List<StageEnemyEntry>();
         itemDrops ??= new List<ItemDropEntry>();
         waves ??= new List<StageWaveConfig>();
+
+        openingEnemies?.NormalizeBossEncounter();
+        foreach (StageWaveConfig wave in waves)
+            wave?.NormalizeBossEncounter();
     }
 }
 
@@ -72,22 +93,27 @@ public class StageWaveConfig
 {
     [SerializeField, Min(1)] private int enemyCount = 5;
     [SerializeField, Min(0f)] private float delayBeforeWave = 1f;
-    [Tooltip("Marks every enemy in this wave as a boss. Boss waves are normally configured with Enemy Count = 1.")]
+    [Tooltip("Legacy boss flag. New boss waves use Boss Encounter below.")]
     [SerializeField] private bool isBossWave;
     [Tooltip("Leave empty to use Stage Enemies. Fill this only for a special wave, such as a boss wave.")]
     [SerializeField] private List<StageEnemyEntry> enemyOverrides = new();
+    [Tooltip("Configure one fixed enemy override as a boss encounter.")]
+    [SerializeField] private BossEncounterConfig bossEncounter;
 
     public int EnemyCount => Mathf.Max(1, enemyCount);
     public float DelayBeforeWave => Mathf.Max(0f, delayBeforeWave);
-    public bool IsBossWave => isBossWave;
+    public bool IsBossWave => bossEncounter != null ? bossEncounter.Enabled : isBossWave;
+    public BossEncounterConfig BossEncounter => bossEncounter;
     public bool HasEnemyOverrides => enemyOverrides != null && enemyOverrides.Count > 0;
+    public bool HasValidBossEncounter => !IsBossWave || (EnemyCount == 1 && enemyOverrides != null && enemyOverrides.Count == 1);
     public IReadOnlyList<StageEnemyEntry> EnemyOverrides => enemyOverrides;
 
     public StageWaveConfig(
         int enemyCount,
         float delayBeforeWave,
         bool isBossWave = false,
-        IReadOnlyList<StageEnemyEntry> enemyOverrides = null)
+        IReadOnlyList<StageEnemyEntry> enemyOverrides = null,
+        BossEncounterConfig bossEncounter = null)
     {
         this.enemyCount = Mathf.Max(1, enemyCount);
         this.delayBeforeWave = Mathf.Max(0f, delayBeforeWave);
@@ -95,6 +121,55 @@ public class StageWaveConfig
         this.enemyOverrides = enemyOverrides != null
             ? new List<StageEnemyEntry>(enemyOverrides)
             : new List<StageEnemyEntry>();
+        this.bossEncounter = bossEncounter;
+    }
+
+    /// <summary>
+    /// Unity may materialize an empty nested BossEncounterConfig in the Inspector.
+    /// Such a normal wave must not remain enabled as a boss.
+    /// </summary>
+    public void NormalizeBossEncounter()
+    {
+        if (bossEncounter == null) return;
+
+        bool canBeBoss = EnemyCount == 1 && enemyOverrides != null && enemyOverrides.Count == 1;
+        if (!canBeBoss)
+            bossEncounter.SetEnabled(false);
+    }
+}
+
+[System.Serializable]
+public class BossEncounterConfig
+{
+    // Normal waves must never become boss waves merely because Unity creates
+    // an empty serializable BossEncounterConfig for their Inspector foldout.
+    [SerializeField] private bool enabled;
+    [SerializeField] private string displayName;
+    [SerializeField, Min(0.01f)] private float healthMultiplier = 5f;
+    [SerializeField, Min(0.01f)] private float attackMultiplier = 1.5f;
+    [SerializeField, Min(0.01f)] private float armorMultiplier = 1.25f;
+
+    public bool Enabled => enabled;
+    public string DisplayName => displayName;
+    public float HealthMultiplier => Mathf.Max(0.01f, healthMultiplier);
+    public float AttackMultiplier => Mathf.Max(0.01f, attackMultiplier);
+    public float ArmorMultiplier => Mathf.Max(0.01f, armorMultiplier);
+
+    public BossEncounterConfig() { }
+
+    public BossEncounterConfig(string displayName, float healthMultiplier = 5f,
+        float attackMultiplier = 1.5f, float armorMultiplier = 1.25f)
+    {
+        enabled = true;
+        this.displayName = displayName;
+        this.healthMultiplier = Mathf.Max(0.01f, healthMultiplier);
+        this.attackMultiplier = Mathf.Max(0.01f, attackMultiplier);
+        this.armorMultiplier = Mathf.Max(0.01f, armorMultiplier);
+    }
+
+    public void SetEnabled(bool value)
+    {
+        enabled = value;
     }
 }
 

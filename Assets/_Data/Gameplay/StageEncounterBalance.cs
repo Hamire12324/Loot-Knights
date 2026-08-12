@@ -2,11 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Co-op encounter curve for a full party of four. Enemy counts are total kills,
-/// not simultaneous spawns: EnemySpawner/StageMapController still batch them by
-/// the configured Max Alive limit.
-/// </summary>
 public static class StageEncounterBalance
 {
     private const string Slime = "SlimeCtrl";
@@ -30,15 +25,21 @@ public static class StageEncounterBalance
             return;
 
         Dictionary<string, PoolObj> prefabs = CollectPrefabs(stages);
-        if (!HasRequiredPrefabs(prefabs))
-        {
-            Debug.LogError("Stage encounter balance was not applied because one or more enemy prefabs are missing from the stage assets.");
-            return;
-        }
 
         foreach (StageConfig stage in stages)
         {
-            if (stage == null) continue;
+            if (stage == null || !stage.UseGeneratedEncounterBalance) continue;
+
+            List<string> missingPrefabs = GetMissingPrefabsForStage(stage.StageNumber, prefabs);
+            if (missingPrefabs.Count > 0)
+            {
+                Debug.LogWarning(
+                    $"Stage {stage.StageNumber} encounter balance was skipped. Missing enemy prefabs: " +
+                    string.Join(", ", missingPrefabs) + ".",
+                    stage);
+                continue;
+            }
+
             ApplyStage(stage, prefabs);
         }
     }
@@ -58,12 +59,26 @@ public static class StageEncounterBalance
         return prefabs;
     }
 
-    private static bool HasRequiredPrefabs(IReadOnlyDictionary<string, PoolObj> prefabs)
+    private static List<string> GetMissingPrefabsForStage(
+        int stageNumber,
+        IReadOnlyDictionary<string, PoolObj> prefabs)
     {
-        string[] required = { Slime, PoisonSlime, Bat, Skeleton, SkeletonArcher, ArmoredSkeleton, GreatswordSkeleton, Orc, ArmoredOrc, EliteOrc, OrcRider, Werebear, Werewolf, Necromancer };
+        string[] required = stageNumber switch
+        {
+            <= 5 => new[] { Slime, PoisonSlime, Bat },
+            <= 10 => new[] { Skeleton, SkeletonArcher, ArmoredSkeleton, GreatswordSkeleton },
+            <= 15 => new[] { Orc, ArmoredOrc, EliteOrc, OrcRider },
+            _ => new[] { Werebear, Werewolf, Necromancer }
+        };
+
+        List<string> missing = new();
         foreach (string prefab in required)
-            if (!prefabs.ContainsKey(prefab)) return false;
-        return true;
+        {
+            if (!prefabs.TryGetValue(prefab, out PoolObj value) || value == null)
+                missing.Add(prefab);
+        }
+
+        return missing;
     }
 
     private static void ApplyStage(StageConfig stage, IReadOnlyDictionary<string, PoolObj> p)
@@ -76,6 +91,7 @@ public static class StageEncounterBalance
         Entry[] roster;
         string miniBoss;
         string boss = null;
+        BossEncounterConfig bossEncounter = stage.FindBossEncounter();
 
         if (number <= 5)
         {
@@ -143,7 +159,7 @@ public static class StageEncounterBalance
         };
 
         if (boss != null)
-            waves.Add(Wave(1, 2.5f, p, boss, true));
+            waves.Add(BossWave(2.5f, p, boss, bossEncounter));
 
         stage.ApplyEncounterBalance(stageName, balancedRoster, Wave(opening, 0f, p), waves);
     }
@@ -159,6 +175,27 @@ public static class StageEncounterBalance
             ? null
             : new List<StageEnemyEntry> { new StageEnemyEntry(prefabs[overrideEnemy], 1) };
         return new StageWaveConfig(count, delay, boss, overrides);
+    }
+
+    private static StageWaveConfig BossWave(
+        float delay,
+        IReadOnlyDictionary<string, PoolObj> prefabs,
+        string bossPrefab,
+        BossEncounterConfig bossEncounter)
+    {
+        List<StageEnemyEntry> overrides = new()
+        {
+            new StageEnemyEntry(prefabs[bossPrefab], 1)
+        };
+        string displayName = bossPrefab.EndsWith("Ctrl", StringComparison.Ordinal)
+            ? bossPrefab[..^4]
+            : bossPrefab;
+        return new StageWaveConfig(
+            1,
+            delay,
+            false,
+            overrides,
+            bossEncounter ?? new BossEncounterConfig(displayName));
     }
 
     private static List<StageEnemyEntry> ResolveEntries(IEnumerable<Entry> entries, IReadOnlyDictionary<string, PoolObj> prefabs)
