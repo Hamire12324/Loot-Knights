@@ -1,10 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Central tuning values for the two-currency economy.
-/// Coins pay for repeatable power progression; diamonds buy convenience or can
-/// be exchanged for coins when a player wants to keep progressing.
-/// </summary>
 public static class EconomyPricing
 {
     public const int CoinsPerDiamondExchange = 250;

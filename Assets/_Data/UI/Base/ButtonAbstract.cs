@@ -1,25 +1,37 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public abstract class ButtonAbstract : BaseMonoBehaviour
 {
+    public event Action OnClicked;
+
     [SerializeField] protected Button button;
+
     protected override void Start()
     {
         base.Start();
-        this.AddOnClickEvent();
+        AddOnClickEvent();
     }
+
     protected abstract void OnClick();
+
+    protected void NotifyClicked()
+    {
+        OnClicked?.Invoke();
+    }
 
     protected override void LoadComponents()
     {
         base.LoadComponents();
-        this.LoadButton();
+        LoadButton();
     }
+
     protected virtual void LoadButton()
     {
         if (button != null) return;
-        this.button = transform.GetComponent<Button>();
+
+        button = GetComponent<Button>();
         if (button != null)
         {
             Debug.Log(transform.name + ": LoadButton", gameObject);

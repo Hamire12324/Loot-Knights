@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class EnemySpawner : BaseMonoBehaviour
 {
+    private const string ElementalSkillTreeResourcePath = "SkillTrees/Common/Elemental_SkillTree";
     [Header("Pool")]
     [SerializeField] private PoolManager poolManager;
     [SerializeField] private PoolObj enemyPrefab;
@@ -26,6 +27,7 @@ public class EnemySpawner : BaseMonoBehaviour
     [SerializeField, Min(0)] private int maxElementalShardDrops = 2;
     [SerializeField, Min(0f)] private float elementalShardScatterRadius = 0.35f;
     [SerializeField, Min(0f)] private float elementalShardPower = 1f;
+    [SerializeField] private SkillTreeDefinition elementalSkillTree;
 
     private readonly List<PoolObj> aliveEnemies = new();
     private static readonly ElementType[] DropElements =
@@ -144,7 +146,7 @@ public class EnemySpawner : BaseMonoBehaviour
         int enemyCount,
         int level,
         IReadOnlyList<StageEnemyEntry> stageEnemyEntries,
-        bool isBossWave = false)
+        BossEncounterConfig bossEncounter = null)
     {
         List<PoolObj> spawnedEnemies = new();
 
@@ -166,10 +168,10 @@ public class EnemySpawner : BaseMonoBehaviour
                 break;
 
             BossEnemy bossEnemy = enemy.GetComponent<BossEnemy>();
-            if (bossEnemy == null && isBossWave)
+            if (bossEnemy == null && bossEncounter != null && bossEncounter.Enabled)
                 bossEnemy = enemy.gameObject.AddComponent<BossEnemy>();
 
-            bossEnemy?.Configure(isBossWave);
+            bossEnemy?.Configure(bossEncounter);
 
             anchorUseCounts[positionIndex]++;
             spawnedEnemies.Add(enemy);
@@ -356,7 +358,9 @@ public class EnemySpawner : BaseMonoBehaviour
         if (count <= 0)
             return;
 
-        ElementType element = ResolveDropElement(receiver);
+        if (!TryResolveUnlockedDropElement(receiver, out ElementType element))
+            return;
+
         for (int i = 0; i < count; i++)
         {
             Vector2 scatter = Random.insideUnitCircle * Mathf.Max(0f, elementalShardScatterRadius);
@@ -365,13 +369,34 @@ public class EnemySpawner : BaseMonoBehaviour
         }
     }
 
-    private static ElementType ResolveDropElement(CharacterDamReceiver receiver)
+    private bool TryResolveUnlockedDropElement(CharacterDamReceiver receiver, out ElementType element)
     {
-        CharacterElementalState state = receiver.GetComponentInChildren<CharacterElementalState>();
-        if (state != null && state.TryGetStrongestStatus(out ElementType element, out _))
-            return element;
+        element = ElementType.None;
+        elementalSkillTree ??= Resources.Load<SkillTreeDefinition>(ElementalSkillTreeResourcePath);
+        if (elementalSkillTree == null)
+            return false;
 
-        return DropElements[Random.Range(0, DropElements.Length)];
+        SkillTreeRuntime runtime = new(elementalSkillTree);
+        CharacterElementalState state = receiver.GetComponentInChildren<CharacterElementalState>();
+        if (state != null && state.TryGetStrongestStatus(out ElementType statusElement, out _) && runtime.HasElement(statusElement))
+        {
+            element = statusElement;
+            return true;
+        }
+
+        ElementType[] unlockedElements = new ElementType[DropElements.Length];
+        int unlockedCount = 0;
+        foreach (ElementType candidate in DropElements)
+        {
+            if (runtime.HasElement(candidate))
+                unlockedElements[unlockedCount++] = candidate;
+        }
+
+        if (unlockedCount == 0)
+            return false;
+
+        element = unlockedElements[Random.Range(0, unlockedCount)];
+        return true;
     }
 
     private static PoolObj ResolvePoolObj(CharacterDamReceiver receiver)

@@ -1,99 +1,32 @@
 using System;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class MainMenuPanel : BaseMonoBehaviour
 {
-    public event Action OnContinueRequested;
     public event Action OnCreateCharacterRequested;
     public event Action OnDeleteCharacterRequested;
     public event Action OnQuitRequested;
 
-    [Header("Status")]
-    [SerializeField] private TMP_Text characterStatusText;
-    [SerializeField] private Button continueButton;
-
-    private Button createCharacterButton;
-    private Button quitButton;
-    protected override void Start()
-    {
-        base.Start();
-
-        this.BindButtonEvents();
-        this.Refresh();
-    }
+    [SerializeField] private ButtonStartGame playButton;
+    [SerializeField] private ButtonQuitGame quitButton;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        this.Refresh();
+        BindButtonEvents();
+    }
+
+    protected override void OnDisable()
+    {
+        UnbindButtonEvents();
+        base.OnDisable();
     }
     protected override void LoadComponents()
     {
         base.LoadComponents();
 
-        if (continueButton == null)
-        {
-            ButtonContinueGame continueGameButton = GetComponentInChildren<ButtonContinueGame>(true);
-
-            if (continueGameButton != null)
-            {
-                continueButton = continueGameButton.GetComponent<Button>();
-            }
-        }
-
-        this.LoadButtonsByName();
-    }
-    protected virtual void LoadButtonsByName()
-    {
-        Button[] buttons = GetComponentsInChildren<Button>(true);
-
-        foreach (Button foundButton in buttons)
-        {
-            string buttonName = foundButton.name.ToLowerInvariant();
-
-            if (continueButton == null && (buttonName.Contains("continue") || buttonName.Contains("resume")))
-            {
-                continueButton = foundButton;
-                continue;
-            }
-
-            if (createCharacterButton == null && (buttonName.Contains("start") || buttonName.Contains("new")))
-            {
-                createCharacterButton = foundButton;
-                continue;
-            }
-
-            if (quitButton == null && buttonName.Contains("quit"))
-            {
-                quitButton = foundButton;
-            }
-        }
-    }
-    private void Refresh()
-    {
-        if (characterStatusText == null) return;
-
-        CreatedCharacterData character = CharacterProfileStorage.Load();
-        bool hasCharacter = character != null;
-
-        characterStatusText.text = character == null
-            ? "Chua co nhan vat"
-            : character.CharacterName + " - "
-              + character.CharacterClass
-              + " - Lv. "
-              + PlayerExperienceStorage.Level;
-
-        if (continueButton != null)
-        {
-            continueButton.interactable = hasCharacter;
-        }
-    }
-
-    public void RequestContinueGame()
-    {
-        OnContinueRequested?.Invoke();
+        playButton ??= GetComponentInChildren<ButtonStartGame>(true);
+        quitButton ??= GetComponentInChildren<ButtonQuitGame>(true);
     }
     public void RequestCreateCharacter()
     {
@@ -109,24 +42,28 @@ public class MainMenuPanel : BaseMonoBehaviour
     {
         OnQuitRequested?.Invoke();
     }
+
     private void BindButtonEvents()
     {
-        if (continueButton != null)
+        if (playButton != null)
         {
-            continueButton.onClick.RemoveListener(RequestContinueGame);
-            continueButton.onClick.AddListener(RequestContinueGame);
-        }
-
-        if (createCharacterButton != null)
-        {
-            createCharacterButton.onClick.RemoveListener(RequestCreateCharacter);
-            createCharacterButton.onClick.AddListener(RequestCreateCharacter);
+            playButton.OnClicked -= RequestCreateCharacter;
+            playButton.OnClicked += RequestCreateCharacter;
         }
 
         if (quitButton != null)
         {
-            quitButton.onClick.RemoveListener(RequestQuitGame);
-            quitButton.onClick.AddListener(RequestQuitGame);
+            quitButton.OnClicked -= RequestQuitGame;
+            quitButton.OnClicked += RequestQuitGame;
         }
+    }
+
+    private void UnbindButtonEvents()
+    {
+        if (playButton != null)
+            playButton.OnClicked -= RequestCreateCharacter;
+
+        if (quitButton != null)
+            quitButton.OnClicked -= RequestQuitGame;
     }
 }

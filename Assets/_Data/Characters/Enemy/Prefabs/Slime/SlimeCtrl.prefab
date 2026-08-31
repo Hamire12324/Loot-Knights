@@ -1122,7 +1122,7 @@ MonoBehaviour:
   movement: {fileID: 6935674513474067312}
   loseRange: 8
   targetRefreshInterval: 0.25
-  attackCooldown: 1.35
+  attackCooldown: 1.75
   target: {fileID: 0}
   desiredAttackDistance: 0.25
   attackHorizontalRange: 0.5

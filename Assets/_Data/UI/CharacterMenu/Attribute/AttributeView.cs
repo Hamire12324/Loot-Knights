@@ -11,110 +11,57 @@ public class AttributeView : BaseMonoBehaviour
 
     [Header("Texts")]
     [SerializeField] private AttributeText[] attributeTexts;
-
-    [Header("Display")]
     [SerializeField] private string emptyValue = "-";
+    private PlayerSkillTreeManager skillTreeManager;
+
+    protected override void LoadComponents()
+    {
+        base.LoadComponents();
+        attributeTexts ??= GetComponentsInChildren<AttributeText>(true);
+        equipmentManager ??= PlayerEquipmentManager.InstanceOrNull
+            ?? FindAnyObjectByType<PlayerEquipmentManager>(FindObjectsInactive.Include);
+    }
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        SubscribeStatEvents();
-        SubscribeEquipmentEvents();
-        SubscribeSkillTreeEvents();
         Refresh();
+        SubscribeEvents();
     }
 
     protected override void OnDisable()
     {
-        UnsubscribeStatEvents();
-        UnsubscribeEquipmentEvents();
-        UnsubscribeSkillTreeEvents();
+        UnsubscribeEvents();
         base.OnDisable();
-    }
-    protected override void LoadComponents()
-    {
-        base.LoadComponents();
-        LoadCharacterStat();
-        LoadEquipmentManager();
-        LoadAttributeTexts();
     }
 
     public void Refresh()
     {
-        CharacterStat resolvedStat = ResolveCharacterStat();
-        if (resolvedStat != characterStat)
-            SetCharacterStat(resolvedStat);
+        SetCharacterStat(FindCharacterStat());
 
-        AttributeStatSnapshot statSnapshot = characterStat != null
-            ? AttributeStatSnapshot.FromCharacterStat(characterStat)
-            : ResolveProfileStatSnapshot();
-
-        if (attributeTexts == null || attributeTexts.Length == 0)
-            LoadAttributeTexts();
+        CharacterAttributeData data = characterStat != null
+            ? CharacterStatService.FromCharacterStat(characterStat)
+            : CharacterStatService.FromProfile(classAttributes, equipmentManager, GetSkillTrees());
 
         foreach (AttributeText attributeText in attributeTexts)
-        {
-            if (attributeText == null) continue;
-
-            attributeText.Refresh(statSnapshot, emptyValue);
-        }
+            attributeText?.Refresh(data, emptyValue);
     }
 
-    private void LoadCharacterStat()
+    private CharacterStat FindCharacterStat()
     {
-        if (characterStat != null) return;
-
-        SetCharacterStat(ResolveCharacterStat());
-    }
-
-    private CharacterStat ResolveCharacterStat()
-    {
-        if (!useLocalPlayerStats && characterStat != null)
+        if (!useLocalPlayerStats)
             return characterStat;
 
-        HeroCtrl hero = HeroCtrl.GetLocal();
-        if (hero != null && hero.CharacterStat != null)
-            return hero.CharacterStat;
+        HeroCtrl hero = HeroCtrl.GetLocal()
+            ?? FindAnyObjectByType<HeroCtrl>(FindObjectsInactive.Exclude);
 
-        HeroGameplaySpawner spawner = FindAnyObjectByType<HeroGameplaySpawner>(FindObjectsInactive.Include);
-        if (spawner != null && spawner.SpawnedHero != null && spawner.SpawnedHero.CharacterStat != null)
-            return spawner.SpawnedHero.CharacterStat;
-
-        HeroCtrl sceneHero = FindAnyObjectByType<HeroCtrl>(FindObjectsInactive.Exclude);
-        if (sceneHero != null && sceneHero.CharacterStat != null)
-            return sceneHero.CharacterStat;
-
-        return characterStat;
-    }
-
-    private AttributeStatSnapshot ResolveProfileStatSnapshot()
-    {
-        CreatedCharacterData character = CharacterProfileStorage.Load();
-        CharacterClass characterClass = character != null
-            ? character.CharacterClass
-            : CharacterClass.Knight;
-
-        if (classAttributes != null)
+        if (hero == null)
         {
-            foreach (CharacterClassAttributeData classAttribute in classAttributes)
-            {
-                if (classAttribute == null || classAttribute.CharacterClass != characterClass) continue;
-
-                return ApplyEquipment(classAttribute.ToSnapshot());
-            }
+            HeroGameplaySpawner spawner = FindAnyObjectByType<HeroGameplaySpawner>(FindObjectsInactive.Include);
+            hero = spawner != null ? spawner.SpawnedHero : null;
         }
 
-        return ApplyEquipment(GetDefaultSnapshot(characterClass));
-    }
-
-    private AttributeStatSnapshot GetDefaultSnapshot(CharacterClass characterClass)
-    {
-        return characterClass switch
-        {
-            CharacterClass.Ranger => new AttributeStatSnapshot(90f, 0f, 90f, 90f, 0.1f, 1.5f),
-            CharacterClass.Mage => new AttributeStatSnapshot(120f, 0f, 80f, 80f, 0.05f, 1.7f),
-            _ => new AttributeStatSnapshot(100f, 0f, 100f, 100f, 0.05f, 1.5f)
-        };
+        return hero != null ? hero.CharacterStat : characterStat;
     }
 
     private void SetCharacterStat(CharacterStat newCharacterStat)
@@ -126,239 +73,68 @@ public class AttributeView : BaseMonoBehaviour
         SubscribeStatEvents();
     }
 
-    private void LoadAttributeTexts()
+    private IReadOnlyList<SkillTreeDefinition> GetSkillTrees()
     {
-        if (attributeTexts != null && attributeTexts.Length > 0) return;
+        CharacterMenuPanel menu = GetComponentInParent<CharacterMenuPanel>();
+        if (menu != null)
+            return menu.GetSkillTreesForCurrentProfile();
 
-        attributeTexts = GetComponentsInChildren<AttributeText>(true);
+        SkillTreeView skillTree = GetComponentInParent<SkillTreeView>();
+        return skillTree != null ? skillTree.GetSkillTrees() : System.Array.Empty<SkillTreeDefinition>();
     }
 
-    private void LoadEquipmentManager()
+    private void SubscribeEvents()
     {
-        if (equipmentManager != null) return;
-
-        if (PlayerEquipmentManager.InstanceOrNull != null)
-        {
-            equipmentManager = PlayerEquipmentManager.InstanceOrNull;
-            return;
-        }
-
-        equipmentManager = FindAnyObjectByType<PlayerEquipmentManager>(FindObjectsInactive.Include);
-    }
-
-    private AttributeStatSnapshot ApplyEquipment(AttributeStatSnapshot baseSnapshot)
-    {
-        if (!baseSnapshot.IsValid)
-            return baseSnapshot;
-
-        if (equipmentManager == null)
-            LoadEquipmentManager();
-
-        StatAccumulator attack = new(baseSnapshot.Attack);
-        StatAccumulator armor = new(baseSnapshot.Armor);
-        StatAccumulator maxHealth = new(baseSnapshot.MaxHealth);
-        StatAccumulator critChance = new(baseSnapshot.CritChance);
-        StatAccumulator critDamage = new(baseSnapshot.CritDamage);
+        SubscribeStatEvents();
 
         if (equipmentManager != null)
         {
-            foreach (EquipmentSlotData slot in equipmentManager.EquippedSlots)
-            {
-                ItemDefinition item = slot?.Item;
-                if (item == null) continue;
-
-                if (slot.EquipmentInstance != null && slot.EquipmentInstance.IsValid)
-                    ApplyModifiers(slot.EquipmentInstance.BuildModifiers(item));
-                else
-                    ApplyModifiers(item.BuildEquipmentModifiers(equipmentManager.GetUpgradeLevel(slot.SlotType)));
-            }
+            equipmentManager.OnEquipmentChanged -= Refresh;
+            equipmentManager.OnEquipmentChanged += Refresh;
         }
 
-        ApplyAttributePointBonus(StatType.Attack, ref attack);
-        ApplyAttributePointBonus(StatType.Armor, ref armor);
-        ApplyAttributePointBonus(StatType.MaxHealth, ref maxHealth);
-        ApplyAttributePointBonus(StatType.CritChance, ref critChance);
-        ApplyAttributePointBonus(StatType.CritDamage, ref critDamage);
-        ApplySkillTreeModifiers();
-
-        float finalMaxHealth = maxHealth.FinalValue;
-        float healthRatio = baseSnapshot.MaxHealth > 0f
-            ? Mathf.Clamp01(baseSnapshot.CurrentHealth / baseSnapshot.MaxHealth)
-            : 1f;
-
-        return new AttributeStatSnapshot(
-            attack.FinalValue,
-            armor.FinalValue,
-            finalMaxHealth * healthRatio,
-            finalMaxHealth,
-            critChance.FinalValue,
-            critDamage.FinalValue);
-
-        void ApplyModifiers(System.Collections.Generic.IEnumerable<StatModifier> modifiers)
+        skillTreeManager = PlayerSkillTreeManager.Service;
+        if (skillTreeManager != null)
         {
-            if (modifiers == null) return;
-
-            foreach (StatModifier modifier in modifiers)
-            {
-                if (modifier == null || !modifier.IsEnabled) continue;
-
-                switch (modifier.StatType)
-                {
-                    case StatType.Attack:
-                        attack.Add(modifier);
-                        break;
-                    case StatType.Armor:
-                        armor.Add(modifier);
-                        break;
-                    case StatType.MaxHealth:
-                        maxHealth.Add(modifier);
-                        break;
-                    case StatType.CritChance:
-                        critChance.Add(modifier);
-                        break;
-                    case StatType.CritDamage:
-                        critDamage.Add(modifier);
-                        break;
-                }
-            }
+            skillTreeManager.OnChanged -= Refresh;
+            skillTreeManager.OnChanged += Refresh;
         }
-
-        void ApplyAttributePointBonus(StatType statType, ref StatAccumulator accumulator)
-        {
-            float bonus = PlayerAttributePointStorage.GetBonusValue(statType);
-            if (Mathf.Approximately(bonus, 0f)) return;
-
-            accumulator.Add(new StatModifier(statType, ModifierType.Flat, bonus));
-        }
-
-        void ApplySkillTreeModifiers()
-        {
-            IReadOnlyList<SkillTreeDefinition> skillTrees = ResolveSkillTrees();
-            foreach (SkillTreeDefinition tree in skillTrees)
-            {
-                if (tree == null)
-                    continue;
-
-                ApplyModifiers(new SkillTreeRuntime(tree).CreateStatModifiers());
-            }
-        }
+        PlayerAttributePointStorage.OnPointsChanged -= Refresh;
+        PlayerAttributePointStorage.OnPointsChanged += Refresh;
     }
 
-    private IReadOnlyList<SkillTreeDefinition> ResolveSkillTrees()
+    private void UnsubscribeEvents()
     {
-        CharacterMenuPanel menuPanel = GetComponentInParent<CharacterMenuPanel>();
-        if (menuPanel != null)
-            return menuPanel.GetSkillTreesForCurrentProfile();
+        UnsubscribeStatEvents();
 
-        SkillTreeView skillTreeView = GetComponentInParent<SkillTreeView>();
-        return skillTreeView != null
-            ? skillTreeView.GetSkillTrees()
-            : System.Array.Empty<SkillTreeDefinition>();
+        if (equipmentManager != null)
+            equipmentManager.OnEquipmentChanged -= Refresh;
+
+        if (skillTreeManager != null)
+            skillTreeManager.OnChanged -= Refresh;
+
+        skillTreeManager = null;
+        PlayerAttributePointStorage.OnPointsChanged -= Refresh;
     }
 
     private void SubscribeStatEvents()
     {
-        if (characterStat == null)
-            LoadCharacterStat();
-
         if (characterStat == null) return;
 
-        characterStat.OnHealthChanged -= HandleHealthChanged;
-        characterStat.OnHealthChanged += HandleHealthChanged;
-        characterStat.OnStatChanged -= HandleStatChanged;
-        characterStat.OnStatChanged += HandleStatChanged;
+        characterStat.OnHealthChanged -= OnHealthChanged;
+        characterStat.OnHealthChanged += OnHealthChanged;
+        characterStat.OnStatChanged -= OnStatChanged;
+        characterStat.OnStatChanged += OnStatChanged;
     }
 
     private void UnsubscribeStatEvents()
     {
         if (characterStat == null) return;
 
-        characterStat.OnHealthChanged -= HandleHealthChanged;
-        characterStat.OnStatChanged -= HandleStatChanged;
+        characterStat.OnHealthChanged -= OnHealthChanged;
+        characterStat.OnStatChanged -= OnStatChanged;
     }
 
-    private void SubscribeEquipmentEvents()
-    {
-        if (equipmentManager == null)
-            LoadEquipmentManager();
-
-        if (equipmentManager == null) return;
-
-        equipmentManager.OnEquipmentChanged -= HandleEquipmentChanged;
-        equipmentManager.OnEquipmentChanged += HandleEquipmentChanged;
-    }
-
-    private void UnsubscribeEquipmentEvents()
-    {
-        if (equipmentManager == null) return;
-
-        equipmentManager.OnEquipmentChanged -= HandleEquipmentChanged;
-    }
-
-    private void SubscribeSkillTreeEvents()
-    {
-        PlayerSkillTreeManager.Service.OnChanged -= HandleSkillTreeChanged;
-        PlayerSkillTreeManager.Service.OnChanged += HandleSkillTreeChanged;
-    }
-
-    private void UnsubscribeSkillTreeEvents()
-    {
-        PlayerSkillTreeManager.Service.OnChanged -= HandleSkillTreeChanged;
-    }
-
-    private void HandleHealthChanged(float currentHealth)
-    {
-        Refresh();
-    }
-
-    private void HandleStatChanged(StatType statType)
-    {
-        Refresh();
-    }
-
-    private void HandleEquipmentChanged()
-    {
-        Refresh();
-    }
-
-    private void HandleSkillTreeChanged()
-    {
-        Refresh();
-    }
-
-    private struct StatAccumulator
-    {
-        private readonly float baseValue;
-        private float flat;
-        private float percentAdd;
-        private float percentMultiply;
-
-        public float FinalValue => (baseValue + flat) * (1f + percentAdd) * percentMultiply;
-
-        public StatAccumulator(float baseValue)
-        {
-            this.baseValue = baseValue;
-            flat = 0f;
-            percentAdd = 0f;
-            percentMultiply = 1f;
-        }
-
-        public void Add(StatModifier modifier)
-        {
-            float amount = modifier.GetEffectiveValue();
-
-            switch (modifier.ModifierType)
-            {
-                case ModifierType.Flat:
-                    flat += amount;
-                    break;
-                case ModifierType.PercentAdd:
-                    percentAdd += amount;
-                    break;
-                case ModifierType.PercentMultiply:
-                    percentMultiply *= 1f + amount;
-                    break;
-            }
-        }
-    }
+    private void OnHealthChanged(float _) => Refresh();
+    private void OnStatChanged(StatType _) => Refresh();
 }

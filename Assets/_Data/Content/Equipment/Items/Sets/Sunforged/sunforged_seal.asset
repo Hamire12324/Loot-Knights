@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Sunforged Seal
   description: A royal seal for those worthy of its light.
   icon: {fileID: 21300000, guid: c82ba00115b0fc24b9ba1015900b31d4, type: 3}
+  worldScaleMultiplier: 0.2
   rarity: 3
   category: 1
   equipmentSlotType: 8

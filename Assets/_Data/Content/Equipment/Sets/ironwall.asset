@@ -27,7 +27,7 @@ MonoBehaviour:
     modifiers:
     - statType: 3
       modifierType: 1
-      amount: 18
+      amount: 0.18
   - requiredPieceCount: 6
     description: Health Regen +3
     modifiers:

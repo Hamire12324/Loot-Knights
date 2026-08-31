@@ -5,6 +5,12 @@ using UnityEngine.UI;
 
 public class ButtonHeroSkill : ButtonAbstract
 {
+    private const float DefaultManualAimRange = 6f;
+    private const float ClickSuppressionDuration = 0.15f;
+    private const float CooldownTextThreshold = 0.05f;
+
+    private static readonly string[] IconObjectNames = { "Icon", "IconSkill", "SkillIcon" };
+
     private enum HeroSkillButtonMode
     {
         Skill,
@@ -24,25 +30,10 @@ public class ButtonHeroSkill : ButtonAbstract
 
     private float suppressClickUntil;
 
-    public bool SupportsManualAim
-    {
-        get
-        {
-            CharacterSkillDefinition definition = GetRuntime()?.Definition;
-            return mode != HeroSkillButtonMode.ElementAbsorb &&
-                   definition != null &&
-                   definition.SupportsManualAim;
-        }
-    }
+    public bool SupportsManualAim =>
+        mode != HeroSkillButtonMode.ElementAbsorb && GetRuntime()?.Definition?.SupportsManualAim == true;
 
-    public float ManualAimRange
-    {
-        get
-        {
-            CharacterSkillDefinition definition = GetRuntime()?.Definition;
-            return definition != null ? definition.ManualAimRange : 6f;
-        }
-    }
+    public float ManualAimRange => GetRuntime()?.Definition?.ManualAimRange ?? DefaultManualAimRange;
 
     protected override void OnEnable()
     {
@@ -75,38 +66,39 @@ public class ButtonHeroSkill : ButtonAbstract
         if (Time.unscaledTime <= suppressClickUntil)
             return;
 
-        HeroCtrl hero = HeroCtrl.GetLocal();
-        if (hero == null || hero.HeroSkillController == null) return;
+        HeroSkillController skillController = GetLocalSkillController();
+        if (skillController == null)
+            return;
 
         switch (mode)
         {
             case HeroSkillButtonMode.ElementAbsorb:
-                hero.HeroSkillController.TryAbsorbElementConduit();
-                break;
+                skillController.TryAbsorbElementConduit();
+                return;
             case HeroSkillButtonMode.ElementRelease:
-                if (hero.HeroSkillController.TryReleaseElementConduit())
+                if (skillController.TryReleaseElementConduit())
                     RefreshStoredElementSlots();
-                break;
+                return;
             default:
-                hero.HeroSkillController.TryCast(skillIndex);
-                break;
+                skillController.TryCast(skillIndex);
+                return;
         }
     }
 
     public bool TryCastAtPosition(Vector2 targetPosition)
     {
-        HeroCtrl hero = HeroCtrl.GetLocal();
-        if (hero == null || hero.HeroSkillController == null || !SupportsManualAim)
+        HeroSkillController skillController = GetLocalSkillController();
+        if (skillController == null || !SupportsManualAim)
             return false;
 
         return mode == HeroSkillButtonMode.ElementRelease
-            ? hero.HeroSkillController.TryReleaseElementConduitAtPosition(targetPosition)
-            : hero.HeroSkillController.TryCastAtPosition(skillIndex, targetPosition);
+            ? skillController.TryReleaseElementConduitAtPosition(targetPosition)
+            : skillController.TryCastAtPosition(skillIndex, targetPosition);
     }
 
     public void SuppressClickForCurrentGesture()
     {
-        suppressClickUntil = Time.unscaledTime + 0.15f;
+        suppressClickUntil = Time.unscaledTime + ClickSuppressionDuration;
     }
 
     public void SetSkillIndex(int index)
@@ -138,47 +130,42 @@ public class ButtonHeroSkill : ButtonAbstract
         LoadIcon();
 
         CharacterSkillRuntime runtime = GetRuntime();
-        CharacterSkillDefinition definition = runtime != null ? runtime.Definition : null;
-
-        if (mode == HeroSkillButtonMode.ElementAbsorb)
+        switch (mode)
         {
-            LoadElementAbsorbIcon();
-            ApplyExistingIcon(readyColor);
-            RefreshCooldown();
-            return;
+            case HeroSkillButtonMode.ElementAbsorb:
+                LoadElementAbsorbIcon();
+                ApplyExistingIcon(readyColor);
+                break;
+            case HeroSkillButtonMode.ElementRelease:
+                ApplyExistingIcon(IsButtonUsable(runtime) ? readyColor : lockedColor);
+                break;
+            default:
+                RefreshSkillIcon(runtime);
+                RefreshUltimateCharge(runtime);
+                break;
         }
 
-        if (mode == HeroSkillButtonMode.ElementRelease)
-        {
-            Color releaseColor = IsButtonUsable(runtime) ? readyColor : lockedColor;
-            ApplyExistingIcon(releaseColor);
-            RefreshCooldown();
-            return;
-        }
+        RefreshCooldown(runtime);
+    }
 
-        Sprite sprite = definition != null ? definition.Icon : null;
-        bool hasIcon = sprite != null;
-        Color color = mode == HeroSkillButtonMode.Skill && !IsButtonUsable(runtime)
-            ? lockedColor
-            : readyColor;
+    private void RefreshSkillIcon(CharacterSkillRuntime runtime)
+    {
+        Sprite sprite = runtime?.Definition?.Icon;
+        Color color = IsButtonUsable(runtime) ? readyColor : lockedColor;
 
         if (iconImages != null && iconImages.Length > 0)
         {
             foreach (Image iconImage in iconImages)
-                ApplyIcon(iconImage, sprite, hasIcon, color);
+                ApplyIcon(iconImage, sprite, color);
         }
         else
         {
-            ApplyIcon(icon, sprite, hasIcon, color);
+            ApplyIcon(icon, sprite, color);
         }
-
-        RefreshCooldown();
-        RefreshUltimateCharge();
     }
 
-    private void RefreshCooldown()
+    private void RefreshCooldown(CharacterSkillRuntime runtime)
     {
-        CharacterSkillRuntime runtime = GetRuntime();
         float normalized = mode == HeroSkillButtonMode.ElementAbsorb
             ? 0f
             : runtime != null ? runtime.Cooldown.Normalized : 0f;
@@ -191,13 +178,13 @@ public class ButtonHeroSkill : ButtonAbstract
         float remaining = mode == HeroSkillButtonMode.ElementAbsorb
             ? 0f
             : runtime != null ? runtime.Cooldown.Remaining : 0f;
-        cooldownText.text = remaining > 0.05f ? Mathf.CeilToInt(remaining).ToString() : "";
+        cooldownText.text = remaining > CooldownTextThreshold ? Mathf.CeilToInt(remaining).ToString() : "";
     }
 
-    private void RefreshUltimateCharge()
+    private void RefreshUltimateCharge(CharacterSkillRuntime runtime)
     {
-        string resourceId = GetConsumedResourceId(GetRuntime());
-        bool shouldShow = mode == HeroSkillButtonMode.Skill && !string.IsNullOrWhiteSpace(resourceId);
+        string resourceId = GetConsumedResourceId(runtime);
+        bool shouldShow = !string.IsNullOrWhiteSpace(resourceId);
         if (!shouldShow)
         {
             if (ultimateChargeText != null)
@@ -232,41 +219,38 @@ public class ButtonHeroSkill : ButtonAbstract
 
     private CharacterSkillRuntime GetRuntime()
     {
-        HeroCtrl hero = HeroCtrl.GetLocal();
-        if (hero == null || hero.HeroSkillController == null) return null;
+        HeroSkillController skillController = GetLocalSkillController();
+        if (skillController == null)
+            return null;
 
         return mode == HeroSkillButtonMode.Skill
-            ? hero.HeroSkillController.GetSkill(skillIndex)
-            : hero.HeroSkillController.GetSpecialSkill();
+            ? skillController.GetSkill(skillIndex)
+            : skillController.GetSpecialSkill();
     }
 
     private bool IsButtonUsable(CharacterSkillRuntime runtime)
     {
-        if (mode == HeroSkillButtonMode.ElementAbsorb)
-            return runtime != null && runtime.IsUnlocked;
+        if (runtime == null || !runtime.IsUnlocked)
+            return false;
 
-        if (mode == HeroSkillButtonMode.ElementRelease)
-        {
-            HeroCtrl hero = HeroCtrl.GetLocal();
-            return runtime != null &&
-                   runtime.IsUnlocked &&
-                   hero != null &&
-                   hero.HeroSkillController != null &&
-                   hero.HeroSkillController.CanReleaseElementConduit();
-        }
+        return mode != HeroSkillButtonMode.ElementRelease || GetLocalSkillController()?.CanReleaseElementConduit() == true;
+    }
 
-        return runtime != null && runtime.IsUnlocked;
+    private static HeroSkillController GetLocalSkillController()
+    {
+        HeroCtrl hero = HeroCtrl.GetLocal();
+        return hero != null ? hero.HeroSkillController : null;
     }
 
     private void LoadIcon()
     {
-        if (HasValidIconImages()) return;
+        if (HasValidIconImages())
+            return;
 
         List<Image> found = new();
         AddIconImage(found, icon);
-        AddIconImage(found, FindChildComponentByName<Image>("Icon"));
-        AddIconImage(found, FindChildComponentByName<Image>("IconSkill"));
-        AddIconImage(found, FindChildComponentByName<Image>("SkillIcon"));
+        foreach (string iconObjectName in IconObjectNames)
+            AddIconImage(found, FindChildComponentByName<Image>(iconObjectName));
 
         iconImages = found.ToArray();
 
@@ -278,10 +262,7 @@ public class ButtonHeroSkill : ButtonAbstract
     {
         Image namedIcon = FindChildComponentByName<Image>("Icon");
         if (namedIcon == null)
-        {
-            LoadIcon();
             return;
-        }
 
         icon = namedIcon;
         iconImages = new[] { namedIcon };
@@ -308,10 +289,12 @@ public class ButtonHeroSkill : ButtonAbstract
         images.Add(image);
     }
 
-    private static void ApplyIcon(Image target, Sprite sprite, bool hasIcon, Color color)
+    private static void ApplyIcon(Image target, Sprite sprite, Color color)
     {
-        if (target == null) return;
+        if (target == null)
+            return;
 
+        bool hasIcon = sprite != null;
         target.sprite = sprite;
         target.enabled = hasIcon;
         target.color = hasIcon ? color : Color.clear;

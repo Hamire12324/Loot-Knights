@@ -21,6 +21,8 @@ MonoBehaviour:
   targetLayer:
     serializedVersion: 2
     m_Bits: 64
+  seekCastTarget: 1
+  targetTurnRate: 300
   projectileCount: 1
   spreadAngle: 0
   sideSpacing: 0

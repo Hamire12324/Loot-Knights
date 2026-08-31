@@ -16,7 +16,9 @@ public static class CharacterSkillVfxUtility
         Vector2 direction,
         float distance,
         float speed,
-        float rotationOffsetDegrees = 0f)
+        float rotationOffsetDegrees = 0f,
+        Transform homingTarget = null,
+        float targetTurnRate = 0f)
     {
         PoolObj projectile = Play(definition, position, direction);
         if (projectile == null)
@@ -26,7 +28,7 @@ public static class CharacterSkillVfxUtility
         if (mover == null)
             mover = projectile.gameObject.AddComponent<VFXProjectileMover>();
 
-        mover.Play(direction, distance, speed, rotationOffsetDegrees);
+        mover.Play(direction, distance, speed, rotationOffsetDegrees, homingTarget, targetTurnRate);
         return projectile;
     }
 }

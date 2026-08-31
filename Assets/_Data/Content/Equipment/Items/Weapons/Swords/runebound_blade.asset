@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Runebound Blade
   description: An enchanted sword that rewards precise critical strikes.
   icon: {fileID: 2383021590114627578, guid: 2f62558b0d53f794d9a088d90a5f3d52, type: 3}
+  worldScaleMultiplier: 0.2
   rarity: 2
   category: 1
   equipmentSlotType: 1

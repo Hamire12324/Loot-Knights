@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Stormhunter Grips
   description: Charged grips that sharpen swift attacks.
   icon: {fileID: 21300000, guid: 4534d6bc204de2e499d251a94190c25d, type: 3}
+  worldScaleMultiplier: 0.2
   rarity: 2
   category: 1
   equipmentSlotType: 5

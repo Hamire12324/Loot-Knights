@@ -3,12 +3,12 @@ using UnityEngine.EventSystems;
 
 public sealed class SkillTreeEquipSlotDropTarget : MonoBehaviour, IPointerClickHandler, IDropHandler
 {
-    private SkillTreeView owner;
     private int slotIndex;
+    public event System.Action<int> SlotSelected;
+    public event System.Action<int> SlotDropped;
 
-    public void Bind(SkillTreeView view, int index)
+    public void Bind(int index)
     {
-        owner = view;
         slotIndex = Mathf.Max(0, index);
     }
 
@@ -17,16 +17,15 @@ public sealed class SkillTreeEquipSlotDropTarget : MonoBehaviour, IPointerClickH
         if (eventData != null && eventData.button != PointerEventData.InputButton.Left)
             return;
 
-        owner?.ClickEquipSlot(slotIndex);
+        SlotSelected?.Invoke(slotIndex);
     }
 
     public void OnDrop(PointerEventData eventData)
     {
         SkillTreeEquipDragSource source = SkillTreeEquipDragSource.DraggingSource;
-        if (source == null || owner == null)
+        if (source == null)
             return;
 
-        if (owner.CompleteEquipDrag(slotIndex))
-            source.MarkDropped();
+        SlotDropped?.Invoke(slotIndex);
     }
 }

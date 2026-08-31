@@ -13,7 +13,13 @@ public class VFXProjectileMover : MonoBehaviour
         StopMove();
     }
 
-    public void Play(Vector2 direction, float distance, float speed, float rotationOffsetDegrees = 0f)
+    public void Play(
+        Vector2 direction,
+        float distance,
+        float speed,
+        float rotationOffsetDegrees = 0f,
+        Transform homingTarget = null,
+        float targetTurnRate = 0f)
     {
         StopMove();
 
@@ -25,33 +31,40 @@ public class VFXProjectileMover : MonoBehaviour
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, angle + rotationOffsetDegrees);
 
-        moveCoroutine = StartCoroutine(MoveRoutine(direction, distance, speed));
+        moveCoroutine = StartCoroutine(MoveRoutine(
+            direction, distance, speed, rotationOffsetDegrees, homingTarget, targetTurnRate));
     }
 
-    private IEnumerator MoveRoutine(Vector2 direction, float distance, float speed)
+    private IEnumerator MoveRoutine(
+        Vector2 direction, float distance, float speed, float rotationOffsetDegrees,
+        Transform homingTarget, float targetTurnRate)
     {
-        Vector3 startPosition = transform.position;
-        Vector3 endPosition = startPosition + (Vector3)(direction * distance);
-
         if (distance <= 0f || speed <= 0f)
         {
-            transform.position = endPosition;
             moveCoroutine = null;
             yield break;
         }
 
-        float duration = distance / speed;
-        float elapsed = 0f;
+        float travelled = 0f;
 
-        while (elapsed < duration)
+        while (travelled < distance)
         {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            transform.position = Vector3.Lerp(startPosition, endPosition, t);
+            if (homingTarget != null && targetTurnRate > 0f)
+            {
+                Vector2 toTarget = (Vector2)homingTarget.position - (Vector2)transform.position;
+                if (toTarget.sqrMagnitude > 0.001f)
+                    direction = Vector2.MoveTowards(
+                        direction, toTarget.normalized, targetTurnRate / 180f * Time.deltaTime).normalized;
+            }
+
+            float step = Mathf.Min(speed * Time.deltaTime, distance - travelled);
+            transform.position += (Vector3)(direction * step);
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0f, 0f, angle + rotationOffsetDegrees);
+            travelled += step;
             yield return null;
         }
 
-        transform.position = endPosition;
         moveCoroutine = null;
         ReturnToPoolIfNeeded();
     }

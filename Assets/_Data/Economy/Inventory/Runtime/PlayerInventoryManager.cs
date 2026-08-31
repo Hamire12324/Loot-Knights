@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
 public class PlayerInventoryManager : BaseSingleton<PlayerInventoryManager>
@@ -14,7 +13,6 @@ public class PlayerInventoryManager : BaseSingleton<PlayerInventoryManager>
     [SerializeField] private bool loadOnAwake = true;
     [SerializeField] private bool autoSave = true;
     [SerializeField] private float saveDelay = 0.25f;
-    [SerializeField] private List<InventoryItemStack> debugRuntimeItems = new();
 
     private InventoryContainer container;
     private bool loaded;
@@ -195,14 +193,7 @@ public class PlayerInventoryManager : BaseSingleton<PlayerInventoryManager>
     {
         EnsureLoaded();
 
-        List<InventoryItemStack> stacks = container.ToStacks();
-        if (stacks.Count <= 1)
-            return InventoryOperationResult.NoChange(InventoryChangeType.Arranged);
-
-        List<InventoryItemStack> previousStacks = CloneStacks(stacks);
-        stacks.Sort(CompareStacks);
-
-        if (StacksEqual(previousStacks, stacks) && IsCompacted(stacks.Count))
+        if (!InventorySortingService.TrySortByRarityAndName(container, itemDatabase, out List<InventoryItemStack> stacks))
             return InventoryOperationResult.NoChange(InventoryChangeType.Arranged);
 
         container.ClearAll();
@@ -213,6 +204,13 @@ public class PlayerInventoryManager : BaseSingleton<PlayerInventoryManager>
             container.GetAllSlotIndexes());
 
         return CommitResult(result, true);
+    }
+
+    public InventoryOperationResult UpgradeEquipmentAtSlot(int index)
+    {
+        EnsureLoaded();
+
+        return CommitResult(InventoryEquipmentUpgradeService.TryUpgradeAtSlot(container, index), true);
     }
 
     public InventoryOperationResult Reload()
@@ -236,7 +234,6 @@ public class PlayerInventoryManager : BaseSingleton<PlayerInventoryManager>
         container.ClearAll();
         InventorySaveService.Clear();
         saveDirty = false;
-        RefreshDebugSnapshot();
 
         InventoryOperationResult result = InventoryOperationResult.Succeeded(
             InventoryChangeType.Cleared,
@@ -260,15 +257,12 @@ public class PlayerInventoryManager : BaseSingleton<PlayerInventoryManager>
         container = new InventoryContainer(safeCapacity);
         container.LoadFromStacks(savedItems, itemDatabase);
         loaded = true;
-        RefreshDebugSnapshot();
     }
 
     private InventoryOperationResult CommitResult(InventoryOperationResult result, bool save)
     {
         if (result == null || !result.Success || result.Status == InventoryOperationStatus.NoChange)
             return result;
-
-        RefreshDebugSnapshot();
 
         if (save)
             MarkSaveDirty();
@@ -300,125 +294,6 @@ public class PlayerInventoryManager : BaseSingleton<PlayerInventoryManager>
 
         InventorySaveService.SaveItems(container.ToStacks());
         saveDirty = false;
-        RefreshDebugSnapshot();
-    }
-
-    private int CompareStacks(InventoryItemStack left, InventoryItemStack right)
-    {
-        ItemDefinition leftItem = itemDatabase != null ? itemDatabase.GetItem(left.ItemId) : null;
-        ItemDefinition rightItem = itemDatabase != null ? itemDatabase.GetItem(right.ItemId) : null;
-
-        int rarityCompare = GetRaritySortValue(rightItem).CompareTo(GetRaritySortValue(leftItem));
-        if (rarityCompare != 0) return rarityCompare;
-
-        string leftName = leftItem != null ? leftItem.DisplayName : left.ItemId;
-        string rightName = rightItem != null ? rightItem.DisplayName : right.ItemId;
-        return string.CompareOrdinal(leftName, rightName);
-    }
-
-    private static int GetRaritySortValue(ItemDefinition item)
-    {
-        return item != null ? (int)item.Rarity : 0;
-    }
-
-    private bool IsCompacted(int itemStackCount)
-    {
-        if (container == null)
-            return true;
-
-        for (int i = 0; i < container.Capacity; i++)
-        {
-            InventorySlotData slot = container.GetSlot(i);
-            bool shouldHaveItem = i < itemStackCount;
-            bool hasItem = slot != null && !slot.IsEmpty;
-
-            if (shouldHaveItem != hasItem)
-                return false;
-        }
-
-        return true;
-    }
-
-    private static List<InventoryItemStack> CloneStacks(IEnumerable<InventoryItemStack> source)
-    {
-        List<InventoryItemStack> stacks = new();
-
-        foreach (InventoryItemStack stack in source)
-        {
-            if (stack == null) continue;
-            stacks.Add(stack.Clone());
-        }
-
-        return stacks;
-    }
-
-    private static bool StacksEqual(IReadOnlyList<InventoryItemStack> left, IReadOnlyList<InventoryItemStack> right)
-    {
-        if (left == null || right == null) return left == right;
-        if (left.Count != right.Count) return false;
-
-        for (int i = 0; i < left.Count; i++)
-        {
-            InventoryItemStack leftStack = left[i];
-            InventoryItemStack rightStack = right[i];
-
-            if (leftStack == null || rightStack == null)
-            {
-                if (leftStack != rightStack) return false;
-                continue;
-            }
-
-            if (leftStack.ItemId != rightStack.ItemId) return false;
-            if (leftStack.Amount != rightStack.Amount) return false;
-        }
-
-        return true;
-    }
-
-    [ContextMenu("Refresh Debug Runtime Items")]
-    public void RefreshDebugSnapshot()
-    {
-        debugRuntimeItems.Clear();
-
-        if (container == null) return;
-
-        foreach (InventoryItemStack stack in container.ToStacks())
-            debugRuntimeItems.Add(stack);
-    }
-
-    [ContextMenu("Log Runtime Inventory")]
-    public void LogRuntimeInventory()
-    {
-        EnsureLoaded();
-        RefreshDebugSnapshot();
-
-        StringBuilder builder = new();
-        builder.AppendLine("Runtime Inventory:");
-
-        if (debugRuntimeItems.Count == 0)
-        {
-            builder.AppendLine("- Empty");
-        }
-        else
-        {
-            for (int i = 0; i < Inventory.Capacity; i++)
-            {
-                InventorySlotData slot = Inventory.GetSlot(i);
-                if (slot == null || slot.IsEmpty) continue;
-
-                builder.Append("- Slot ");
-                builder.Append(i);
-                builder.Append(": ");
-                builder.Append(slot.Item.ItemId);
-                builder.Append(" x");
-                builder.Append(slot.Amount);
-                builder.Append(" (");
-                builder.Append(slot.Item.DisplayName);
-                builder.AppendLine(")");
-            }
-        }
-
-        Debug.Log(builder.ToString(), this);
     }
 
     private void OnValidate()

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class SkillTreePresenter : MonoBehaviour
+public sealed class SkillTreePresenter : BaseMonoBehaviour
 {
-    [SerializeField] private SkillTreeView view;
+    [SerializeField] private SkillTreeView skillTreeView;
     [SerializeField] private SkillTreeDefinition skillTree;
 
     private SkillTreeRuntime runtime;
@@ -15,18 +15,8 @@ public sealed class SkillTreePresenter : MonoBehaviour
         ? skillTreeManager
         : (skillTreeManager = PlayerSkillTreeManager.Service);
 
-    private void Awake()
+    protected override void OnEnable()
     {
-        LoadView();
-        if (skillTree == null && view != null)
-            skillTree = view.SkillTree;
-
-        RefreshRuntime();
-    }
-
-    private void OnEnable()
-    {
-        LoadView();
         SubscribeView();
 
         SkillTreeManager.OnChanged += Refresh;
@@ -35,7 +25,7 @@ public sealed class SkillTreePresenter : MonoBehaviour
         Refresh();
     }
 
-    private void OnDisable()
+    protected override void OnDisable()
     {
         UnsubscribeView();
 
@@ -45,18 +35,39 @@ public sealed class SkillTreePresenter : MonoBehaviour
         skillTreeManager = null;
         PlayerExperienceStorage.OnLevelSnapshotChanged -= HandleLevelChanged;
     }
-
-    public void Configure(SkillTreeView skillTreeView, SkillTreeDefinition tree)
+    protected override void LoadComponents()
     {
-        view = skillTreeView != null ? skillTreeView : view;
+        base.LoadComponents();
+        LoadSkillTreeView();
+    }
+    private void SubscribeView()
+    {
+        if (skillTreeView == null)
+            return;
 
-        if (skillTree != tree)
-        {
-            skillTree = tree;
-            selectedNodeView = null;
-            pendingEquipNode = null;
-            RefreshRuntime();
-        }
+        skillTreeView.NodeSelected -= SelectNode;
+        skillTreeView.UpgradeClicked -= UpgradeSelected;
+        skillTreeView.EquipClicked -= ToggleEquipSelected;
+        skillTreeView.ResetClicked -= ResetTree;
+        skillTreeView.EquipSlotClicked -= EquipPendingNodeToSlot;
+
+        skillTreeView.NodeSelected += SelectNode;
+        skillTreeView.UpgradeClicked += UpgradeSelected;
+        skillTreeView.EquipClicked += ToggleEquipSelected;
+        skillTreeView.ResetClicked += ResetTree;
+        skillTreeView.EquipSlotClicked += EquipPendingNodeToSlot;
+    }
+
+    private void UnsubscribeView()
+    {
+        if (skillTreeView == null)
+            return;
+
+        skillTreeView.NodeSelected -= SelectNode;
+        skillTreeView.UpgradeClicked -= UpgradeSelected;
+        skillTreeView.EquipClicked -= ToggleEquipSelected;
+        skillTreeView.ResetClicked -= ResetTree;
+        skillTreeView.EquipSlotClicked -= EquipPendingNodeToSlot;
     }
 
     public void SetSkillTree(SkillTreeDefinition tree)
@@ -73,15 +84,9 @@ public sealed class SkillTreePresenter : MonoBehaviour
 
     public void Refresh()
     {
-        LoadView();
-        RefreshRuntime();
-
-        if (view == null)
-            return;
-
-        view.BindNodeViews();
+        skillTreeView.BindNodeViews();
         EnsureSelectedNode();
-        view.Render(CreateViewState());
+        skillTreeView.Render(CreateViewState());
     }
 
     private void SelectNode(SkillTreeNodeView nodeView)
@@ -99,14 +104,12 @@ public sealed class SkillTreePresenter : MonoBehaviour
         if (node == null || runtime == null)
             return;
 
-        if (!runtime.TryUpgrade(node, PlayerExperienceStorage.Level, out string reason))
-        {
-            LogReason(reason);
+        if (!runtime.TryUpgrade(node, PlayerExperienceStorage.Level, out _))
             return;
-        }
 
-        SkillTreeHeroApplier.ApplyStats(GetLoadoutSkillTrees());
-        SkillTreeHeroApplier.ApplyLoadout(GetLoadoutSkillTrees(), GetEquipSlotCount());
+        IReadOnlyList<SkillTreeDefinition> trees = GetLoadoutSkillTrees();
+        SkillTreeHeroApplier.ApplyStats(trees);
+        SkillTreeHeroApplier.ApplyLoadout(trees, GetEquipSlotCount());
         Refresh();
     }
 
@@ -115,19 +118,13 @@ public sealed class SkillTreePresenter : MonoBehaviour
         SkillTreeNodeDefinition node = GetSelectedNode();
         int slotCount = GetEquipSlotCount();
 
-        if (!CanEquip(node, out string reason))
-        {
-            LogReason(reason);
+        if (!CanEquip(node, out _))
             return;
-        }
 
         if (SkillTreeManager.IsEquipped(skillTree, node, slotCount))
         {
-            if (!SkillTreeManager.TryUnequipActiveSkill(skillTree, node, slotCount, out reason))
-            {
-                LogReason(reason);
+            if (!SkillTreeManager.TryUnequipActiveSkill(skillTree, node, slotCount, out _))
                 return;
-            }
 
             pendingEquipNode = null;
             SkillTreeHeroApplier.ApplyLoadout(GetLoadoutSkillTrees(), slotCount);
@@ -145,18 +142,14 @@ public sealed class SkillTreePresenter : MonoBehaviour
             return;
 
         int slotCount = GetEquipSlotCount();
-        int refunded = SkillTreeManager.ResetTreeAndRefund(skillTree, slotCount);
+        SkillTreeManager.ResetTreeAndRefund(skillTree, slotCount);
 
         pendingEquipNode = null;
-        RefreshRuntime();
-        SkillTreeHeroApplier.ApplyStats(GetLoadoutSkillTrees());
-        SkillTreeHeroApplier.ApplyLoadout(GetLoadoutSkillTrees(), slotCount);
+        IReadOnlyList<SkillTreeDefinition> trees = GetLoadoutSkillTrees();
+        SkillTreeHeroApplier.ApplyStats(trees);
+        SkillTreeHeroApplier.ApplyLoadout(trees, slotCount);
         Refresh();
 
-        if (refunded > 0)
-            Debug.Log($"Skill tree reset. Refunded {refunded} points.", this);
-        else
-            Debug.Log("Skill tree reset requested, but there are no spent points to refund.", this);
     }
 
     private void EquipPendingNodeToSlot(int slotIndex)
@@ -165,21 +158,18 @@ public sealed class SkillTreePresenter : MonoBehaviour
             return;
 
         int slotCount = GetEquipSlotCount();
-        if (!SkillTreeManager.TryEquipActiveSkill(skillTree, pendingEquipNode, slotIndex, slotCount, out string reason))
-        {
-            LogReason(reason);
+        if (!SkillTreeManager.TryEquipActiveSkill(skillTree, pendingEquipNode, slotIndex, slotCount, out _))
             return;
-        }
 
         pendingEquipNode = null;
         SkillTreeHeroApplier.ApplyLoadout(GetLoadoutSkillTrees(), slotCount);
         Refresh();
     }
 
-    private SkillTreeViewState CreateViewState()
+    private SkillTreeUiState CreateViewState()
     {
         int slotCount = GetEquipSlotCount();
-        Dictionary<SkillTreeNodeDefinition, SkillTreeNodeViewState> nodeStates = CreateNodeStates();
+        Dictionary<SkillTreeNodeDefinition, SkillTreeNodeUiState> nodeStates = CreateNodeStates();
         SkillTreeNodeDefinition selectedNode = GetSelectedNode();
         int selectedRank = selectedNode != null && runtime != null ? runtime.GetRank(selectedNode) : 0;
         string selectedReason = string.Empty;
@@ -195,13 +185,14 @@ public sealed class SkillTreePresenter : MonoBehaviour
                                              selectedRank > 0 &&
                                              !selectedIsSpecialSkill;
 
-        HeroSkillDefinition[] equippedSkills = SkillTreeManager.GetEquippedActiveSkills(GetLoadoutSkillTrees(), slotCount);
-        HeroSkillDefinition specialSkill = SkillTreeManager.GetEquippedSpecialSkill(GetLoadoutSkillTrees());
+        IReadOnlyList<SkillTreeDefinition> trees = GetLoadoutSkillTrees();
+        HeroSkillDefinition[] equippedSkills = SkillTreeManager.GetEquippedActiveSkills(trees, slotCount);
+        HeroSkillDefinition specialSkill = SkillTreeManager.GetEquippedSpecialSkill(trees);
         bool[] occupiedSlots = new bool[slotCount];
         for (int i = 0; i < occupiedSlots.Length; i++)
             occupiedSlots[i] = i < equippedSkills.Length && equippedSkills[i] != null;
 
-        return new SkillTreeViewState(
+        return new SkillTreeUiState(
             skillTree,
             SkillTreeManager.AvailablePoints,
             selectedNode,
@@ -220,13 +211,13 @@ public sealed class SkillTreePresenter : MonoBehaviour
             nodeStates);
     }
 
-    private Dictionary<SkillTreeNodeDefinition, SkillTreeNodeViewState> CreateNodeStates()
+    private Dictionary<SkillTreeNodeDefinition, SkillTreeNodeUiState> CreateNodeStates()
     {
-        Dictionary<SkillTreeNodeDefinition, SkillTreeNodeViewState> nodeStates = new();
-        if (view == null || runtime == null)
+        Dictionary<SkillTreeNodeDefinition, SkillTreeNodeUiState> nodeStates = new();
+        if (skillTreeView == null || runtime == null)
             return nodeStates;
 
-        foreach (SkillTreeNodeView nodeView in view.GetNodeViews())
+        foreach (SkillTreeNodeView nodeView in skillTreeView.GetNodeViews())
         {
             if (nodeView == null || nodeView.Definition == null)
                 continue;
@@ -235,7 +226,7 @@ public sealed class SkillTreePresenter : MonoBehaviour
             int rank = runtime.GetRank(node);
             bool canUpgrade = runtime.CanUpgrade(node, PlayerExperienceStorage.Level, out _);
 
-            nodeStates[node] = new SkillTreeNodeViewState(
+            nodeStates[node] = new SkillTreeNodeUiState(
                 node,
                 GetNodeIcon(node),
                 rank,
@@ -251,10 +242,10 @@ public sealed class SkillTreePresenter : MonoBehaviour
         if (selectedNodeView != null && selectedNodeView.Definition != null)
             return;
 
-        if (view == null)
+        if (skillTreeView == null)
             return;
 
-        foreach (SkillTreeNodeView nodeView in view.GetNodeViews())
+        foreach (SkillTreeNodeView nodeView in skillTreeView.GetNodeViews())
         {
             if (nodeView == null || nodeView.Definition == null)
                 continue;
@@ -271,12 +262,12 @@ public sealed class SkillTreePresenter : MonoBehaviour
 
     private int GetEquipSlotCount()
     {
-        return view != null ? view.EquipSlotCount : 4;
+        return skillTreeView.EquipSlotCount;
     }
 
     private IReadOnlyList<SkillTreeDefinition> GetLoadoutSkillTrees()
     {
-        return view != null ? view.GetSkillTrees() : new[] { skillTree };
+        return skillTreeView != null ? skillTreeView.GetSkillTrees() : new[] { skillTree };
     }
 
     private void RefreshRuntime()
@@ -323,48 +314,11 @@ public sealed class SkillTreePresenter : MonoBehaviour
         Refresh();
     }
 
-    private void LoadView()
+    private void LoadSkillTreeView()
     {
-        if (view == null)
-            view = GetComponent<SkillTreeView>();
+        if (skillTreeView == null)
+            skillTreeView = GetComponent<SkillTreeView>();
     }
-
-    private void SubscribeView()
-    {
-        if (view == null)
-            return;
-
-        view.NodeSelected -= SelectNode;
-        view.UpgradeClicked -= UpgradeSelected;
-        view.EquipClicked -= ToggleEquipSelected;
-        view.ResetClicked -= ResetTree;
-        view.EquipSlotClicked -= EquipPendingNodeToSlot;
-
-        view.NodeSelected += SelectNode;
-        view.UpgradeClicked += UpgradeSelected;
-        view.EquipClicked += ToggleEquipSelected;
-        view.ResetClicked += ResetTree;
-        view.EquipSlotClicked += EquipPendingNodeToSlot;
-    }
-
-    private void UnsubscribeView()
-    {
-        if (view == null)
-            return;
-
-        view.NodeSelected -= SelectNode;
-        view.UpgradeClicked -= UpgradeSelected;
-        view.EquipClicked -= ToggleEquipSelected;
-        view.ResetClicked -= ResetTree;
-        view.EquipSlotClicked -= EquipPendingNodeToSlot;
-    }
-
-    private void LogReason(string reason)
-    {
-        if (!string.IsNullOrWhiteSpace(reason))
-            Debug.LogWarning(reason, this);
-    }
-
     private static Sprite GetNodeIcon(SkillTreeNodeDefinition node)
     {
         if (node == null)

@@ -65,9 +65,19 @@ public static class StageEncounterBalance
     {
         string[] required = stageNumber switch
         {
+            1 => new[] { Slime },
+            <= 3 => new[] { Slime, PoisonSlime },
             <= 5 => new[] { Slime, PoisonSlime, Bat },
+            6 => new[] { Skeleton },
+            7 => new[] { Skeleton, SkeletonArcher },
+            8 => new[] { Skeleton, SkeletonArcher, ArmoredSkeleton },
             <= 10 => new[] { Skeleton, SkeletonArcher, ArmoredSkeleton, GreatswordSkeleton },
+            11 => new[] { Orc },
+            12 => new[] { Orc, ArmoredOrc },
+            13 => new[] { Orc, ArmoredOrc, EliteOrc },
             <= 15 => new[] { Orc, ArmoredOrc, EliteOrc, OrcRider },
+            16 => new[] { Werebear },
+            17 => new[] { Werebear, Werewolf },
             _ => new[] { Werebear, Werewolf, Necromancer }
         };
 
@@ -84,9 +94,12 @@ public static class StageEncounterBalance
     private static void ApplyStage(StageConfig stage, IReadOnlyDictionary<string, PoolObj> p)
     {
         int number = stage.StageNumber;
-        int opening = 10 + number * 2;
-        int firstWave = 14 + number * 2;
-        int finalWave = firstWave + 4;
+        // The original progression opened a new player's first stage with 36
+        // enemies. Keep the same three-beat structure, but teach positioning
+        // and skills before crowd pressure becomes the main challenge.
+        int opening = 4 + number;
+        int firstWave = 5 + number;
+        int finalWave = firstWave + 2;
         string stageName;
         Entry[] roster;
         string miniBoss;
@@ -98,13 +111,13 @@ public static class StageEncounterBalance
             stageName = $"Stage {number} - Slime Meadow";
             roster = number switch
             {
-                1 => new[] { E(Slime, 70), E(PoisonSlime, 20), E(Bat, 10) },
-                2 => new[] { E(Slime, 55), E(PoisonSlime, 30), E(Bat, 15) },
-                3 => new[] { E(Slime, 40), E(PoisonSlime, 35), E(Bat, 25) },
-                4 => new[] { E(Slime, 30), E(PoisonSlime, 40), E(Bat, 30) },
-                _ => new[] { E(Slime, 25), E(PoisonSlime, 40), E(Bat, 35) }
+                1 => new[] { E(Slime, 100) },
+                2 => new[] { E(Slime, 75), E(PoisonSlime, 25) },
+                3 => new[] { E(Slime, 60), E(PoisonSlime, 40) },
+                4 => new[] { E(Slime, 50), E(PoisonSlime, 30), E(Bat, 20) },
+                _ => new[] { E(Slime, 40), E(PoisonSlime, 35), E(Bat, 25) }
             };
-            miniBoss = PoisonSlime;
+            miniBoss = number == 1 ? Slime : number < 4 ? PoisonSlime : Bat;
             if (number == 5) boss = PoisonSlime;
         }
         else if (number <= 10)
@@ -112,13 +125,19 @@ public static class StageEncounterBalance
             stageName = $"Stage {number} - Skeleton Crypt";
             roster = number switch
             {
-                6 => new[] { E(Skeleton, 70), E(SkeletonArcher, 20), E(ArmoredSkeleton, 10) },
-                7 => new[] { E(Skeleton, 55), E(SkeletonArcher, 25), E(ArmoredSkeleton, 20) },
-                8 => new[] { E(Skeleton, 40), E(SkeletonArcher, 25), E(ArmoredSkeleton, 20), E(GreatswordSkeleton, 15) },
-                9 => new[] { E(Skeleton, 35), E(SkeletonArcher, 25), E(ArmoredSkeleton, 20), E(GreatswordSkeleton, 20) },
+                6 => new[] { E(Skeleton, 100) },
+                7 => new[] { E(Skeleton, 75), E(SkeletonArcher, 25) },
+                8 => new[] { E(Skeleton, 55), E(SkeletonArcher, 25), E(ArmoredSkeleton, 20) },
+                9 => new[] { E(Skeleton, 40), E(SkeletonArcher, 25), E(ArmoredSkeleton, 20), E(GreatswordSkeleton, 15) },
                 _ => new[] { E(Skeleton, 25), E(SkeletonArcher, 25), E(ArmoredSkeleton, 25), E(GreatswordSkeleton, 25) }
             };
-            miniBoss = number < 8 ? ArmoredSkeleton : GreatswordSkeleton;
+            miniBoss = number switch
+            {
+                6 => Skeleton,
+                7 => SkeletonArcher,
+                8 => ArmoredSkeleton,
+                _ => GreatswordSkeleton
+            };
             if (number == 10) boss = GreatswordSkeleton;
         }
         else if (number <= 15)
@@ -126,13 +145,19 @@ public static class StageEncounterBalance
             stageName = $"Stage {number} - Orc Warcamp";
             roster = number switch
             {
-                11 => new[] { E(Orc, 65), E(ArmoredOrc, 20), E(EliteOrc, 15) },
-                12 => new[] { E(Orc, 50), E(ArmoredOrc, 25), E(EliteOrc, 15), E(OrcRider, 10) },
-                13 => new[] { E(Orc, 40), E(ArmoredOrc, 25), E(EliteOrc, 20), E(OrcRider, 15) },
+                11 => new[] { E(Orc, 100) },
+                12 => new[] { E(Orc, 70), E(ArmoredOrc, 30) },
+                13 => new[] { E(Orc, 50), E(ArmoredOrc, 30), E(EliteOrc, 20) },
                 14 => new[] { E(Orc, 30), E(ArmoredOrc, 25), E(EliteOrc, 25), E(OrcRider, 20) },
                 _ => new[] { E(Orc, 20), E(ArmoredOrc, 25), E(EliteOrc, 30), E(OrcRider, 25) }
             };
-            miniBoss = number == 11 ? EliteOrc : OrcRider;
+            miniBoss = number switch
+            {
+                11 => Orc,
+                12 => ArmoredOrc,
+                13 => EliteOrc,
+                _ => OrcRider
+            };
             if (number == 15) boss = OrcRider;
         }
         else
@@ -140,13 +165,13 @@ public static class StageEncounterBalance
             stageName = $"Stage {number} - Moonfall Citadel";
             roster = number switch
             {
-                16 => new[] { E(Werebear, 50), E(Werewolf, 35), E(Necromancer, 15) },
-                17 => new[] { E(Werebear, 40), E(Werewolf, 35), E(Necromancer, 25) },
-                18 => new[] { E(Werebear, 35), E(Werewolf, 35), E(Necromancer, 30) },
+                16 => new[] { E(Werebear, 100) },
+                17 => new[] { E(Werebear, 65), E(Werewolf, 35) },
+                18 => new[] { E(Werebear, 45), E(Werewolf, 35), E(Necromancer, 20) },
                 19 => new[] { E(Werebear, 30), E(Werewolf, 35), E(Necromancer, 35) },
                 _ => new[] { E(Werebear, 25), E(Werewolf, 30), E(Necromancer, 45) }
             };
-            miniBoss = Necromancer;
+            miniBoss = number == 16 ? Werebear : number == 17 ? Werewolf : Necromancer;
             if (number == 20) boss = Necromancer;
         }
 

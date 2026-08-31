@@ -7,6 +7,9 @@ public class EnemyItemDrop : CharacterDrop
     [SerializeField] private ItemPickup itemPickupPrefab;
     [SerializeField] private int minItemDrops = 0;
     [SerializeField] private int maxItemDrops = 1;
+    [Header("Set Loot Balance")]
+    [Tooltip("Applied after choosing an item that belongs to an equipment set. This keeps full sets as a longer-term goal without reducing ordinary loot.")]
+    [SerializeField, Range(0f, 1f)] private float equipmentSetDropChance = 0.35f;
 
     protected override void LoadComponents()
     {
@@ -36,6 +39,8 @@ public class EnemyItemDrop : CharacterDrop
         {
             ItemDropEntry drop = PickDrop(drops);
             if (drop == null) continue;
+            if (drop.Item.EquipmentSet != null && Random.value > equipmentSetDropChance)
+                continue;
 
             SpawnDrop(drop, receiver);
         }

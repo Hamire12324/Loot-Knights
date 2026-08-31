@@ -10,24 +10,13 @@ public sealed class PlayerSkillTreeStorage
     private const string EquippedNodeKeyPrefix = "LootKnights.SkillTree.Equipped.";
     private const string GlobalEquippedTreeKeyPrefix = "LootKnights.SkillTree.Equipped.Global.Tree.";
     private const string GlobalEquippedNodeKeyPrefix = "LootKnights.SkillTree.Equipped.Global.Node.";
-    private const int DebugMinimumStartingPoints = 99;
 
     public const int PointsPerLevel = 1;
 
     public event Action OnChanged;
 
-    public int AvailablePoints => Mathf.Max(0, PlayerPrefs.GetInt(AvailablePointsKey, 0));
-    public int HighestRewardedLevel => Mathf.Max(1, PlayerPrefs.GetInt(HighestRewardedLevelKey, 1));
-
-    public void EnsureDebugStartingPoints()
-    {
-        if (AvailablePoints >= DebugMinimumStartingPoints)
-            return;
-
-        PlayerPrefs.SetInt(AvailablePointsKey, DebugMinimumStartingPoints);
-        PlayerPrefs.Save();
-        OnChanged?.Invoke();
-    }
+    public int AvailablePoints => Mathf.Max(0, PlayerPrefs.GetInt(GetCharacterKey(AvailablePointsKey), 0));
+    public int HighestRewardedLevel => Mathf.Max(1, PlayerPrefs.GetInt(GetCharacterKey(HighestRewardedLevelKey), 1));
 
     public void EnsureLevelRewarded(int level)
     {
@@ -37,8 +26,8 @@ public sealed class PlayerSkillTreeStorage
         if (safeLevel <= highestRewardedLevel) return;
 
         int gainedLevels = safeLevel - highestRewardedLevel;
-        PlayerPrefs.SetInt(AvailablePointsKey, AvailablePoints + gainedLevels * PointsPerLevel);
-        PlayerPrefs.SetInt(HighestRewardedLevelKey, safeLevel);
+        PlayerPrefs.SetInt(GetCharacterKey(AvailablePointsKey), AvailablePoints + gainedLevels * PointsPerLevel);
+        PlayerPrefs.SetInt(GetCharacterKey(HighestRewardedLevelKey), safeLevel);
         PlayerPrefs.Save();
         OnChanged?.Invoke();
     }
@@ -53,7 +42,7 @@ public sealed class PlayerSkillTreeStorage
     {
         if (amount <= 0) return;
 
-        PlayerPrefs.SetInt(AvailablePointsKey, AvailablePoints + amount);
+        PlayerPrefs.SetInt(GetCharacterKey(AvailablePointsKey), AvailablePoints + amount);
         PlayerPrefs.Save();
         OnChanged?.Invoke();
     }
@@ -63,7 +52,7 @@ public sealed class PlayerSkillTreeStorage
         if (amount <= 0 || AvailablePoints < amount)
             return false;
 
-        PlayerPrefs.SetInt(AvailablePointsKey, AvailablePoints - amount);
+        PlayerPrefs.SetInt(GetCharacterKey(AvailablePointsKey), AvailablePoints - amount);
         PlayerPrefs.Save();
         OnChanged?.Invoke();
         return true;
@@ -130,7 +119,7 @@ public sealed class PlayerSkillTreeStorage
         }
 
         if (refund > 0)
-            PlayerPrefs.SetInt(AvailablePointsKey, AvailablePoints + refund);
+            PlayerPrefs.SetInt(GetCharacterKey(AvailablePointsKey), AvailablePoints + refund);
 
         PlayerPrefs.Save();
         OnChanged?.Invoke();
@@ -393,8 +382,8 @@ public sealed class PlayerSkillTreeStorage
 
     public void ClearAllProgress(SkillTreeDefinition tree = null)
     {
-        PlayerPrefs.DeleteKey(AvailablePointsKey);
-        PlayerPrefs.DeleteKey(HighestRewardedLevelKey);
+        PlayerPrefs.DeleteKey(GetCharacterKey(AvailablePointsKey));
+        PlayerPrefs.DeleteKey(GetCharacterKey(HighestRewardedLevelKey));
 
         if (tree != null)
         {
@@ -411,22 +400,27 @@ public sealed class PlayerSkillTreeStorage
 
     private static string GetRankKey(SkillTreeDefinition tree, SkillTreeNodeDefinition node)
     {
-        return RankKeyPrefix + tree.TreeId + "." + node.NodeId;
+        return GetCharacterKey(RankKeyPrefix + tree.TreeId + "." + node.NodeId);
     }
 
     private static string GetEquippedNodeKey(SkillTreeDefinition tree, int slotIndex)
     {
-        return EquippedNodeKeyPrefix + tree.TreeId + "." + Mathf.Max(0, slotIndex);
+        return GetCharacterKey(EquippedNodeKeyPrefix + tree.TreeId + "." + Mathf.Max(0, slotIndex));
     }
 
     private static string GetGlobalEquippedTreeKey(int slotIndex)
     {
-        return GlobalEquippedTreeKeyPrefix + Mathf.Max(0, slotIndex);
+        return GetCharacterKey(GlobalEquippedTreeKeyPrefix + Mathf.Max(0, slotIndex));
     }
 
     private static string GetGlobalEquippedNodeKey(int slotIndex)
     {
-        return GlobalEquippedNodeKeyPrefix + Mathf.Max(0, slotIndex);
+        return GetCharacterKey(GlobalEquippedNodeKeyPrefix + Mathf.Max(0, slotIndex));
+    }
+
+    private static string GetCharacterKey(string key)
+    {
+        return CharacterProfileStorage.GetCurrentCharacterKey(key);
     }
 
     private static bool IsAnyRegularGlobalSlotOccupied(int slotIndex)

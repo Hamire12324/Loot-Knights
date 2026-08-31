@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Stormpiercer Bow
   description: A charged bow that strikes with thunderous speed.
   icon: {fileID: 6994406547662694295, guid: 62d2d71ca492f9846bbb289f23ccd3dd, type: 3}
+  worldScaleMultiplier: 0.2
   rarity: 3
   category: 1
   equipmentSlotType: 1

@@ -147,8 +147,8 @@ public class StageManager : BaseMonoBehaviour
         StageConfig stage = CurrentStage;
         if (stage == null) return null;
 
-        PlayerCurrencyStorage.Add(CurrencyType.Coins, stage.CoinReward);
-        PlayerCurrencyStorage.Add(CurrencyType.Diamonds, stage.DiamondReward);
+        PlayerCurrencyManager.Service.Add(CurrencyType.Coins, stage.CoinReward);
+        PlayerCurrencyManager.Service.Add(CurrencyType.Diamonds, stage.DiamondReward);
         PlayerLevelRewardResult experienceResult = PlayerExperienceStorage.Add(stage.ExperienceReward);
 
         currentStageRewardGranted = true;
@@ -356,7 +356,11 @@ public class StageManager : BaseMonoBehaviour
         ReturnToLobby();
     }
 
-    private void HandleHeroDeath(CharacterDamReceiver receiver)
+    /// <summary>
+    /// Ends the current attempt without rewards or stage-unlock progress.
+    /// It is also used when the stage cannot spawn its required enemies.
+    /// </summary>
+    public void FailCurrentStage()
     {
         if (currentStageCompleted || currentStageFailed)
             return;
@@ -368,6 +372,11 @@ public class StageManager : BaseMonoBehaviour
         stageCompletePanel?.Hide();
         StopShowDefeatPanelCoroutine();
         showDefeatPanelCoroutine = StartCoroutine(ShowDefeatPanelAfterDelay());
+    }
+
+    private void HandleHeroDeath(CharacterDamReceiver receiver)
+    {
+        FailCurrentStage();
     }
 
     private IEnumerator ShowDefeatPanelAfterDelay()

@@ -48,7 +48,7 @@ public sealed class SkillTreeNodeView : MonoBehaviour, IPointerClickHandler
         BindButton();
     }
 
-    public void Render(SkillTreeNodeViewState state)
+    public void Render(SkillTreeNodeUiState state)
     {
         if (state == null || state.Definition == null)
             return;
@@ -203,7 +203,7 @@ public sealed class SkillTreeNodeView : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    private static Color GetIconColor(SkillTreeNodeViewState state)
+    private static Color GetIconColor(SkillTreeNodeUiState state)
     {
         if (state == null)
             return Color.white;
@@ -221,7 +221,7 @@ public sealed class SkillTreeNodeView : MonoBehaviour, IPointerClickHandler
                 node.Reaction != ElementalReactionType.None);
     }
 
-    private static Color GetTextColor(Color defaultColor, SkillTreeNodeViewState state)
+    private static Color GetTextColor(Color defaultColor, SkillTreeNodeUiState state)
     {
         if (state == null)
             return defaultColor;

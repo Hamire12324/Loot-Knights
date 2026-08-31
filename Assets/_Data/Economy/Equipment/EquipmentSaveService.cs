@@ -41,13 +41,13 @@ public static class EquipmentSaveService
 
     public static void Clear()
     {
-        PlayerPrefs.DeleteKey(EquipmentKey);
+        PlayerPrefs.DeleteKey(GetCurrentEquipmentKey());
         PlayerPrefs.Save();
     }
 
     private static EquipmentSaveData LoadData()
     {
-        string json = PlayerPrefs.GetString(EquipmentKey, string.Empty);
+        string json = PlayerPrefs.GetString(GetLoadEquipmentKey(), string.Empty);
 
         if (string.IsNullOrWhiteSpace(json))
             return new EquipmentSaveData();
@@ -62,7 +62,7 @@ public static class EquipmentSaveService
     private static void SaveData(EquipmentSaveData data)
     {
         RemoveInvalidItems(data);
-        PlayerPrefs.SetString(EquipmentKey, JsonUtility.ToJson(data));
+        PlayerPrefs.SetString(GetCurrentEquipmentKey(), JsonUtility.ToJson(data));
         PlayerPrefs.Save();
     }
 
@@ -71,5 +71,14 @@ public static class EquipmentSaveService
         data.Items.RemoveAll(item =>
             item == null ||
             string.IsNullOrWhiteSpace(item.ItemId));
+    }
+
+    private static string GetCurrentEquipmentKey() => CharacterProfileStorage.GetCurrentCharacterKey(EquipmentKey);
+
+    private static string GetLoadEquipmentKey()
+    {
+        string characterKey = GetCurrentEquipmentKey();
+        return !PlayerPrefs.HasKey(characterKey) && CharacterProfileStorage.IsLegacyProgressOwnedByCurrentCharacter()
+            ? EquipmentKey : characterKey;
     }
 }

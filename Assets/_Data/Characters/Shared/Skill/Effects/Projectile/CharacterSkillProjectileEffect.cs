@@ -54,6 +54,11 @@ public class CharacterSkillProjectileEffect : CharacterSkillEffectDefinition
     [SerializeField] private bool returnToPoolOnFinalHit = true;
     [SerializeField] private LayerMask targetLayer;
 
+    [Header("Target Assist")]
+    [Tooltip("Gently steers the projectile toward the target acquired when the skill was cast. Useful for basic ranged attacks while moving.")]
+    [SerializeField] private bool seekCastTarget;
+    [SerializeField, Min(0f)] private float targetTurnRate = 360f;
+
     [Header("Spread")]
     [SerializeField, Min(1)] private int projectileCount = 1;
     [SerializeField, Min(0f)] private float spreadAngle;
@@ -151,6 +156,7 @@ public class CharacterSkillProjectileEffect : CharacterSkillEffectDefinition
             return;
 
         Vector2 direction = context.AimDirection == Vector2.zero ? Vector2.down : context.AimDirection.normalized;
+        Transform homingTarget = ResolveProjectileTarget(context, caster);
         Vector2 side = new(-direction.y, direction.x);
         float angleStep = count > 1 ? spreadAngle / (count - 1) : 0f;
         float startAngle = -spreadAngle * 0.5f;
@@ -161,8 +167,34 @@ public class CharacterSkillProjectileEffect : CharacterSkillEffectDefinition
             ? Vector2.zero
             : Rotate(direction, index * spawnOriginAngleStep) * spawnOriginRadius;
         Vector3 position = caster.transform.position + (Vector3)(originOffset + projectileDirection * startOffset + side * sideOffset);
+
+        // A moving player can change their facing between pressing attack and the
+        // animation-hit frame. Re-aim the single guided arrow at the target at the
+        // moment it is spawned instead of firing along that transient movement input.
+        if (homingTarget != null && count == 1)
+        {
+            Vector2 toTarget = (Vector2)homingTarget.position - (Vector2)position;
+            if (toTarget.sqrMagnitude > 0.001f)
+                projectileDirection = toTarget.normalized;
+        }
+
         projectileDirection = GetProjectileDirection(context, caster, position, projectileDirection);
-        SpawnProjectile(caster, position, projectileDirection, settings);
+        SpawnProjectile(context, caster, position, projectileDirection, settings, homingTarget);
+    }
+
+    private Transform ResolveProjectileTarget(CharacterSkillExecutionContext context, CharacterCtrl caster)
+    {
+        if (!seekCastTarget)
+            return null;
+
+        if (context.Target != null && context.Target.gameObject.activeInHierarchy)
+            return context.Target;
+
+        // Basic shots should not fall back to the movement direction just because
+        // the enemy entered range after the attack button was pressed.
+        return caster.CharacterTargetFinder != null
+            ? caster.CharacterTargetFinder.FindClosestTargetAnywhere()
+            : null;
     }
 
     protected virtual int GetProjectileCount(CharacterSkillExecutionContext context)
@@ -179,7 +211,13 @@ public class CharacterSkillProjectileEffect : CharacterSkillEffectDefinition
         return fallbackDirection;
     }
 
-    private void SpawnProjectile(CharacterCtrl caster, Vector3 position, Vector2 direction, RuntimeSettings settings)
+    private void SpawnProjectile(
+        CharacterSkillExecutionContext context,
+        CharacterCtrl caster,
+        Vector3 position,
+        Vector2 direction,
+        RuntimeSettings settings,
+        Transform homingTarget)
     {
         PoolObj projectile = CharacterSkillVfxUtility.PlayProjectile(
             projectileVfx,
@@ -187,7 +225,9 @@ public class CharacterSkillProjectileEffect : CharacterSkillEffectDefinition
             direction,
             settings.Length,
             settings.Speed,
-            rotationOffset);
+            rotationOffset,
+            homingTarget,
+            targetTurnRate);
 
         if (projectile == null)
             return;
@@ -245,6 +285,7 @@ public class CharacterSkillProjectileEffect : CharacterSkillEffectDefinition
         delay = Mathf.Max(0f, delay);
         penetration = Mathf.Max(0, penetration);
         projectileCount = Mathf.Max(1, projectileCount);
+        targetTurnRate = Mathf.Max(0f, targetTurnRate);
         spreadAngle = Mathf.Max(0f, spreadAngle);
         sideSpacing = Mathf.Max(0f, sideSpacing);
         shotInterval = Mathf.Max(0f, shotInterval);

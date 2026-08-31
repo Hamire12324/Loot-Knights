@@ -5,13 +5,11 @@ public static class PlayerExperienceStorage
 {
     public const string ExperienceKey = "LootKnights.Character.Experience";
 
-    private static readonly int DebugMinimumExperience = PlayerLevel.GetTotalExperienceForLevel(PlayerLevel.MaxLevel);
-
     public static event Action<int> OnExperienceChanged;
     public static event Action<PlayerLevelSnapshot> OnLevelSnapshotChanged;
     public static event Action<int, int> OnLevelChanged;
 
-    public static int Experience => Mathf.Max(PlayerPrefs.GetInt(ExperienceKey, DebugMinimumExperience), DebugMinimumExperience);
+    public static int Experience => Mathf.Max(0, PlayerPrefs.GetInt(GetExperienceKey(), 0));
     public static int Level => Snapshot.Level;
     public static int MaxLevel => PlayerLevel.MaxLevel;
     public static PlayerLevelSnapshot Snapshot => PlayerLevel.CreateSnapshot(Experience);
@@ -21,7 +19,7 @@ public static class PlayerExperienceStorage
         PlayerLevelSnapshot before = Snapshot;
         int safeAmount = Mathf.Max(0, amount);
 
-        PlayerPrefs.SetInt(ExperienceKey, safeAmount);
+        PlayerPrefs.SetInt(GetExperienceKey(), safeAmount);
         PlayerPrefs.Save();
 
         PlayerLevelSnapshot after = Snapshot;
@@ -44,7 +42,7 @@ public static class PlayerExperienceStorage
     public static void Delete()
     {
         PlayerLevelSnapshot before = Snapshot;
-        PlayerPrefs.DeleteKey(ExperienceKey);
+        PlayerPrefs.DeleteKey(GetExperienceKey());
         PlayerAttributePointStorage.Clear();
         PlayerSkillTreeManager.Service.ClearAllProgress();
         PlayerPrefs.Save();
@@ -62,5 +60,18 @@ public static class PlayerExperienceStorage
 
         if (before.Level != after.Level)
             OnLevelChanged?.Invoke(before.Level, after.Level);
+    }
+
+    public static string GetExperienceKey(string characterId = null)
+    {
+        if (string.IsNullOrEmpty(characterId))
+        {
+            CreatedCharacterData selectedCharacter = CharacterProfileStorage.Load();
+            characterId = selectedCharacter != null ? selectedCharacter.CharacterId : null;
+        }
+
+        return string.IsNullOrEmpty(characterId)
+            ? ExperienceKey
+            : ExperienceKey + "." + characterId;
     }
 }

@@ -52,8 +52,8 @@ public static class PlayerCurrencyStorage
 
     public static void Delete()
     {
-        PlayerPrefs.DeleteKey(CoinsKey);
-        PlayerPrefs.DeleteKey(DiamondsKey);
+        PlayerPrefs.DeleteKey(GetCurrentKey(CoinsKey));
+        PlayerPrefs.DeleteKey(GetCurrentKey(DiamondsKey));
         PlayerPrefs.Save();
 
         OnCurrencyChanged?.Invoke(CurrencyType.Coins, Get(CurrencyType.Coins));
@@ -62,11 +62,15 @@ public static class PlayerCurrencyStorage
 
     private static string GetKey(CurrencyType type)
     {
-        return type switch
+        string key = type switch
         {
             CurrencyType.Diamonds => DiamondsKey,
             _ => CoinsKey
         };
+
+        string characterKey = GetCurrentKey(key);
+        return !PlayerPrefs.HasKey(characterKey) && CharacterProfileStorage.IsLegacyProgressOwnedByCurrentCharacter()
+            ? key : characterKey;
     }
 
     private static int GetDefaultValue(CurrencyType type)
@@ -77,4 +81,6 @@ public static class PlayerCurrencyStorage
             _ => DefaultCoins
         };
     }
+
+    private static string GetCurrentKey(string key) => CharacterProfileStorage.GetCurrentCharacterKey(key);
 }

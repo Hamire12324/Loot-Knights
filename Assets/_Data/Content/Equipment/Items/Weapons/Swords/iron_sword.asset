@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Iron Sword
   description: A dependable blade for close-quarters combat.
   icon: {fileID: -5087867363097849969, guid: 5772319e32235444b8526a02b97ff236, type: 3}
+  worldScaleMultiplier: 0.2
   rarity: 1
   category: 1
   equipmentSlotType: 1

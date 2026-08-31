@@ -10,6 +10,6 @@ public class CurrencyReward : PoolObj
 
     public void Grant()
     {
-        PlayerCurrencyStorage.Add(currencyType, Amount);
+        PlayerCurrencyManager.Service.Add(currencyType, Amount);
     }
 }

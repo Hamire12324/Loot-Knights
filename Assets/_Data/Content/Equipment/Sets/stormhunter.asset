@@ -21,7 +21,7 @@ MonoBehaviour:
     modifiers:
     - statType: 6
       modifierType: 1
-      amount: 10
+      amount: 0.1
   - requiredPieceCount: 4
     description: Crit Chance +8
     modifiers:
@@ -33,4 +33,4 @@ MonoBehaviour:
     modifiers:
     - statType: 1
       modifierType: 1
-      amount: 15
+      amount: 0.15

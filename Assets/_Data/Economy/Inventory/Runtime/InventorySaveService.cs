@@ -38,13 +38,13 @@ public static class InventorySaveService
 
     public static void Clear()
     {
-        PlayerPrefs.DeleteKey(InventoryKey);
+        PlayerPrefs.DeleteKey(GetCurrentInventoryKey());
         PlayerPrefs.Save();
     }
 
     private static InventorySaveData LoadData()
     {
-        string json = PlayerPrefs.GetString(InventoryKey, string.Empty);
+        string json = PlayerPrefs.GetString(GetLoadInventoryKey(), string.Empty);
 
         if (string.IsNullOrWhiteSpace(json))
             return new InventorySaveData();
@@ -59,7 +59,7 @@ public static class InventorySaveService
     private static void SaveData(InventorySaveData data)
     {
         RemoveInvalidStacks(data);
-        PlayerPrefs.SetString(InventoryKey, JsonUtility.ToJson(data));
+        PlayerPrefs.SetString(GetCurrentInventoryKey(), JsonUtility.ToJson(data));
         PlayerPrefs.Save();
     }
 
@@ -69,5 +69,14 @@ public static class InventorySaveService
             stack == null ||
             string.IsNullOrWhiteSpace(stack.ItemId) ||
             stack.Amount <= 0);
+    }
+
+    private static string GetCurrentInventoryKey() => CharacterProfileStorage.GetCurrentCharacterKey(InventoryKey);
+
+    private static string GetLoadInventoryKey()
+    {
+        string characterKey = GetCurrentInventoryKey();
+        return !PlayerPrefs.HasKey(characterKey) && CharacterProfileStorage.IsLegacyProgressOwnedByCurrentCharacter()
+            ? InventoryKey : characterKey;
     }
 }

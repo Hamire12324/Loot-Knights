@@ -27,7 +27,7 @@ MonoBehaviour:
     modifiers:
     - statType: 8
       modifierType: 1
-      amount: 25
+      amount: 0.25
   - requiredPieceCount: 6
     description: Attack +18 and Armor +18
     modifiers:

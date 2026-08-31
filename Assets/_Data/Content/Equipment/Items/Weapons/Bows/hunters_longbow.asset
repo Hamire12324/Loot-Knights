@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Hunter's Longbow
   description: A swift bow balanced for accurate ranged attacks.
   icon: {fileID: -2493871707704461177, guid: d3661afa6a4a0154daa30c4481803c78, type: 3}
+  worldScaleMultiplier: 0.2
   rarity: 1
   category: 1
   equipmentSlotType: 1

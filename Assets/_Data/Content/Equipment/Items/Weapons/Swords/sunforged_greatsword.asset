@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Sunforged Greatsword
   description: A radiant heavy blade forged for dungeon champions.
   icon: {fileID: 270138247091584535, guid: 15d3ca01303f09b498772fc7da67c047, type: 3}
+  worldScaleMultiplier: 0.2
   rarity: 3
   category: 1
   equipmentSlotType: 1

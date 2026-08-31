@@ -9,6 +9,14 @@ public class ItemPickup : PoolObj
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private PlayerInventoryManager inventoryManager;
 
+    private Vector3 baseLocalScale;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        baseLocalScale = transform.localScale;
+    }
+
     protected override void LoadComponents()
     {
         base.LoadComponents();
@@ -19,6 +27,7 @@ public class ItemPickup : PoolObj
     {
         item = itemDefinition;
         amount = Mathf.Max(1, pickupAmount);
+        transform.localScale = baseLocalScale * (item != null ? item.WorldScaleMultiplier : 1f);
         RefreshVisual();
     }
 
@@ -28,6 +37,7 @@ public class ItemPickup : PoolObj
 
         item = null;
         amount = 1;
+        transform.localScale = baseLocalScale;
 
         if (spriteRenderer == null)
             LoadSpriteRenderer();
@@ -95,4 +105,5 @@ public class ItemPickup : PoolObj
         inventoryManager = FindAnyObjectByType<PlayerInventoryManager>(FindObjectsInactive.Include);
         return inventoryManager;
     }
+
 }

@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Ranger's Longbow
   description: A seasoned ranger's bow with a rapid, sure draw.
   icon: {fileID: -1264930730521774380, guid: 403b1e01b865a0b4eb4e1a70eb447085, type: 3}
+  worldScaleMultiplier: 0.2
   rarity: 2
   category: 1
   equipmentSlotType: 1

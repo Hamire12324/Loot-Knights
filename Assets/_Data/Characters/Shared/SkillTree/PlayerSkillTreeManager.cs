@@ -50,7 +50,6 @@ public sealed class PlayerSkillTreeManager : BaseSingleton<PlayerSkillTreeManage
             return;
 
         base.Awake();
-        storage.EnsureDebugStartingPoints();
     }
 
     protected override void OnDestroy()

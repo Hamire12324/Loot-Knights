@@ -37,7 +37,7 @@ public class StageMapController : BaseMonoBehaviour
     private int currentWaveIndex;
     private int remainingEnemiesInWave;
     private IReadOnlyList<StageEnemyEntry> currentWaveEnemyEntries;
-    private bool currentWaveIsBossWave;
+    private BossEncounterConfig currentWaveBossEncounter;
     private bool openingEncounterPending;
     private bool stageRunning;
     private Coroutine nextWaveCoroutine;
@@ -106,8 +106,7 @@ public class StageMapController : BaseMonoBehaviour
 
         if (enemySpawner == null)
         {
-            Debug.LogWarning(name + ": EnemySpawner was not found; stage is completed immediately.", gameObject);
-            CompleteStage();
+            AbortStage("EnemySpawner was not found, so the stage cannot start.");
             return;
         }
 
@@ -223,14 +222,13 @@ public class StageMapController : BaseMonoBehaviour
         List<Vector3> points = GetSpawnPositions();
         if (points.Count == 0)
         {
-            Debug.LogWarning(name + ": Add at least one EnemySpawnPoint before starting this stage.", gameObject);
-            CompleteStage();
+            AbortStage("No EnemySpawnPoint is configured for the next wave.");
             return;
         }
 
         remainingEnemiesInWave = GetCurrentWaveEnemyCount();
         currentWaveEnemyEntries = GetCurrentWaveEnemyEntries();
-        currentWaveIsBossWave = IsCurrentWaveBossWave();
+        currentWaveBossEncounter = GetCurrentWaveBossEncounter();
         if (activeStage != null)
         {
             if (openingEncounterPending)
@@ -257,23 +255,24 @@ public class StageMapController : BaseMonoBehaviour
             return;
         }
 
+        if (!TryResolveEnemySpawner())
+        {
+            AbortStage("EnemySpawner is no longer available while spawning a wave.");
+            return;
+        }
+
         List<PoolObj> spawned = enemySpawner.SpawnCount(
             points,
             remainingEnemiesInWave,
             activeStage != null ? activeStage.DifficultyLevel : 1,
             currentWaveEnemyEntries,
-            currentWaveIsBossWave);
+            currentWaveBossEncounter);
 
         remainingEnemiesInWave -= spawned.Count;
 
         if (spawned.Count == 0)
         {
-            Debug.LogWarning(
-                name + ": Unable to spawn the remaining enemies for this wave. " +
-                "Check the stage roster and EnemySpawner limits.",
-                gameObject);
-            remainingEnemiesInWave = 0;
-            QueueNextWaveOrComplete();
+            AbortStage("Unable to spawn the remaining enemies for this wave.");
             return;
         }
 
@@ -291,6 +290,15 @@ public class StageMapController : BaseMonoBehaviour
 
         if (livingWaveEnemies.Count == 0)
             HandleCurrentWaveBatchCleared();
+    }
+
+    private bool TryResolveEnemySpawner()
+    {
+        if (enemySpawner != null)
+            return true;
+
+        enemySpawner = FindAnyObjectByType<EnemySpawner>(FindObjectsInactive.Include);
+        return enemySpawner != null;
     }
 
     private List<Vector3> GetSpawnPositions()
@@ -329,8 +337,7 @@ public class StageMapController : BaseMonoBehaviour
             List<Vector3> points = GetSpawnPositions();
             if (points.Count == 0)
             {
-                Debug.LogWarning(name + ": Add at least one EnemySpawnPoint before spawning reinforcements.", gameObject);
-                CompleteStage();
+                AbortStage("No EnemySpawnPoint is configured for the remaining wave enemies.");
                 return;
             }
 
@@ -370,6 +377,18 @@ public class StageMapController : BaseMonoBehaviour
         completionCoroutine = StartCoroutine(CompleteStageAfterDelay());
     }
 
+    private void AbortStage(string reason)
+    {
+        if (!stageRunning) return;
+
+        Debug.LogError(name + ": " + reason + " Attempt cancelled without completing the stage.", gameObject);
+        StopActiveStage();
+        enemySpawner?.ReturnAllAliveEnemies();
+
+        StageManager manager = FindAnyObjectByType<StageManager>(FindObjectsInactive.Include);
+        manager?.FailCurrentStage();
+    }
+
     private IEnumerator CompleteStageAfterDelay()
     {
         float delay = Mathf.Max(0f, victoryDelay);
@@ -387,7 +406,7 @@ public class StageMapController : BaseMonoBehaviour
         currentWaveIndex = 0;
         remainingEnemiesInWave = 0;
         currentWaveEnemyEntries = null;
-        currentWaveIsBossWave = false;
+        currentWaveBossEncounter = null;
         openingEncounterPending = false;
         CurrentWaveNumber = 0;
         NotifyWaveChanged();
@@ -456,15 +475,26 @@ public class StageMapController : BaseMonoBehaviour
         return activeStage != null ? activeStage.EnemyRoster : null;
     }
 
-    private bool IsCurrentWaveBossWave()
+    private BossEncounterConfig GetCurrentWaveBossEncounter()
     {
         if (activeStage == null)
-            return false;
+            return null;
 
         StageWaveConfig wave = openingEncounterPending
             ? activeStage.OpeningEnemies
             : activeStage.Waves[currentWaveIndex];
-        return wave != null && wave.IsBossWave;
+        if (wave == null || !wave.IsBossWave)
+            return null;
+
+        if (!wave.HasValidBossEncounter)
+        {
+            Debug.LogError(
+                $"{name}: A boss wave must have Enemy Count = 1 and exactly one Enemy Override.",
+                gameObject);
+            return null;
+        }
+
+        return wave.BossEncounter ?? new BossEncounterConfig();
     }
 
     private void NotifyWaveChanged()

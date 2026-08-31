@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Ironwall Cuirass
   description: Layered steel built to endure the front line.
   icon: {fileID: 21300000, guid: 603e026921ee6c44ab5c48b149bb31e9, type: 3}
+  worldScaleMultiplier: 0.2
   rarity: 1
   category: 1
   equipmentSlotType: 4

@@ -8,6 +8,10 @@ public class ItemDefinition : ScriptableObject
     [SerializeField] private string displayName;
     [SerializeField, TextArea] private string description;
     [SerializeField] private Sprite icon;
+    [Header("World Pickup")]
+    [SerializeField, Min(0.01f), Tooltip("Multiplier applied to this item's world pickup prefab scale.")]
+    private float worldScaleMultiplier = 1f;
+    [Header("Inventory")]
     [SerializeField] private ItemRarity rarity = ItemRarity.Common;
     [SerializeField] private ItemCategory category = ItemCategory.Auto;
     [SerializeField] private EquipmentSlotType equipmentSlotType = EquipmentSlotType.None;
@@ -25,6 +29,7 @@ public class ItemDefinition : ScriptableObject
     public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
     public string Description => description;
     public Sprite Icon => icon;
+    public float WorldScaleMultiplier => Mathf.Max(0.01f, worldScaleMultiplier);
     public ItemRarity Rarity => rarity;
     public ItemCategory Category => category == ItemCategory.Auto
         ? (MaxStack <= 1 ? ItemCategory.Equipment : ItemCategory.Item)
@@ -119,6 +124,7 @@ public class ItemDefinition : ScriptableObject
     private void OnValidate()
     {
         maxStack = Mathf.Max(1, maxStack);
+        worldScaleMultiplier = Mathf.Max(0.01f, worldScaleMultiplier);
         maxUpgradeLevel = Mathf.Max(0, maxUpgradeLevel);
         minRolledModifierCount = Mathf.Max(0, minRolledModifierCount);
         maxRolledModifierCount = Mathf.Max(minRolledModifierCount, maxRolledModifierCount);

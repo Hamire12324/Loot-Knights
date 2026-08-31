@@ -1,20 +1,18 @@
 using System;
 using UnityEngine;
-
-/// <summary>
-/// Runtime marker applied by a boss wave. It keeps boss identity separate from the
-/// prefab, so a prefab can appear as a normal enemy in one stage and as a boss later.
-/// </summary>
-[DisallowMultipleComponent]
 public class BossEnemy : MonoBehaviour
 {
     [Header("Presentation")]
-    [SerializeField] private string displayName = "Dread Werebear";
+    [SerializeField] private string displayName;
 
     private EnemyCtrl enemy;
     private CharacterDamReceiver damageReceiver;
+    private CharacterStat characterStat;
+    private string configuredDisplayName;
     public bool IsBoss { get; private set; }
-    public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? gameObject.name : displayName;
+    public string DisplayName => string.IsNullOrWhiteSpace(configuredDisplayName)
+        ? (string.IsNullOrWhiteSpace(displayName) ? gameObject.name : displayName)
+        : configuredDisplayName;
     public CharacterDamReceiver DamageReceiver => damageReceiver;
 
     public static event Action<BossEnemy> OnBossSpawned;
@@ -29,20 +27,25 @@ public class BossEnemy : MonoBehaviour
     private void OnDisable()
     {
         UnsubscribeDeath();
+        RemoveBossModifiers();
     }
 
-    public void Configure(bool isBoss)
+    public void Configure(BossEncounterConfig config)
     {
         enemy ??= GetComponent<EnemyCtrl>();
         damageReceiver ??= enemy != null ? enemy.CharacterDamReceiver : null;
+        characterStat ??= enemy != null ? enemy.CharacterStat : null;
         UnsubscribeDeath();
+        RemoveBossModifiers();
 
-        IsBoss = isBoss;
-        enemy?.SetFaction(isBoss ? Faction.Boss : Faction.Enemy);
+        IsBoss = config != null && config.Enabled;
+        configuredDisplayName = IsBoss ? config.DisplayName : null;
+        enemy?.SetFaction(IsBoss ? Faction.Boss : Faction.Enemy);
 
-        if (!isBoss)
+        if (!IsBoss)
             return;
 
+        ApplyBossModifiers(config);
         if (damageReceiver != null)
             damageReceiver.OnDeath += HandleDeath;
 
@@ -62,5 +65,28 @@ public class BossEnemy : MonoBehaviour
     {
         if (damageReceiver != null)
             damageReceiver.OnDeath -= HandleDeath;
+    }
+
+    private void ApplyBossModifiers(BossEncounterConfig config)
+    {
+        if (characterStat == null)
+            return;
+
+        AddMultiplier(characterStat.MaxHealth, config.HealthMultiplier, StatType.MaxHealth);
+        AddMultiplier(characterStat.Attack, config.AttackMultiplier, StatType.Attack);
+        AddMultiplier(characterStat.Armor, config.ArmorMultiplier, StatType.Armor);
+        characterStat.SetCurrentHealth(characterStat.MaxHealth.FinalValue);
+    }
+
+    private void RemoveBossModifiers()
+    {
+        if (characterStat != null)
+            characterStat.RemoveModifiersFromSource(this, false);
+    }
+
+    private void AddMultiplier(StatValue stat, float multiplier, StatType statType)
+    {
+        if (stat != null)
+            stat.AddBuffModifier(new StatModifier(statType, ModifierType.PercentMultiply, multiplier - 1f, this));
     }
 }

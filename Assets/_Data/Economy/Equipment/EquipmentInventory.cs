@@ -27,16 +27,6 @@ public class EquipmentInventory
         return slot != null ? slot.Item : null;
     }
 
-    public ItemDefinition SetItem(EquipmentSlotType slotType, ItemDefinition item)
-    {
-        EquipmentSlotData slot = GetOrCreateSlot(slotType);
-        if (slot == null) return null;
-
-        ItemDefinition previousItem = slot.Item;
-        slot.Set(item);
-        return previousItem;
-    }
-
     public ItemDefinition SetItem(
         EquipmentSlotType slotType,
         ItemDefinition item,

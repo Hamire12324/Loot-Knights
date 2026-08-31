@@ -33,8 +33,6 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
 
     [Header("Tree Switcher")]
     [SerializeField] private bool buildTreeSwitcher = true;
-    [SerializeField] private string primarySkillTreeLabel = "CLASS";
-    [SerializeField] private string secondarySkillTreeLabel = "ELEMENT";
     [SerializeField] private Vector2 treeSwitcherInset = new(0f, 20f);
     [SerializeField] private Vector2 treeSwitcherSize = new(420f, 56f);
     [SerializeField] private Vector2 treeSwitcherButtonSize = new(200f, 46f);
@@ -215,7 +213,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     {
         SerializedObject so = new(this);
 
-        DrawGroup(so, "Tree Switcher", nameof(buildTreeSwitcher), nameof(primarySkillTreeLabel), nameof(secondarySkillTreeLabel), nameof(treeSwitcherInset), nameof(treeSwitcherSize), nameof(treeSwitcherButtonSize), nameof(treeSwitcherButtonSpacing), nameof(treeSwitcherTextSize));
+        DrawGroup(so, "Tree Switcher", nameof(buildTreeSwitcher), nameof(treeSwitcherInset), nameof(treeSwitcherSize), nameof(treeSwitcherButtonSize), nameof(treeSwitcherButtonSpacing), nameof(treeSwitcherTextSize));
         DrawGroup(so, "Skill Trees", nameof(buildAllClassSkillTrees), nameof(classSkillTrees));
         DrawGroup(so, "Layout", nameof(treeWidthRatio), nameof(padding), nameof(panelGap), nameof(treeInnerPadding), nameof(treeClipHorizontalPadding), nameof(treeClipTopPadding), nameof(treeClipBottomPadding), nameof(detailHeightRatio), nameof(contentSize), nameof(contentOffset), nameof(contentScale2D), nameof(skillPointsInset), nameof(skillPointsSize), nameof(skillPointsTextSize), nameof(resetButtonInset), nameof(resetButtonSize), nameof(resetButtonTextSize), nameof(resetButtonTopRight), nameof(autoExpandScrollContent), nameof(scrollContentPadding), nameof(horizontalScroll), nameof(startTreeAtTop), nameof(scrollSensitivity));
         DrawGroup(so, "Node", nameof(nodeSize), nameof(iconSize), nameof(lineThickness), nameof(textSize), nameof(nodeIconFramePadding), nameof(useMajorMinorNodeSizes), nameof(majorNodeSize), nameof(majorIconSize), nameof(minorNodeSize), nameof(minorIconSize), nameof(showNodeRankText), nameof(showNodeCostText), nameof(nodeRankTextOffset), nameof(nodeCostTextOffset));
@@ -520,7 +518,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         if (view == null)
             return;
 
-        SkillTreeDefinition existingPrimary = view.PrimarySkillTree;
+        SkillTreeDefinition existingPrimary = view.ClassSkillTree;
         SkillTreeDefinition existingSecondary = GetExistingSecondarySkillTree(view);
 
         if (skillTree == null && existingPrimary != null)
@@ -551,7 +549,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
 
         foreach (SkillTreeDefinition tree in view.GetSkillTrees())
         {
-            if (tree != null && tree != view.PrimarySkillTree)
+            if (tree != null && tree != view.ClassSkillTree)
                 return tree;
         }
 
@@ -561,6 +559,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     private void BuildTree(RectTransform root)
     {
         RectTransform treeArea = CreatePanel(root, "TreeArea", treeFrameSprite);
+        treeArea.gameObject.AddComponent<SkillTreeTreeAreaView>();
         Anchor(treeArea, Vector2.zero, new Vector2(treeWidthRatio, 1f), new Vector2(padding, padding), new Vector2(-panelGap * 0.5f, -padding));
 
         TMP_Text points = CreateText(treeArea, "SkillPointText", "POINTS: 0", Mathf.Max(8f, skillPointsTextSize), TextAlignmentOptions.Right, Vector2.zero, Max(skillPointsSize, new Vector2(80f, 18f)));
@@ -682,6 +681,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     private void BuildTreeSwitcher(Transform treeArea)
     {
         RectTransform switcher = CreateEmpty(treeArea, "TreeSwitcher");
+        switcher.gameObject.AddComponent<SkillTreeTreeSwitcherView>();
         switcher.anchorMin = new Vector2(0.5f, 1f);
         switcher.anchorMax = new Vector2(0.5f, 1f);
         switcher.pivot = new Vector2(0.5f, 1f);
@@ -696,7 +696,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         RectTransform primaryButton = CreateButton(
             switcher,
             "ClassTreeButton",
-            string.IsNullOrWhiteSpace(primarySkillTreeLabel) ? "CLASS" : primarySkillTreeLabel,
+            "CLASS",
             new Vector2(-offset, 0f),
             buttonSize,
             fontSize);
@@ -705,7 +705,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         RectTransform secondaryButton = CreateButton(
             switcher,
             "ElementTreeButton",
-            string.IsNullOrWhiteSpace(secondarySkillTreeLabel) ? "ELEMENT" : secondarySkillTreeLabel,
+            "ELEMENT",
             new Vector2(offset, 0f),
             buttonSize,
             fontSize);
@@ -746,6 +746,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     private void BuildDetail(RectTransform root)
     {
         RectTransform detail = CreatePanel(root, "DetailPanel", detailFrameSprite);
+        detail.gameObject.AddComponent<SkillTreeDetailPanelView>();
         Anchor(detail, new Vector2(treeWidthRatio, 1f - detailHeightRatio), Vector2.one, new Vector2(panelGap * 0.5f, panelGap * 0.5f), new Vector2(-padding, -padding));
 
         Sprite previewIcon = GetFirstIcon();
@@ -786,6 +787,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     private void BuildEquipPanel(RectTransform root)
     {
         RectTransform equipPanel = CreatePanel(root, "EquipSkillPanel", equipFrameSprite);
+        equipPanel.gameObject.AddComponent<SkillTreeEquipPanelView>();
         Anchor(equipPanel, new Vector2(treeWidthRatio, 0f), new Vector2(1f, 1f - detailHeightRatio), new Vector2(panelGap * 0.5f, padding), new Vector2(-padding, -panelGap * 0.5f));
 
         float scale = Mathf.Max(0.1f, equipContentScale);
@@ -816,6 +818,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         CreateElementCoreSlot(equipPanel, slotSize, slotIconSize, indexTextOffset, indexTextSize, scale);
 
         RectTransform slotsRoot = CreateEmpty(equipPanel, "Slots");
+        slotsRoot.gameObject.AddComponent<SkillTreeEquipSlotsView>();
         float titleGap = Mathf.Max(4f, 8f * scale);
         Anchor(slotsRoot, Vector2.zero, Vector2.one, new Vector2(innerPadding, innerPadding), new Vector2(-innerPadding, -innerPadding - titleHeight - titleGap));
 
@@ -842,6 +845,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
     private void CreateElementCoreSlot(RectTransform parent, Vector2 slotSize, Vector2 slotIconSize, Vector2 indexTextOffset, float indexTextSize, float scale)
     {
         RectTransform slot = CreateImage(parent, "ElementCoreSlot", null, Vector2.zero, slotSize);
+        slot.gameObject.AddComponent<SkillTreeElementCoreSlotView>();
         slot.anchorMin = new Vector2(0.5f, 0.5f);
         slot.anchorMax = new Vector2(0.5f, 0.5f);
         slot.pivot = new Vector2(0.5f, 0.5f);
@@ -1261,7 +1265,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         foreach (SkillTreeNodeView nodeView in root.GetComponentsInChildren<SkillTreeNodeView>(true))
         {
             if (nodeView == null || nodeView.Definition == null) continue;
-            view.RegisterNode(nodeView, nodeView.Definition);
+            nodeView.Bind(view, nodeView.Definition);
         }
     }
 
@@ -1271,12 +1275,8 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         {
             SerializedObject viewSo = new(view);
             SetObjectReference(viewSo, "skillTree", skillTree);
-            SetObjectReference(viewSo, "primarySkillTree", skillTree);
-            SetObjectReference(viewSo, "secondarySkillTree", secondarySkillTree);
-            SetString(viewSo, "primarySkillTreeLabel", primarySkillTreeLabel);
-            SetString(viewSo, "secondarySkillTreeLabel", secondarySkillTreeLabel);
-            SetBool(viewSo, "buildMissingNodeViews", false);
-            SetBool(viewSo, "buildTreeSwitcher", false);
+            SetObjectReference(viewSo, "classSkillTree", skillTree);
+            SetObjectReference(viewSo, "elementalSkillTree", secondarySkillTree);
             viewSo.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(view);
         }
@@ -1649,6 +1649,7 @@ public sealed class SkillViewHierarchyBuilder : EditorWindow
         label.color = activeTextColor;
         label.textWrappingMode = TextWrappingModes.Normal;
         label.raycastTarget = false;
+        go.AddComponent<SkillTreeTextView>();
         return label;
     }
 

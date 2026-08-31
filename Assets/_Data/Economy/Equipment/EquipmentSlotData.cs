@@ -18,12 +18,6 @@ public class EquipmentSlotData
         this.slotType = slotType;
     }
 
-    public void Set(ItemDefinition item)
-    {
-        EquipmentInstanceData instance = item != null ? item.CreateEquipmentInstance() : null;
-        Set(item, instance);
-    }
-
     public void Set(ItemDefinition item, EquipmentInstanceData equipmentInstance)
     {
         this.item = item;

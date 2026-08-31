@@ -9,19 +9,27 @@ public class CurrencyView : BaseMonoBehaviour
 
     [SerializeField] private TextMeshProUGUI coinsText;
     [SerializeField] private TextMeshProUGUI diamondsText;
+    private PlayerCurrencyManager currencyManager;
 
     protected override void OnEnable()
     {
         base.OnEnable();
 
-        PlayerCurrencyStorage.OnCurrencyChanged -= HandleCurrencyChanged;
-        PlayerCurrencyStorage.OnCurrencyChanged += HandleCurrencyChanged;
+        currencyManager = PlayerCurrencyManager.Service;
+        if (currencyManager != null)
+        {
+            currencyManager.OnCurrencyChanged -= HandleCurrencyChanged;
+            currencyManager.OnCurrencyChanged += HandleCurrencyChanged;
+        }
         Refresh();
     }
 
     protected override void OnDisable()
     {
-        PlayerCurrencyStorage.OnCurrencyChanged -= HandleCurrencyChanged;
+        if (currencyManager != null)
+            currencyManager.OnCurrencyChanged -= HandleCurrencyChanged;
+
+        currencyManager = null;
         base.OnDisable();
     }
 
@@ -35,8 +43,11 @@ public class CurrencyView : BaseMonoBehaviour
     public void Refresh()
     {
         LoadComponents();
-        SetText(coinsText, PlayerCurrencyStorage.Coins);
-        SetText(diamondsText, PlayerCurrencyStorage.Diamonds);
+        if (currencyManager == null)
+            return;
+
+        SetText(coinsText, currencyManager.Coins);
+        SetText(diamondsText, currencyManager.Diamonds);
     }
 
     private void HandleCurrencyChanged(CurrencyType type, int amount)

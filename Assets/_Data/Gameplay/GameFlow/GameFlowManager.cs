@@ -5,9 +5,19 @@ public class GameFlowManager : BaseMonoBehaviour
 {
     private const string DefaultGameplaySceneName = "GamePlay";
 
+    private enum Screen
+    {
+        MainMenu,
+        CharacterCreation,
+        CharacterSelection,
+        Lobby,
+        StageSelection
+    }
+
     [Header("Panels")]
     [SerializeField] private MainMenuPanel mainMenuPanel;
     [SerializeField] private CharacterCreationPanel characterCreationPanel;
+    [SerializeField] private CharacterSelectionPanel characterSelectionPanel;
     [SerializeField] private LobbyPanel lobbyPanel;
     [SerializeField] private StageSelectPanel stageSelectPanel;
 
@@ -25,9 +35,6 @@ public class GameFlowManager : BaseMonoBehaviour
     protected override void Start()
     {
         base.Start();
-
-        LoadPanelReferences();
-        SubscribePanelEvents();
 
         CurrentCharacter = CharacterProfileStorage.Load();
 
@@ -52,39 +59,77 @@ public class GameFlowManager : BaseMonoBehaviour
 
     public void ShowMainMenu()
     {
-        SetPanel(mainMenuPanel, true);
-        SetPanel(characterCreationPanel, false);
-        SetPanel(lobbyPanel, false);
-        SetPanel(stageSelectPanel, false);
+        ShowScreen(Screen.MainMenu);
     }
 
     public void ContinueGame()
     {
-        CurrentCharacter = CharacterProfileStorage.Load();
+        if (!CharacterProfileStorage.HasCharacter()) return;
+        ShowCharacterSelection();
+    }
 
-        if (CurrentCharacter == null) return;
-
-        EnterLobby(CurrentCharacter);
+    public void PlayGame()
+    {
+        if (CharacterProfileStorage.HasCharacter())
+            ShowCharacterSelection();
+        else
+            ShowCharacterCreation();
     }
     public void ShowCharacterCreation()
     {
-        SetPanel(mainMenuPanel, false);
-        SetPanel(characterCreationPanel, true);
-        SetPanel(lobbyPanel, false);
-        SetPanel(stageSelectPanel, false);
+        if (!CharacterProfileStorage.CanCreateCharacter())
+        {
+            ShowCharacterSelection();
+            return;
+        }
+
+        ShowScreen(Screen.CharacterCreation);
     }
 
     public void ConfirmCharacter(CreatedCharacterData characterData)
     {
+        if (!CharacterProfileStorage.CanCreateCharacter())
+        {
+            ShowCharacterSelection();
+            return;
+        }
+
+        SaveCurrentCharacterProgress();
         CharacterProfileStorage.Save(characterData);
         EnterLobby(characterData);
     }
 
     public void DeleteCharacter()
     {
-        CharacterProfileStorage.Delete();
-        CurrentCharacter = null;
-        ShowMainMenu();
+        ShowCharacterSelection();
+    }
+
+    public void ShowCharacterSelection()
+    {
+        if (characterSelectionPanel == null) return;
+
+        ShowScreen(Screen.CharacterSelection);
+    }
+
+    public void ReturnToLobby()
+    {
+        CurrentCharacter = CharacterProfileStorage.Load();
+        if (CurrentCharacter == null)
+        {
+            ShowMainMenu();
+            return;
+        }
+
+        ShowScreen(Screen.Lobby);
+    }
+
+    private void SelectCharacter(CreatedCharacterData characterData)
+    {
+        if (characterData == null) return;
+
+        SaveCurrentCharacterProgress();
+        CharacterProfileStorage.Select(characterData);
+        EnterLobby(characterData);
     }
 
     public void QuitGame()
@@ -98,7 +143,7 @@ public class GameFlowManager : BaseMonoBehaviour
 
         if (CurrentCharacter == null) return;
 
-        EnterGameplay(CurrentCharacter);
+        LoadGameplayScene();
     }
 
     public void ShowStageSelection()
@@ -108,18 +153,12 @@ public class GameFlowManager : BaseMonoBehaviour
         if (CurrentCharacter == null) return;
 
         if (stageSelectPanel == null)
-            LoadPanelReferences();
-
-        if (stageSelectPanel == null)
         {
             Debug.LogError(transform.name + ": Missing StageSelectPanel reference.", gameObject);
             return;
         }
 
-        SetPanel(mainMenuPanel, false);
-        SetPanel(characterCreationPanel, false);
-        SetPanel(lobbyPanel, false);
-        SetPanel(stageSelectPanel, true);
+        ShowScreen(Screen.StageSelection);
     }
 
     public void SelectStageAndStart(int stageIndex)
@@ -131,17 +170,26 @@ public class GameFlowManager : BaseMonoBehaviour
     private void EnterLobby(CreatedCharacterData characterData)
     {
         CurrentCharacter = characterData;
-
-        SetPanel(mainMenuPanel, false);
-        SetPanel(characterCreationPanel, false);
-        SetPanel(lobbyPanel, true);
-        SetPanel(stageSelectPanel, false);
+        ReloadCurrentCharacterProgress();
+        ShowScreen(Screen.Lobby);
     }
 
-    private void EnterGameplay(CreatedCharacterData characterData)
+    private static void SaveCurrentCharacterProgress()
     {
-        CurrentCharacter = characterData;
-        LoadGameplayScene();
+        if (PlayerInventoryManager.InstanceOrNull != null)
+            PlayerInventoryManager.InstanceOrNull.SaveNow();
+
+        if (PlayerEquipmentManager.InstanceOrNull != null)
+            PlayerEquipmentManager.InstanceOrNull.Save();
+    }
+
+    private static void ReloadCurrentCharacterProgress()
+    {
+        if (PlayerInventoryManager.InstanceOrNull != null)
+            PlayerInventoryManager.InstanceOrNull.Reload();
+
+        if (PlayerEquipmentManager.InstanceOrNull != null)
+            PlayerEquipmentManager.InstanceOrNull.Reload();
     }
 
     private void LoadGameplayScene()
@@ -160,11 +208,19 @@ public class GameFlowManager : BaseMonoBehaviour
         SceneManager.LoadScene(targetSceneName);
     }
 
-    private void SetPanel(BaseMonoBehaviour panel, bool active)
+    private void ShowScreen(Screen screen)
     {
-        if (panel == null) return;
+        SetPanel(mainMenuPanel, screen == Screen.MainMenu);
+        SetPanel(characterCreationPanel, screen == Screen.CharacterCreation);
+        SetPanel(characterSelectionPanel, screen == Screen.CharacterSelection);
+        SetPanel(lobbyPanel, screen == Screen.Lobby);
+        SetPanel(stageSelectPanel, screen == Screen.StageSelection);
+    }
 
-        panel.SetActive(active);
+    private static void SetPanel(BaseMonoBehaviour panel, bool active)
+    {
+        if (panel != null)
+            panel.SetActive(active);
     }
 
     private void SubscribePanelEvents()
@@ -173,13 +229,11 @@ public class GameFlowManager : BaseMonoBehaviour
 
         if (mainMenuPanel != null)
         {
-            mainMenuPanel.OnContinueRequested -= ContinueGame;
-            mainMenuPanel.OnCreateCharacterRequested -= ShowCharacterCreation;
+            mainMenuPanel.OnCreateCharacterRequested -= PlayGame;
             mainMenuPanel.OnDeleteCharacterRequested -= DeleteCharacter;
             mainMenuPanel.OnQuitRequested -= QuitGame;
 
-            mainMenuPanel.OnContinueRequested += ContinueGame;
-            mainMenuPanel.OnCreateCharacterRequested += ShowCharacterCreation;
+            mainMenuPanel.OnCreateCharacterRequested += PlayGame;
             mainMenuPanel.OnDeleteCharacterRequested += DeleteCharacter;
             mainMenuPanel.OnQuitRequested += QuitGame;
         }
@@ -187,15 +241,25 @@ public class GameFlowManager : BaseMonoBehaviour
         if (characterCreationPanel != null)
         {
             characterCreationPanel.OnCharacterCreated -= ConfirmCharacter;
-            characterCreationPanel.OnBackRequested -= ShowMainMenu;
+            characterCreationPanel.OnBackRequested -= ShowCharacterSelection;
 
             characterCreationPanel.OnCharacterCreated += ConfirmCharacter;
-            characterCreationPanel.OnBackRequested += ShowMainMenu;
+            characterCreationPanel.OnBackRequested += ShowCharacterSelection;
+        }
+
+        if (characterSelectionPanel != null)
+        {
+            characterSelectionPanel.OnCharacterSelected -= SelectCharacter;
+            characterSelectionPanel.OnCreateCharacterRequested -= ShowCharacterCreation;
+            characterSelectionPanel.OnBackRequested -= ShowMainMenu;
+
+            characterSelectionPanel.OnCharacterSelected += SelectCharacter;
+            characterSelectionPanel.OnCreateCharacterRequested += ShowCharacterCreation;
+            characterSelectionPanel.OnBackRequested += ShowMainMenu;
         }
 
         if (lobbyPanel != null)
         {
-            lobbyPanel.OnReadyGoRequested -= StartGameplay;
             lobbyPanel.OnReadyGoRequested -= ShowStageSelection;
             lobbyPanel.OnReadyGoRequested += ShowStageSelection;
         }
@@ -203,10 +267,10 @@ public class GameFlowManager : BaseMonoBehaviour
         if (stageSelectPanel != null)
         {
             stageSelectPanel.OnStageSelected -= SelectStageAndStart;
-            stageSelectPanel.OnBackRequested -= ContinueGame;
+            stageSelectPanel.OnBackRequested -= ReturnToLobby;
 
             stageSelectPanel.OnStageSelected += SelectStageAndStart;
-            stageSelectPanel.OnBackRequested += ContinueGame;
+            stageSelectPanel.OnBackRequested += ReturnToLobby;
         }
     }
 
@@ -214,8 +278,7 @@ public class GameFlowManager : BaseMonoBehaviour
     {
         if (mainMenuPanel != null)
         {
-            mainMenuPanel.OnContinueRequested -= ContinueGame;
-            mainMenuPanel.OnCreateCharacterRequested -= ShowCharacterCreation;
+            mainMenuPanel.OnCreateCharacterRequested -= PlayGame;
             mainMenuPanel.OnDeleteCharacterRequested -= DeleteCharacter;
             mainMenuPanel.OnQuitRequested -= QuitGame;
         }
@@ -223,19 +286,25 @@ public class GameFlowManager : BaseMonoBehaviour
         if (characterCreationPanel != null)
         {
             characterCreationPanel.OnCharacterCreated -= ConfirmCharacter;
-            characterCreationPanel.OnBackRequested -= ShowMainMenu;
+            characterCreationPanel.OnBackRequested -= ShowCharacterSelection;
+        }
+
+        if (characterSelectionPanel != null)
+        {
+            characterSelectionPanel.OnCharacterSelected -= SelectCharacter;
+            characterSelectionPanel.OnCreateCharacterRequested -= ShowCharacterCreation;
+            characterSelectionPanel.OnBackRequested -= ShowMainMenu;
         }
 
         if (lobbyPanel != null)
         {
-            lobbyPanel.OnReadyGoRequested -= StartGameplay;
             lobbyPanel.OnReadyGoRequested -= ShowStageSelection;
         }
 
         if (stageSelectPanel != null)
         {
             stageSelectPanel.OnStageSelected -= SelectStageAndStart;
-            stageSelectPanel.OnBackRequested -= ContinueGame;
+            stageSelectPanel.OnBackRequested -= ReturnToLobby;
         }
     }
 
@@ -249,6 +318,11 @@ public class GameFlowManager : BaseMonoBehaviour
         if (characterCreationPanel == null)
         {
             characterCreationPanel = FindAnyObjectByType<CharacterCreationPanel>(FindObjectsInactive.Include);
+        }
+
+        if (characterSelectionPanel == null)
+        {
+            characterSelectionPanel = FindAnyObjectByType<CharacterSelectionPanel>(FindObjectsInactive.Include);
         }
 
         if (lobbyPanel == null)

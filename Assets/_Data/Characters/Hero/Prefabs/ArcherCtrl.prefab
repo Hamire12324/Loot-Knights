@@ -92,7 +92,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeroVFXController
   characterCtrl: {fileID: 8879337150097753119}
-    attackVfx: {fileID: 0}
+  attackVfx: {fileID: 0}
   attackAnchor: {fileID: 8256115376057758440}
   attackSfx: {fileID: 11400000, guid: f15bc3fc0f5143c0a1429ff491e3d7a4, type: 2}
   defaultHitVfx: {fileID: 11400000, guid: 5e968ca568c24b15ae9b5f984ad3d27f, type: 2}
@@ -254,6 +254,7 @@ MonoBehaviour:
     CausesHitStun: 0
     HitStunDuration: 0.2
     HitStunImmunityDuration: 0.75
+    IgnoresHitStunImmunity: 0
     InterruptsAttack: 1
     HitVfx: {fileID: 0}
     HitVfxOffset: {x: 0, y: 0, z: 0}
@@ -633,6 +634,7 @@ MonoBehaviour:
   characterLevel: {fileID: 9111760946998288107}
   photonView: {fileID: 4558969153179040639}
   profile:
+    CharacterId: 
     CharacterName: 
     CharacterClass: 1
   heroLevel: {fileID: 9111760946998288107}
@@ -1080,3 +1082,4 @@ MonoBehaviour:
     isDirty: 1
     cachedFinalValue: 0
   currentHealth: 0
+  currentMana: 0

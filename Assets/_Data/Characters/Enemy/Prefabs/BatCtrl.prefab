@@ -1162,7 +1162,7 @@ MonoBehaviour:
   movement: {fileID: 6935674513474067312}
   loseRange: 8
   targetRefreshInterval: 0.25
-  attackCooldown: 1.4
+  attackCooldown: 1.85
   target: {fileID: 0}
   orbitRadius: 1.8
   orbitAngularSpeed: 180

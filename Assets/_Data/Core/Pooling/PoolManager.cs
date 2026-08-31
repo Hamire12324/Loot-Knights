@@ -198,7 +198,10 @@ public class PoolManager : BaseSingleton<PoolManager>
             : $"{config.Prefab.name}_Pool";
 
         GameObject parentObj = new(parentName);
-        parentObj.transform.SetParent(transform);
+        // Dynamically registered pools (such as VFX) do not have a per-pool
+        // parent. Keep them under the configured category root instead of
+        // scattering them directly beneath PoolManager.
+        parentObj.transform.SetParent(DefaultParent);
         return parentObj.transform;
     }
 }

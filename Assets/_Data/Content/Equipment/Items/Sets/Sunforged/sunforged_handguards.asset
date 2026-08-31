@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Sunforged Handguards
   description: Golden guards that channel sacred strength.
   icon: {fileID: 21300000, guid: 4fecef46fa8a7894c919ebde06485831, type: 3}
+  worldScaleMultiplier: 0.2
   rarity: 3
   category: 1
   equipmentSlotType: 5

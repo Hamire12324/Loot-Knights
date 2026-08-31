@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Ironwall Band
   description: A ring bearing the mark of a fortress.
   icon: {fileID: 21300000, guid: 161d4730f36de6b42ad214d0d33e423d, type: 3}
+  worldScaleMultiplier: 0.2
   rarity: 1
   category: 1
   equipmentSlotType: 8

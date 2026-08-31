@@ -7,6 +7,7 @@ public enum InventoryChangeType
     Swapped,
     Arranged,
     CapacityChanged,
+    Updated,
     Loaded,
     Cleared
 }

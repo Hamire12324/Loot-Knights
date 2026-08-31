@@ -1,20 +1,20 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class SettingsRuntimeBootstrap : BaseMonoBehaviour
 {
     [Header("References")]
     [SerializeField] private SettingsPanel settingsPanel;
+    [SerializeField] private LobbyMenuPanel lobbyMenuPanel;
 
-    [Header("Options")]
     [SerializeField] private bool createEventSystemIfMissing = true;
-    [SerializeField] private bool bindButtonsByName = true;
 
     protected override void LoadComponents()
     {
         base.LoadComponents();
         LoadSettingsPanel();
+        LoadLobbyMenuPanel();
+        EnsureLobbySettingsButton();
     }
 
     protected override void Awake()
@@ -58,9 +58,35 @@ public class SettingsRuntimeBootstrap : BaseMonoBehaviour
 
         settingsPanel.InitializeFromBootstrap();
 
-        if (bindButtonsByName)
+    }
+
+    private void LoadLobbyMenuPanel()
+    {
+        if (lobbyMenuPanel != null) return;
+
+        lobbyMenuPanel = Object.FindAnyObjectByType<LobbyMenuPanel>(FindObjectsInactive.Include);
+        if (lobbyMenuPanel != null) return;
+
+        foreach (Transform item in Object.FindObjectsByType<Transform>(FindObjectsInactive.Include))
         {
-            BindExistingSettingsButtons(settingsPanel);
+            if (item.name.Trim() != "LobbyMenuPanel") continue;
+
+            lobbyMenuPanel = item.gameObject.AddComponent<LobbyMenuPanel>();
+            return;
+        }
+    }
+
+    private static void EnsureLobbySettingsButton()
+    {
+        foreach (Transform item in Object.FindObjectsByType<Transform>(FindObjectsInactive.Include))
+        {
+            if (item.name.Trim() != "Btn_Settings") continue;
+            if (item.GetComponent<ButtonSettings>() == null)
+            {
+                item.gameObject.AddComponent<ButtonSettings>();
+            }
+
+            return;
         }
     }
 
@@ -92,16 +118,4 @@ public class SettingsRuntimeBootstrap : BaseMonoBehaviour
         eventSystem.AddComponent<StandaloneInputModule>();
     }
 
-    private void BindExistingSettingsButtons(SettingsPanel panel)
-    {
-        Button[] buttons = Object.FindObjectsByType<Button>(FindObjectsInactive.Include);
-        foreach (Button button in buttons)
-        {
-            if (button == null) continue;
-            if (!button.name.ToLowerInvariant().Contains("setting")) continue;
-
-            button.onClick.RemoveListener(panel.Show);
-            button.onClick.AddListener(panel.Show);
-        }
-    }
 }

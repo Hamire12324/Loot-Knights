@@ -4,7 +4,18 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
+public class InventorySlotUI : BaseMonoBehaviour,
+    IPointerClickHandler,
+    IPointerEnterHandler,
+    IPointerExitHandler,
+    IPointerMoveHandler,
+    IPointerDownHandler,
+    IPointerUpHandler,
+    IInitializePotentialDragHandler,
+    IBeginDragHandler,
+    IDragHandler,
+    IEndDragHandler,
+    IDropHandler
 {
     public event Action<InventorySlotUI> OnClicked;
     public event Action<InventorySlotUI, InventorySlotUI> OnDropped;
@@ -19,6 +30,8 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
     [SerializeField] private CanvasGroup canvasGroup;
     [SerializeField] private Vector2 dragPreviewSize = new(72f, 72f);
     [SerializeField] private float draggingSlotAlpha = 0.45f;
+    [SerializeField] private bool dragEnabled = true;
+    [SerializeField, Min(0f)] private float itemDragHoldDuration = 0.25f;
 
     private Text legacyNameText;
     private Text legacyAmountText;
@@ -29,8 +42,12 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
     private int currentInventoryIndex = -1;
     private GameObject dragPreviewObject;
     private RectTransform dragPreviewRect;
-    private Image dragPreviewIcon;
-    private TextMeshProUGUI dragPreviewAmountText;
+    private ScrollRect parentScrollRect;
+    private Coroutine dragArmCoroutine;
+    private bool pointerPressed;
+    private bool itemDragArmed;
+    private bool isDragging;
+    private bool forwardingScrollDrag;
     private static InventorySlotUI draggingSlot;
 
     public ItemDefinition CurrentItem => currentItem;
@@ -50,23 +67,16 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
         LoadSelectionFrame();
         LoadRootCanvas();
         LoadCanvasGroup();
+        LoadParentScrollRect();
         BindButton();
     }
 
-    public void Configure(
-        Button slotButton,
-        Image icon,
-        TextMeshProUGUI itemName,
-        TextMeshProUGUI amount,
-        TextMeshProUGUI rarity,
-        Image selectedFrame)
+    public void Configure(Button slotButton)
     {
-        button = slotButton;
-        iconImage = icon;
-        nameText = itemName;
-        amountText = amount;
-        rarityText = rarity;
-        selectionFrame = selectedFrame;
+        if (slotButton != null)
+            button = slotButton;
+
+        LoadComponents();
         BindButton();
     }
 
@@ -97,31 +107,14 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
             iconImage.enabled = item.Icon != null;
         }
 
-        if (nameText != null)
-            nameText.text = item.DisplayName;
+        SetText(nameText, item.DisplayName);
+        SetText(legacyNameText, item.DisplayName);
 
-        if (legacyNameText != null)
-            legacyNameText.text = item.DisplayName;
-
-        if (rarityText != null)
-        {
-            rarityText.text = item.Rarity.ToString();
-            rarityText.color = GetRarityColor(item.Rarity);
-        }
-
-        if (legacyRarityText != null)
-        {
-            legacyRarityText.text = item.Rarity.ToString();
-            legacyRarityText.color = GetRarityColor(item.Rarity);
-        }
+        SetRarityText(item.Rarity);
 
         string amountValue = GetAmountTextValue(item, amount, equipmentInstance);
-
-        if (amountText != null)
-            amountText.text = amountValue;
-
-        if (legacyAmountText != null)
-            legacyAmountText.text = amountValue;
+        SetText(amountText, amountValue);
+        SetText(legacyAmountText, amountValue);
 
         SetActive(true);
     }
@@ -131,10 +124,16 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
         currentInventoryIndex = inventoryIndex;
     }
 
+    public void SetDragEnabled(bool value)
+    {
+        dragEnabled = value;
+    }
+
     public void SetEmpty()
     {
         LoadComponents();
 
+        ItemTooltipUI.Hide();
         currentItem = null;
         currentEquipmentInstance = null;
         currentAmount = 0;
@@ -148,23 +147,12 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
             iconImage.enabled = false;
         }
 
-        if (nameText != null)
-            nameText.text = string.Empty;
-
-        if (legacyNameText != null)
-            legacyNameText.text = string.Empty;
-
-        if (rarityText != null)
-            rarityText.text = string.Empty;
-
-        if (legacyRarityText != null)
-            legacyRarityText.text = string.Empty;
-
-        if (amountText != null)
-            amountText.text = string.Empty;
-
-        if (legacyAmountText != null)
-            legacyAmountText.text = string.Empty;
+        SetText(nameText, string.Empty);
+        SetText(legacyNameText, string.Empty);
+        SetText(rarityText, string.Empty);
+        SetText(legacyRarityText, string.Empty);
+        SetText(amountText, string.Empty);
+        SetText(legacyAmountText, string.Empty);
     }
 
     public void SetSelected(bool selected)
@@ -173,12 +161,85 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
             selectionFrame.enabled = selected;
     }
 
+    // Selection is deliberately handled by Unity's click gesture, which is not
+    // emitted after the pointer has crossed the EventSystem drag threshold.
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData == null || eventData.button != PointerEventData.InputButton.Left)
+            return;
+
+        HandleClick();
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (HasItem && rootCanvas != null)
+            ItemTooltipUI.Show(currentItem, currentEquipmentInstance, rootCanvas, eventData.position);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        ItemTooltipUI.Hide();
+    }
+
+    public void OnPointerMove(PointerEventData eventData)
+    {
+        if (HasItem && rootCanvas != null)
+            ItemTooltipUI.Move(eventData.position, rootCanvas);
+    }
+
+    public void OnInitializePotentialDrag(PointerEventData eventData)
+    {
+        if (eventData != null)
+            eventData.useDragThreshold = true;
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (eventData == null || eventData.button != PointerEventData.InputButton.Left)
+            return;
+
+        // A touch device does not have a persistent hover cursor. Show the
+        // tooltip from the exact touch location as soon as the item is pressed.
+        if (HasItem && rootCanvas != null)
+            ItemTooltipUI.Show(currentItem, currentEquipmentInstance, rootCanvas, eventData.position);
+
+        pointerPressed = true;
+        itemDragArmed = false;
+        StopDragArmTimer();
+
+        // A swipe belongs to the ScrollRect. Reordering an item requires a
+        // deliberate hold first, which prevents item buttons from stealing
+        // normal inventory scrolling on touch devices.
+        if (dragEnabled && HasItem)
+            dragArmCoroutine = StartCoroutine(ArmItemDragAfterHold());
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (eventData != null && eventData.button != PointerEventData.InputButton.Left)
+            return;
+
+        pointerPressed = false;
+        StopDragArmTimer();
+    }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (eventData == null || eventData.button != PointerEventData.InputButton.Left) return;
-        if (!HasItem) return;
+        if (eventData == null || eventData.button != PointerEventData.InputButton.Left)
+            return;
+
+        if (!itemDragArmed)
+        {
+            BeginScrollDrag(eventData);
+            return;
+        }
+
+        if (!dragEnabled || !HasItem)
+            return;
 
         draggingSlot = this;
+        isDragging = true;
         SetSelected(true);
         SetDraggingVisual(true);
         CreateDragPreview();
@@ -187,11 +248,32 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (forwardingScrollDrag)
+        {
+            parentScrollRect?.OnDrag(eventData);
+            return;
+        }
+
+        if (!isDragging)
+            return;
+
         UpdateDragPreviewPosition(eventData);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (forwardingScrollDrag)
+        {
+            parentScrollRect?.OnEndDrag(eventData);
+            forwardingScrollDrag = false;
+            return;
+        }
+
+        if (!isDragging)
+            return;
+
+        isDragging = false;
+
         if (draggingSlot == this)
             draggingSlot = null;
 
@@ -221,7 +303,10 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
     private void SetDraggingVisual(bool dragging)
     {
         if (canvasGroup != null)
+        {
             canvasGroup.alpha = dragging ? draggingSlotAlpha : 1f;
+            canvasGroup.blocksRaycasts = !dragging;
+        }
     }
 
     private void CreateDragPreview()
@@ -244,11 +329,11 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
         dragPreviewRect.pivot = new Vector2(0.5f, 0.5f);
         dragPreviewRect.sizeDelta = GetDragPreviewSize();
 
-        dragPreviewIcon = dragPreviewObject.GetComponent<Image>();
-        dragPreviewIcon.sprite = currentItem.Icon;
-        dragPreviewIcon.preserveAspect = true;
-        dragPreviewIcon.raycastTarget = false;
-        dragPreviewIcon.color = Color.white;
+        Image previewIcon = dragPreviewObject.GetComponent<Image>();
+        previewIcon.sprite = currentItem.Icon;
+        previewIcon.preserveAspect = true;
+        previewIcon.raycastTarget = false;
+        previewIcon.color = Color.white;
 
         if (currentAmount > 1)
             CreateDragPreviewAmountText();
@@ -266,15 +351,15 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
         textRect.anchoredPosition = new Vector2(0f, 2f);
         textRect.sizeDelta = new Vector2(0f, 24f);
 
-        dragPreviewAmountText = textObject.GetComponent<TextMeshProUGUI>();
-        dragPreviewAmountText.raycastTarget = false;
-        dragPreviewAmountText.alignment = TextAlignmentOptions.BottomRight;
-        dragPreviewAmountText.fontSize = 18f;
-        dragPreviewAmountText.fontStyle = FontStyles.Bold;
-        dragPreviewAmountText.color = Color.white;
-        dragPreviewAmountText.outlineWidth = 0.25f;
-        dragPreviewAmountText.outlineColor = Color.black;
-        dragPreviewAmountText.text = currentAmount.ToString();
+        TextMeshProUGUI previewAmountText = textObject.GetComponent<TextMeshProUGUI>();
+        previewAmountText.raycastTarget = false;
+        previewAmountText.alignment = TextAlignmentOptions.BottomRight;
+        previewAmountText.fontSize = 18f;
+        previewAmountText.fontStyle = FontStyles.Bold;
+        previewAmountText.color = Color.white;
+        previewAmountText.outlineWidth = 0.25f;
+        previewAmountText.outlineColor = Color.black;
+        previewAmountText.text = currentAmount.ToString();
     }
 
     private Vector2 GetDragPreviewSize()
@@ -316,8 +401,6 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
         Destroy(dragPreviewObject);
         dragPreviewObject = null;
         dragPreviewRect = null;
-        dragPreviewIcon = null;
-        dragPreviewAmountText = null;
     }
 
     private static Color GetRarityColor(ItemRarity rarity)
@@ -344,6 +427,64 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
         return item.MaxStack > 1 ? Mathf.Max(1, amount).ToString() : string.Empty;
     }
 
+    private System.Collections.IEnumerator ArmItemDragAfterHold()
+    {
+        if (itemDragHoldDuration > 0f)
+            yield return new WaitForSecondsRealtime(itemDragHoldDuration);
+
+        if (pointerPressed && dragEnabled && HasItem)
+            itemDragArmed = true;
+
+        dragArmCoroutine = null;
+    }
+
+    private void StopDragArmTimer()
+    {
+        if (dragArmCoroutine != null)
+            StopCoroutine(dragArmCoroutine);
+
+        dragArmCoroutine = null;
+    }
+
+    private void BeginScrollDrag(PointerEventData eventData)
+    {
+        itemDragArmed = false;
+        StopDragArmTimer();
+
+        if (parentScrollRect == null)
+            return;
+
+        forwardingScrollDrag = true;
+        parentScrollRect.OnBeginDrag(eventData);
+    }
+
+    private void SetRarityText(ItemRarity rarity)
+    {
+        string value = rarity.ToString();
+        Color color = GetRarityColor(rarity);
+
+        SetText(rarityText, value);
+        SetText(legacyRarityText, value);
+
+        if (rarityText != null)
+            rarityText.color = color;
+
+        if (legacyRarityText != null)
+            legacyRarityText.color = color;
+    }
+
+    private static void SetText(TMP_Text target, string value)
+    {
+        if (target != null)
+            target.text = value;
+    }
+
+    private static void SetText(Text target, string value)
+    {
+        if (target != null)
+            target.text = value;
+    }
+
     private void LoadButton()
     {
         if (button != null) return;
@@ -358,8 +499,9 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
     {
         if (button == null) return;
 
+        // Input is owned by the pointer handlers above. Keeping this listener
+        // would let Button and drag lifecycle compete for the same gesture.
         button.onClick.RemoveListener(HandleClick);
-        button.onClick.AddListener(HandleClick);
     }
 
     private void LoadRootCanvas()
@@ -369,6 +511,12 @@ public class InventorySlotUI : BaseMonoBehaviour, IBeginDragHandler, IDragHandle
         Canvas parentCanvas = GetComponentInParent<Canvas>(true);
         if (parentCanvas != null)
             rootCanvas = parentCanvas.rootCanvas;
+    }
+
+    private void LoadParentScrollRect()
+    {
+        if (parentScrollRect == null)
+            parentScrollRect = GetComponentInParent<ScrollRect>(true);
     }
 
     private void LoadCanvasGroup()

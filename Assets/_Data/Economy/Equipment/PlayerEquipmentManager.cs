@@ -57,15 +57,10 @@ public class PlayerEquipmentManager : BaseSingleton<PlayerEquipmentManager>
         return equipmentInventory.GetItem(slotType);
     }
 
-    public int GetUpgradeLevel(ItemDefinition item)
-    {
-        return EquipmentUpgradeStorage.GetLevel(item);
-    }
-
     public int GetUpgradeLevel(EquipmentSlotType slotType)
     {
         EquipmentInstanceData instance = GetEquipmentInstance(slotType);
-        return instance != null ? instance.UpgradeLevel : GetUpgradeLevel(GetItem(slotType));
+        return instance != null ? instance.UpgradeLevel : 0;
     }
 
     public EquipmentInstanceData GetEquipmentInstance(EquipmentSlotType slotType)
@@ -78,14 +73,13 @@ public class PlayerEquipmentManager : BaseSingleton<PlayerEquipmentManager>
     public int GetUpgradeCost(EquipmentSlotType slotType)
     {
         ItemDefinition item = GetItem(slotType);
-        return item == null ? 0 : EconomyPricing.GetEquipmentUpgradeCost(item, GetUpgradeLevel(slotType));
+        return EquipmentUpgradeService.GetCost(item, GetUpgradeLevel(slotType));
     }
 
-    /// <summary>Returns every equipped set and its current piece count.</summary>
     public IReadOnlyList<EquipmentSetProgress> GetSetProgresses()
     {
         EnsureLoaded();
-        return BuildSetProgresses();
+        return EquipmentStatCalculator.BuildSetProgresses(equipmentInventory.Slots);
     }
 
     public bool CanEquip(ItemDefinition item, EquipmentSlotType slotType)
@@ -138,39 +132,17 @@ public class PlayerEquipmentManager : BaseSingleton<PlayerEquipmentManager>
             return false;
 
         EquipmentInstanceData instance = equipmentInventory.GetInstance(slotType);
-        if (instance == null)
+        if (instance == null || !instance.IsValid)
         {
-            instance = CreateLegacyInstance(item);
+            instance = item.CreateEquipmentInstance();
             equipmentInventory.SetItem(slotType, item, instance);
         }
 
-        int previousLevel = instance.UpgradeLevel;
-        if (!TrySpendUpgradeCost(item, previousLevel, levels))
-            return false;
-
-        instance.AddUpgradeLevels(levels, item.MaxUpgradeLevel);
-        int nextLevel = instance.UpgradeLevel;
-
-        if (nextLevel == previousLevel)
+        if (!EquipmentUpgradeService.TryUpgrade(item, instance, levels))
             return false;
 
         Commit();
         return true;
-    }
-
-    public bool UpgradeItem(ItemDefinition item, int levels = 1)
-    {
-        return UpgradeEquippedInstance(item, levels);
-    }
-
-    public bool UpgradeItemById(string itemId, int levels = 1)
-    {
-        EnsureLoaded();
-
-        if (itemDatabase == null || !itemDatabase.TryGetItem(itemId, out ItemDefinition item))
-            return false;
-
-        return UpgradeEquippedInstance(item, levels);
     }
 
     public bool Unequip(EquipmentSlotType slotType, PlayerInventoryManager inventoryManager = null)
@@ -206,6 +178,7 @@ public class PlayerEquipmentManager : BaseSingleton<PlayerEquipmentManager>
         equipmentInventory.ClearAll();
 
         EquipmentSaveService.Clear();
+        ApplyToLocalHero();
         OnEquipmentChanged?.Invoke();
     }
 
@@ -217,22 +190,7 @@ public class PlayerEquipmentManager : BaseSingleton<PlayerEquipmentManager>
             itemDatabase = ItemDatabase.LoadDefault();
 
         EnsureEquipmentInventory();
-        equipmentInventory.EnsureDefaultSlots();
-        equipmentInventory.ClearAll();
-
-        IReadOnlyList<EquipmentItemSaveData> savedItems = EquipmentSaveService.LoadItems();
-        foreach (EquipmentItemSaveData savedItem in savedItems)
-        {
-            if (savedItem == null || string.IsNullOrWhiteSpace(savedItem.ItemId)) continue;
-            if (itemDatabase == null || !itemDatabase.TryGetItem(savedItem.ItemId, out ItemDefinition item)) continue;
-            if (!CanEquip(item, savedItem.SlotType)) continue;
-
-            EquipmentInstanceData instance = savedItem.HasEquipmentInstance
-                ? savedItem.EquipmentInstance
-                : CreateLegacyInstance(item);
-
-            equipmentInventory.SetItem(savedItem.SlotType, item, instance);
-        }
+        EquipmentLoadService.LoadInto(equipmentInventory, itemDatabase);
 
         loaded = true;
         ApplyToLocalHero();
@@ -275,49 +233,6 @@ public class PlayerEquipmentManager : BaseSingleton<PlayerEquipmentManager>
         }
 
         return item != null ? item.CreateEquipmentInstance() : null;
-    }
-
-    private EquipmentInstanceData CreateLegacyInstance(ItemDefinition item)
-    {
-        if (item == null) return null;
-
-        EquipmentInstanceData instance = item.CreateEquipmentInstance();
-        instance?.SetUpgradeLevel(EquipmentUpgradeStorage.GetLevel(item), item.MaxUpgradeLevel);
-        return instance;
-    }
-
-    private bool UpgradeEquippedInstance(ItemDefinition item, int levels)
-    {
-        EnsureLoaded();
-
-        if (item == null || item.MaxUpgradeLevel <= 0)
-            return false;
-
-        foreach (EquipmentSlotData slot in equipmentInventory.Slots)
-        {
-            if (slot == null || slot.Item != item) continue;
-
-            EquipmentInstanceData instance = slot.EquipmentInstance;
-            if (instance == null)
-            {
-                instance = CreateLegacyInstance(item);
-                slot.Set(item, instance);
-            }
-
-            int previousLevel = instance.UpgradeLevel;
-            if (!TrySpendUpgradeCost(item, previousLevel, levels))
-                return false;
-
-            instance.AddUpgradeLevels(levels, item.MaxUpgradeLevel);
-
-            if (instance.UpgradeLevel == previousLevel)
-                return false;
-
-            Commit();
-            return true;
-        }
-
-        return false;
     }
 
     private void ReturnPreviousItemToInventory(
@@ -374,58 +289,8 @@ public class PlayerEquipmentManager : BaseSingleton<PlayerEquipmentManager>
 
         EnsureLoaded();
 
-        List<StatModifier> equipmentModifiers = new();
-
-        foreach (EquipmentSlotData slot in equipmentInventory.Slots)
-        {
-            ItemDefinition item = slot?.Item;
-            if (item == null) continue;
-
-            EquipmentInstanceData instance = slot.EquipmentInstance;
-
-            if (instance != null && instance.IsValid)
-                equipmentModifiers.AddRange(instance.BuildModifiers(item));
-            else
-                equipmentModifiers.AddRange(item.BuildEquipmentModifiers(EquipmentUpgradeStorage.GetLevel(item)));
-        }
-
-        foreach (EquipmentSetProgress progress in BuildSetProgresses())
-            progress.Set.AddActiveBonuses(progress.EquippedPieceCount, equipmentModifiers);
-
-        hero.CharacterStat.RecalculateEquipment(equipmentModifiers);
-    }
-
-    private static bool TrySpendUpgradeCost(ItemDefinition item, int currentLevel, int requestedLevels)
-    {
-        if (item == null || requestedLevels <= 0 || currentLevel >= item.MaxUpgradeLevel)
-            return false;
-
-        int levelsToBuy = Mathf.Min(requestedLevels, item.MaxUpgradeLevel - currentLevel);
-        int totalCost = 0;
-        for (int levelOffset = 0; levelOffset < levelsToBuy; levelOffset++)
-            totalCost += EconomyPricing.GetEquipmentUpgradeCost(item, currentLevel + levelOffset);
-
-        return PlayerCurrencyStorage.TrySpend(CurrencyType.Coins, totalCost);
-    }
-
-    private List<EquipmentSetProgress> BuildSetProgresses()
-    {
-        Dictionary<EquipmentSetDefinition, int> pieceCounts = new();
-
-        foreach (EquipmentSlotData slot in equipmentInventory.Slots)
-        {
-            EquipmentSetDefinition set = slot?.Item != null ? slot.Item.EquipmentSet : null;
-            if (set == null || !set.IsValid) continue;
-
-            pieceCounts.TryGetValue(set, out int count);
-            pieceCounts[set] = count + 1;
-        }
-
-        List<EquipmentSetProgress> progresses = new(pieceCounts.Count);
-        foreach (KeyValuePair<EquipmentSetDefinition, int> pair in pieceCounts)
-            progresses.Add(new EquipmentSetProgress(pair.Key, pair.Value));
-
-        return progresses;
+        hero.CharacterStat.RecalculateEquipment(
+            EquipmentStatCalculator.BuildModifiers(equipmentInventory.Slots));
     }
 
     [ContextMenu("Apply Equipment To Local Hero")]
